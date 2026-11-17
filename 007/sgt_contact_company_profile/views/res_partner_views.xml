@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <!-- CRM-007 Update_002: Contact form shows the Yellow Pages company profile of the CRM Deal.
+       Everything new is READ-ONLY here: the data is written by the CRM-006 button "Cập nhật Contact" on the Deal.
+       Targets only nodes of the BASE Contact form (base.view_partner_form, Odoo 19 scan view 127); the xpaths exclude the
+       nested 'Contacts & Addresses' sub-form (it also has an avatar and an address block).
+       Reused fields: vat (Tax Code), comment (Vietnamese introduction), image_1920 (logo = avatar), street... (Address).
+       New fields: 13 profile fields + x_sgt_crm_synced + one non-stored related Company logo.  No JS, no API, no cron. -->
+  <record id="view_contact007_partner_form" model="ir.ui.view">
+    <field name="name">res.partner.form.contact007.company.profile</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="priority" eval="95"/>
+    <field name="arch" type="xml">
+
+      <!-- Person avatar remains editable; the Company avatar remains read-only in this form. -->
+      <xpath expr="/form/sheet/div//field[@name='image_1920']" position="attributes">
+        <attribute name="readonly">is_company</attribute>
+      </xpath>
+
+      <!-- Address: same layout as the Company card of CRM-005 (Street on line 1 with a pin; Street 2, City, State, ZIP, Country on line 2).  CSS only, same fields. -->
+      <!-- ===== COMPANY PROFILE block (Individual and Company): between the main fields and the tabs ===== -->
+      <!-- Individual only: same flow as CRM-005, BEFORE notebook. Company retains only the core profile. -->
+      <xpath expr="/form/sheet/notebook[1]" position="before">
+  <field name="x_sgt_crm_synced" invisible="1"/>
+  <field name="x_sgt_crm007_company_logo" invisible="1" readonly="1"/>
+  <div name="sgt_contact007_profile" class="sgt_cp_root" invisible="not (is_company or parent_id or x_sgt_crm_synced or x_type_contact or x_country or x_fb_industry or x_yp_employee_range or vat)">
+    <div class="sgt_cp_hero">
+      <div class="sgt_cp_hero_person" invisible="is_company">
+        <div class="sgt_cp_hero_avatar"><field name="image_128" widget="image" readonly="1" nolabel="1" options="{'size': [86, 86]}"/></div>
+        <div class="sgt_cp_hero_details"><div class="sgt_cp_eyebrow">INDIVIDUAL CONTACT</div>
+          <field name="name" nolabel="1" readonly="1" class="sgt_cp_heading"/>
+          <div class="sgt_cp_hint">Avatar can be changed using the native Contact image above</div>
+        </div>
+      </div>
+      <div class="sgt_cp_hero_company">
+        <div class="sgt_cp_logo" invisible="not is_company or not image_128"><field name="image_128" widget="image" nolabel="1" readonly="1" options="{'size': [86, 86]}"/></div>
+        <div class="sgt_cp_logo" invisible="is_company or not parent_id or not x_sgt_crm007_company_logo"><field name="x_sgt_crm007_company_logo" widget="image" nolabel="1" readonly="1" options="{'size': [86, 86]}"/></div>
+        <div class="sgt_cp_hero_details"><div class="sgt_cp_eyebrow">COMPANY PROFILE</div>
+          <field name="name" nolabel="1" readonly="1" class="sgt_cp_heading" invisible="not is_company"/>
+          <field name="parent_id" nolabel="1" readonly="1" class="sgt_cp_heading" invisible="is_company or not parent_id" options="{'no_create': True}"/>
+          <div class="sgt_cp_hint" invisible="not is_company and parent_id">Company details are managed through CRM</div>
+        </div>
+      </div>
+    </div>
+    <div class="sgt_cp_duo">
+      <section class="sgt_cp_panel" invisible="is_company">
+        <div class="sgt_cp_panel_head"><i class="fa fa-address-card-o"/> Thông tin liên hệ</div>
+        <div class="sgt_cp_panel_body">
+          <div class="sgt_cp_kv" invisible="not function"><strong>Chức vụ</strong><field name="function" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not email"><strong>Email</strong><field name="email" widget="email" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not phone"><strong>Điện thoại</strong><field name="phone" widget="phone" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not website"><strong>Website</strong><field name="website" widget="url" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_empty" invisible="function or email or phone or website">Chưa có thông tin liên hệ.</div>
+        </div>
+      </section>
+      <section class="sgt_cp_panel sgt_cp_geo_panel">
+        <div class="sgt_cp_panel_head"><i class="fa fa-map-marker"/> Địa chỉ &amp; Tọa độ</div>
+        <div class="sgt_cp_panel_body">
+          <div class="sgt_cp_kv" invisible="not street"><strong>Street</strong><field name="street" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not street2"><strong>Street 2</strong><field name="street2" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not city"><strong>City</strong><field name="city" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not state_id"><strong>State</strong><field name="state_id" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not zip"><strong>ZIP</strong><field name="zip" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not country_id"><strong>Country</strong><field name="country_id" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_geo_coords" invisible="not (partner_latitude and partner_longitude)">
+            <div class="sgt_cp_coord"><span>LATITUDE</span><field name="partner_latitude" readonly="1" nolabel="1" options="{'enable_formatting': false}"/></div>
+            <div class="sgt_cp_coord"><span>LONGITUDE</span><field name="partner_longitude" readonly="1" nolabel="1" options="{'enable_formatting': false}"/></div>
+          </div>
+          <div class="sgt_cp_geo_empty" invisible="partner_latitude and partner_longitude">Chưa xác định tọa độ. Cần định vị lại qua chức năng Geolocation của Odoo.</div>
+        </div>
+      </section>
+    </div>
+    <div class="sgt_cp_stats">
+      <section class="sgt_cp_panel" invisible="not x_type_contact"><div class="sgt_cp_panel_head">Business Type</div><div class="sgt_cp_panel_body"><field name="x_type_contact" readonly="1" nolabel="1"/></div></section>
+      <section class="sgt_cp_panel" invisible="not x_country"><div class="sgt_cp_panel_head">Main Market</div><div class="sgt_cp_panel_body"><field name="x_country" readonly="1" nolabel="1"/></div></section>
+      <section class="sgt_cp_panel" invisible="not x_yp_employee_range"><div class="sgt_cp_panel_head">Employee Size</div><div class="sgt_cp_panel_body"><field name="x_yp_employee_range" readonly="1" nolabel="1"/></div></section>
+    </div>
+    <div class="sgt_cp_bottom">
+      <section class="sgt_cp_panel" invisible="not x_fb_industry"><div class="sgt_cp_panel_head">Business Industries</div><div class="sgt_cp_panel_body"><field name="x_fb_industry" widget="text" readonly="1" nolabel="1"/></div></section>
+      <section class="sgt_cp_panel" invisible="not (vat or x_yp_founded_year or x_yp_listing_url)">
+        <div class="sgt_cp_panel_head">Quick Info</div><div class="sgt_cp_panel_body">
+          <div class="sgt_cp_kv" invisible="not vat"><strong>Tax Code</strong><field name="vat" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not x_yp_founded_year"><strong>Founded Year</strong><field name="x_yp_founded_year" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not x_yp_listing_url"><strong>Yellow Pages</strong><field name="x_yp_listing_url" widget="url" readonly="1" nolabel="1"/></div>
+        </div>
+      </section>
+      <section class="sgt_cp_panel sgt_cp_wide" invisible="not (x_url_zalo_group or x_url_fb_profile or x_group_link or x_group_post_link)">
+        <div class="sgt_cp_panel_head">Profile Links</div><div class="sgt_cp_panel_body sgt_cp_link_grid">
+          <div class="sgt_cp_kv" invisible="not x_url_zalo_group"><strong>Zalo Group</strong><field name="x_url_zalo_group" widget="url" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not x_url_fb_profile"><strong>Facebook</strong><field name="x_url_fb_profile" widget="url" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not x_group_link"><strong>Group URL</strong><field name="x_group_link" widget="url" readonly="1" nolabel="1"/></div>
+          <div class="sgt_cp_kv" invisible="not x_group_post_link"><strong>Post URL</strong><field name="x_group_post_link" widget="url" readonly="1" nolabel="1"/></div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div name="sgt_contact007_boxes" class="sgt_cp_boxes" invisible="is_company or not (x_sgt_crm_synced or x_yp_intro_en or x_yp_gallery_html or x_yp_partners_html)">
+    <div class="sgt_cp_pair">
+      <section class="sgt_cp_panel sgt_cp_intro"><div class="sgt_cp_panel_head">Company Introduction — English</div><div class="sgt_cp_panel_body"><field name="x_yp_intro_en" readonly="1" nolabel="1" widget="html"/></div></section>
+      <section class="sgt_cp_panel sgt_cp_intro"><div class="sgt_cp_panel_head">Company Introduction — Vietnamese</div><div class="sgt_cp_panel_body"><field name="comment" readonly="1" nolabel="1" widget="html" invisible="not x_sgt_crm_synced"/></div></section>
+    </div>
+    <details class="sgt_cp_panel sgt_cp_media_panel" open="open"><summary class="sgt_cp_panel_head">Image Gallery</summary><div class="sgt_cp_panel_body sgt_cp_gallery"><field name="x_yp_gallery_html" readonly="1" nolabel="1" widget="html"/></div></details>
+    <details class="sgt_cp_panel sgt_cp_media_panel" open="open"><summary class="sgt_cp_panel_head">Partners</summary><div class="sgt_cp_panel_body sgt_cp_gallery sgt_cp_partners"><field name="x_yp_partners_html" readonly="1" nolabel="1" widget="html"/></div></details>
+  </div>
+</xpath></field>
+  </record>
+</odoo>

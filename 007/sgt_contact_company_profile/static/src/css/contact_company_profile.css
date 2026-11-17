@@ -1,0 +1,57 @@
+/* CRM-007 Update_003: CSS ONLY (no Sass preprocessing) - scoped to Contact company profile. */
+.o_form_view .sgt_cp_root, .o_form_view .sgt_cp_boxes {
+  --sgt-cp-blue: #0061BD; --sgt-cp-red: #E51922;
+  --sgt-cp-border: #dce2eb; --sgt-cp-text: #293549;
+  --sgt-cp-muted: #68768a; --sgt-cp-surface: #f7f9fc;
+  min-width: 0; width: 100%; color: var(--sgt-cp-text);
+}
+.o_form_view .sgt_cp_root { margin: 1rem 0; }
+.o_form_view .sgt_cp_boxes { margin: 1rem 0; }
+.o_form_view .sgt_cp_hero { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; background: #fff; border: 1px solid var(--sgt-cp-border); border-top: 4px solid var(--sgt-cp-blue); border-radius: 12px; padding: 1.15rem; box-shadow: 0 2px 7px rgba(35,50,80,.04); }
+.o_form_view .sgt_cp_hero_person, .o_form_view .sgt_cp_hero_company { display:flex; align-items:center; gap:1rem; min-width:0; }
+.o_form_view .sgt_cp_hero_person { border-right: 1px solid var(--sgt-cp-border); padding-right: .8rem; }
+.o_form_view .sgt_cp_hero_avatar, .o_form_view .sgt_cp_logo { flex: 0 0 84px; height:84px; width:84px; overflow:hidden; border-radius:12px; background:var(--sgt-cp-surface); border:1px solid var(--sgt-cp-border); display:flex; align-items:center; justify-content:center; }
+.o_form_view .sgt_cp_hero_avatar img, .o_form_view .sgt_cp_logo img { max-width:84px; max-height:84px; object-fit:contain; }
+.o_form_view .sgt_cp_hero_details { min-width:0; flex:1; }
+.o_form_view .sgt_cp_eyebrow { font-size:.72rem; font-weight:700; letter-spacing:.055em; color:var(--sgt-cp-blue); margin-bottom:.35rem; }
+.o_form_view .sgt_cp_heading, .o_form_view .sgt_cp_heading a, .o_form_view .sgt_cp_heading .o_field_widget { color:var(--sgt-cp-text); font-size:1.2rem; font-weight:700; overflow-wrap:anywhere; max-width:100%; }
+.o_form_view .sgt_cp_hint { font-size:.76rem; color:var(--sgt-cp-muted); margin-top:.35rem; }
+.o_form_view .sgt_cp_panel { min-width:0; background:#fff; border:1px solid var(--sgt-cp-border); border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(35,50,80,.04); margin:0; }
+.o_form_view .sgt_cp_panel_head { display:block; padding:.7rem 1rem; background:#edf3fa; font-size:.9rem; font-weight:700; color:#193a61; border-bottom:1px solid var(--sgt-cp-border); }
+.o_form_view .sgt_cp_panel_head .fa { color:var(--sgt-cp-blue); margin-right:.4rem; }
+.o_form_view .sgt_cp_panel_body { padding:.75rem 1rem; min-width:0; overflow-wrap:anywhere; }
+.o_form_view .sgt_cp_bottom, .o_form_view .sgt_cp_pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:1rem; }
+.o_form_view .sgt_cp_duo { display:flex; flex-wrap:wrap; gap:1rem; margin-top:1rem; }
+.o_form_view .sgt_cp_duo > .sgt_cp_panel { flex:1 1 340px; }
+.o_form_view .sgt_cp_stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:1rem; }
+.o_form_view .sgt_cp_wide { grid-column: 1 / -1; }
+.o_form_view .sgt_cp_kv { display:grid; grid-template-columns:minmax(100px, 38%) minmax(0,1fr); align-items:start; gap:.65rem; padding:.55rem 0; border-bottom:1px solid #e8edf4; min-width:0; }
+.o_form_view .sgt_cp_kv:last-child { border-bottom:0; }
+.o_form_view .sgt_cp_kv strong { font-size:.82rem; color:#46576d; font-weight:600; }
+.o_form_view .sgt_cp_kv .o_field_widget { min-width:0; width:100%; max-width:100%; overflow-wrap:anywhere; }
+.o_form_view .sgt_cp_geo_coords { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); background:#edf4ff; border:1px solid #dceafe; border-radius:8px; margin-top:.75rem; padding:.7rem; gap:.7rem; }
+.o_form_view .sgt_cp_coord { min-width:0; }
+.o_form_view .sgt_cp_coord span { display:block; font-size:.7rem; font-weight:700; color:var(--sgt-cp-blue); margin-bottom:.25rem; }
+.o_form_view .sgt_cp_coord .o_field_widget { font-weight:700; font-variant-numeric:tabular-nums; }
+.o_form_view .sgt_cp_geo_empty, .o_form_view .sgt_cp_empty { color:var(--sgt-cp-muted); font-size:.83rem; padding:.65rem 0; }
+.o_form_view .sgt_cp_link_grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:1.1rem; }
+.o_form_view .sgt_cp_intro .sgt_cp_panel_body { min-height: 6rem; }
+.o_form_view .sgt_cp_media_panel { margin-top:1rem; }
+.o_form_view details.sgt_cp_media_panel > summary { cursor:pointer; list-style:revert; }
+.o_form_view .sgt_cp_gallery .o_readonly { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:.75rem; }
+.o_form_view .sgt_cp_gallery .o_readonly p, .o_form_view .sgt_cp_gallery .o_readonly div, .o_form_view .sgt_cp_gallery .o_readonly span { display:contents; }
+.o_form_view .sgt_cp_gallery figure { min-width:0; margin:0; padding:.4rem; border:1px solid var(--sgt-cp-border); border-radius:9px; background:#fff; }
+.o_form_view .sgt_cp_gallery img { display:block; width:100%; max-width:100%; height:auto; aspect-ratio:4 / 3; object-fit:cover; border-radius:7px; }
+.o_form_view .sgt_cp_gallery figcaption { font-size:.75rem; line-height:1.35; color:var(--sgt-cp-muted); text-align:center; margin-top:.35rem; overflow-wrap:anywhere; }
+.o_form_view .sgt_cp_partners img { object-fit:contain; aspect-ratio:3 / 2; }
+@media (max-width: 950px) { .o_form_view .sgt_cp_hero { grid-template-columns:minmax(0,1fr); } .o_form_view .sgt_cp_hero_person { border-right:0; border-bottom:1px solid var(--sgt-cp-border); padding:0 0 1rem; } .o_form_view .sgt_cp_stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width: 680px) { .o_form_view .sgt_cp_pair, .o_form_view .sgt_cp_bottom, .o_form_view .sgt_cp_stats { grid-template-columns:minmax(0,1fr); } .o_form_view .sgt_cp_root .sgt_cp_panel, .o_form_view .sgt_cp_boxes .sgt_cp_panel { width:100%; } .o_form_view .sgt_cp_hero { padding:.8rem; } .o_form_view .sgt_cp_link_grid { grid-template-columns:minmax(0,1fr); } }
+
+/* Container query: when Chatter reduces the sheet width, cards also stack. */
+.o_form_view .sgt_cp_root, .o_form_view .sgt_cp_boxes { container-type:inline-size; }
+@container (max-width: 700px) {
+  .o_form_view .sgt_cp_hero, .o_form_view .sgt_cp_pair,
+  .o_form_view .sgt_cp_bottom, .o_form_view .sgt_cp_stats { grid-template-columns:minmax(0,1fr); }
+  .o_form_view .sgt_cp_hero_person { border-right:0; border-bottom:1px solid #dce2eb; padding:0 0 1rem; }
+  .o_form_view .sgt_cp_link_grid { grid-template-columns:minmax(0,1fr); }
+}

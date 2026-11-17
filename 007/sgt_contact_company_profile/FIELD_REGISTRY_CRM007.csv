@@ -1,0 +1,16 @@
+task_id,model,technical_field,field_type,purpose,reason_new_field,scan_20261011_checked_no_existing_field,created_in_addon
+CRM-007,res.partner,x_type_contact,Char,Business Type (copied from the CRM Deal by CRM-006),"res.partner has no business-type field; owner wants the same fields as on the CRM Deal (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_country,Char,Main Market (copied from the CRM Deal),"country_id is the address country, not the main market; same field name as on the CRM Deal (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_yp_employee_range,Char,Employee Size,"no staff-size field on res.partner (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_fb_industry,Char,Business Industries,"category_id are tags written by CRM-006 and cannot show the full industry text (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_url_zalo_group,Char,Link Zalo Group,"website holds the company site only; no Zalo link field (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_url_fb_profile,Char,Link Profile (Facebook),"no social-profile field on res.partner (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_group_link,Char,Group URL,"no group-link field on res.partner (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_group_post_link,Char,Post URL,"no post-link field on res.partner (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_yp_founded_year,Integer,Founded Year,"no founding-year field on res.partner (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_yp_listing_url,Char,Yellow Pages Link (Deal field referred),"website must keep the company site; the listing link is another URL (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_yp_intro_en,Html,Company Introduction (English),"comment (Notes) is used for the Vietnamese introduction; no field for the English one (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_yp_gallery_html,Html,Image Gallery,"image_1920 holds one image only; no field holds several pictures (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_yp_partners_html,Html,Partners (logos),"no field holds several pictures (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_sgt_crm_synced,Boolean,Marks Contacts written by the CRM-006 button (avatar read-only only for them),"no existing flag tells which Contacts come from CRM; chosen by the owner as marker 'cach 1' (2026-10-31)",YES,sgt_contact_company_profile
+CRM-007,res.partner,x_sgt_crm007_company_logo,Image,Non-stored related Company logo displayed on Individual,"Reads parent_id.image_128; approved 2026-10-31; no extra stored image data",YES,sgt_contact_company_profile
