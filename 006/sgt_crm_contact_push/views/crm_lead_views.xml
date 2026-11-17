@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- CRM-006: extra button next to the existing "Create Contact" button.
+         Only visible when the Deal already has a Contact. -->
+    <record id="view_crm006_lead_form_push_contact" model="ir.ui.view">
+        <field name="name">crm.lead.form.crm006.push.contact</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <xpath expr="//form/header" position="inside">
+                <button name="action_sgt_crm006_push_contact" type="object"
+                        string="Cập nhật Contact" class="btn-secondary"
+                        invisible="not partner_id" groups="base.group_user"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
