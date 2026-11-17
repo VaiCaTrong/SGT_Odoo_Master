@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        UI-009 - Login page (/web/login, also sign-up / reset-password which share web.login_layout).
+        With the Website app installed, web.login_layout is rewritten by website.login_layout so the page is
+        rendered by website.layout. We inherit website.login_layout ITSELF (not web.login_layout): our view is
+        then applied right after it, and is simply skipped if that view is ever disabled, so the login page
+        can never break because an anchor is missing. Only login-family pages get the flag; the rest of the
+        website is not touched.
+    -->
+    <template id="login_layout_flag" inherit_id="website.login_layout" name="SGT login page flag">
+        <xpath expr="//t[@t-call='website.layout']" position="inside">
+            <t t-set="sgt_login_page" t-value="True"/>
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+        </xpath>
+    </template>
+
+    <!-- Xinyang logo above the login form -->
+    <template id="login_brand" inherit_id="web.login" name="SGT login: Xinyang logo">
+        <xpath expr="//div[@id='oe_structure_login_top']" position="before">
+            <div class="sgt_login_brand text-center">
+                <img src="/sgt_xinyang_welcome/static/src/img/logo_xinyang_horizontal.png" alt="Jiangsu Xinyang Electromechanical Equipment Co., Ltd" width="300" height="56"/>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Header (combined logo, top-left) and footer (Saigon Trade information) - login page only -->
+    <template id="layout_login_frame" inherit_id="website.layout" name="SGT login: header and footer" priority="99">
+        <xpath expr="//main" position="before">
+            <header t-if="sgt_login_page" class="sgt_hd">
+                <div class="sgt_hd_in">
+                    <a class="sgt_hd_logo" href="https://saigontrade.vn/" target="_blank" rel="noopener">
+                        <img src="/sgt_xinyang_welcome/static/src/img/logo_saigontrade_xinyang_v3.png" alt="Saigon Trade x Xinyang"/>
+                    </a>
+                    <p class="sgt_hd_tag">We accompany organizations in and outside Vietnam to expand their business in the Vietnamese market.</p>
+                </div>
+            </header>
+        </xpath>
+        <xpath expr="//main" position="after">
+            <footer t-if="sgt_login_page" class="sgt_ft">
+                <div class="sgt_ft_main">
+                    <div class="sgt_ft_in">
+                        <div class="sgt_ft_brand">
+                            <img class="sgt_ft_logo" src="/sgt_xinyang_welcome/static/src/img/logo_saigontrade.png" alt="Saigon Trade" width="200" height="61"/>
+                            <p class="sgt_ft_name">CÔNG TY TNHH SÀI GÒN TRADE</p>
+                            <p>Chúng tôi đồng hành cùng các tổ chức trong và ngoài lãnh thổ để mở rộng hoạt động kinh doanh tại thị trường Việt Nam.</p>
+                            <p><b>Mã số thuế:</b> 0318419089</p>
+                        </div>
+                        <div>
+                            <h4>Liên hệ</h4>
+                            <p><b>Văn phòng đại diện:</b><br/>37 Tôn Đức Thắng, Bến Nghé, Quận 1, TP. Hồ Chí Minh</p>
+                            <p><b>Hotline:</b> <a href="tel:+84939632525">0939 632 525</a></p>
+                            <p><b>Website:</b> <a href="https://saigontrade.vn/" target="_blank" rel="noopener">saigontrade.vn</a></p>
+                        </div>
+                        <div>
+                            <h4>Chi nhánh</h4>
+                            <ul class="sgt_ft_br">
+                                <li><b>CN1</b> 15 Nguyễn Lương Bằng, Tân Phú, Q.7</li>
+                                <li><b>CN2</b> 69 Hoàng Văn Thái, Tân Mỹ, Q.7</li>
+                                <li><b>CN3</b> 108 Diệp Minh Châu, Tân Sơn Nhì, Q. Tân Phú</li>
+                                <li><b>CN4</b> Phú Mỹ Apartments, Phú Mỹ, Q.7</li>
+                                <li><b>CN5</b> Lavita Charm, Trường Thọ, TP. Thủ Đức</li>
+                                <li><b>CN6</b> KCN Hải Sơn, Đức Hòa Hạ, Long An</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="sgt_ft_bar">
+                    <div class="sgt_ft_in sgt_ft_bar_in">
+                        <span>© Công ty TNHH Sài Gòn Trade</span>
+                        <a href="https://saigontrade.vn/" target="_blank" rel="noopener">saigontrade.vn</a>
+                    </div>
+                </div>
+            </footer>
+        </xpath>
+    </template>
+</odoo>

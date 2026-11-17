@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dashboard | Xinyang</title>
+<link rel="icon" href="/sgt_xinyang_welcome/static/src/img/logo_xinyang.png?v=__VERSION__" type="image/png">
+<style>
+:root{--navy:#061b36;--navy2:#0a315e;--blue:#0061bd;--bright:#0c91ec;--red:#e51922;--ink:#0c2340;--muted:#5c7088;--paper:#f6f9fc;--line:#e1e9f2;--white:#fff;--up:#0b8a4b;--down:#d2262d;--warn:#8a5a00;--warnbg:#fff7e0;--warnline:#f0d98c}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font:14px/1.45 "Segoe UI",Inter,Arial,sans-serif;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+.shell{max-width:1500px;margin:0 auto;padding:22px clamp(14px,3vw,40px) 60px}
+.top{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+.top h1{margin:0;font-size:24px;letter-spacing:-.01em}
+.top p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.filter{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 10px;box-shadow:0 6px 20px rgba(6,27,54,.05)}
+.seg{display:inline-flex;background:var(--paper);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:7px 13px;border-radius:8px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer;transition:background .18s,color .18s}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--navy);box-shadow:0 1px 5px rgba(6,27,54,.14)}
+.stepper{display:inline-flex;align-items:center;gap:4px}
+.ic{border:1px solid var(--line);background:#fff;border-radius:10px;width:34px;height:34px;cursor:pointer;display:inline-grid;place-items:center;transition:border-color .18s,background .18s}
+.ic:hover{border-color:var(--bright);background:#f0f8ff}
+.ic:disabled{opacity:.4;cursor:default}
+input[type=date]{border:1px solid var(--line);border-radius:10px;height:34px;padding:0 10px;background:#fff}
+.range{font-weight:700;color:var(--navy);font-size:13px;min-width:150px;text-align:center}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px;border-bottom:1px solid var(--line)}
+.tabs a{padding:11px 16px;text-decoration:none;color:var(--muted);font-weight:700;font-size:13px;border-bottom:3px solid transparent;margin-bottom:-1px;border-radius:8px 8px 0 0;transition:color .18s,background .18s}
+.tabs a:hover{color:var(--ink);background:#eef5fc}
+.tabs a[aria-current="page"]{color:var(--navy);border-bottom-color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px 16px;box-shadow:0 8px 26px rgba(6,27,54,.05);display:flex;flex-direction:column;gap:12px;animation:rise .45s ease-out backwards}
+.card:nth-child(2){animation-delay:.05s}.card:nth-child(3){animation-delay:.1s}.card:nth-child(4){animation-delay:.15s}
+@keyframes rise{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+.card h2{margin:0;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.card h2 small{letter-spacing:0;text-transform:none;font-weight:600;color:var(--bright)}
+.big{font-size:44px;line-height:1;font-weight:800;color:var(--navy);letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:12.5px}
+.delta{display:inline-flex;gap:6px;align-items:center;font-weight:800;font-size:13px}
+.delta.up{color:var(--up)}.delta.down{color:var(--down)}.delta.flat{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.tile{background:var(--paper);border-radius:12px;padding:10px 12px}
+.tile b{display:block;font-size:22px;color:var(--navy)}
+.tile span{font-size:12px;color:var(--muted)}
+.more{margin-top:auto;align-self:flex-start;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;font-weight:700;font-size:12.5px;color:var(--navy);text-decoration:none;transition:background .18s,border-color .18s}
+.more:hover{background:#f0f8ff;border-color:var(--bright)}
+.warn{background:var(--warnbg);border:1px solid var(--warnline);color:var(--warn);border-radius:12px;padding:11px 13px;font-size:13px}
+.warn b{display:block;margin-bottom:2px}
+.skel{height:44px;border-radius:10px;background:linear-gradient(90deg,#eef3f8 25%,#f8fbfe 50%,#eef3f8 75%);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:16px;box-shadow:0 8px 26px rgba(6,27,54,.05)}
+.panel h3{margin:0 0 12px;font-size:15px}
+.basis{color:var(--muted);font-size:12.5px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #eef3f8;vertical-align:top}
+tr:hover td{background:#f8fbfe}
+.tw{overflow-x:auto}
+a.lnk{color:var(--blue);font-weight:700;text-decoration:none}a.lnk:hover{text-decoration:underline}
+.pager{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px;color:var(--muted);font-size:12.5px}
+.pager button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-weight:700;cursor:pointer}
+.pager button:disabled{opacity:.4;cursor:default}
+.empty{color:var(--muted);padding:14px 4px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:16px;align-items:start}
+.updated{color:var(--muted);font-size:12px;margin-top:14px;text-align:right}
+.sw{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:2px 0 14px}
+.sw .seg button b{margin-left:6px;font-weight:800;color:var(--blue)}
+.deals{display:flex;flex-direction:column;gap:14px}
+.deal{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff;animation:rise .35s ease-out backwards}
+.deal header{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;margin-bottom:2px}
+.deal header a{font-size:15.5px}
+.chip{display:inline-block;border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:700;background:#eef5fc;color:var(--navy);border:1px solid var(--line)}
+.chip.tag{background:#fff7e0;border-color:var(--warnline);color:var(--warn)}
+.when{color:var(--muted);font-size:12.5px;margin-bottom:8px}
+.info{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 12px;margin:0;font-size:13px}
+.info dt{color:var(--muted);font-size:12px;padding-top:1px}
+.info dd{margin:0;overflow-wrap:anywhere}
+.note{margin:10px 0 0;padding:8px 10px;background:var(--paper);border-radius:10px;color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.acts a{border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-weight:700;font-size:12.5px;color:var(--navy);text-decoration:none;background:#fff;transition:background .18s,border-color .18s}
+.acts a:hover{background:#f0f8ff;border-color:var(--bright)}
+.ev{min-width:0}
+.ev h4{margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.th{padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:linear-gradient(90deg,#eef3f8 25%,#f8fbfe 50%,#eef3f8 75%);background-size:200% 100%;animation:sh 1.2s infinite;cursor:zoom-in;aspect-ratio:4/3;display:block;width:100%}
+.th.ok{animation:none;background:#fff}
+.th img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+.th:hover img{transform:scale(1.04)}
+.th.bad{animation:none;background:var(--warnbg);color:var(--warn);font-size:12px;cursor:default;padding:10px;display:grid;place-items:center;text-align:center}
+.noev{border:1px dashed var(--line);border-radius:12px;padding:16px;color:var(--muted);font-size:13px;text-align:center}
+.evnote{margin-top:6px;color:var(--warn);font-size:12px}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(6,27,54,.88);display:flex;align-items:center;justify-content:center;padding:28px;animation:rise .2s ease-out}
+.lb figure{margin:0;max-width:min(1400px,96vw);max-height:92vh;display:flex;flex-direction:column;align-items:center;gap:10px}
+.lb img{max-width:100%;max-height:82vh;border-radius:10px;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.lb figcaption{color:#dbe7f5;font-size:13px}
+.lb button{position:absolute;border:0;background:rgba(255,255,255,.16);color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;transition:background .18s}
+.lb button:hover{background:rgba(255,255,255,.3)}
+.lb .x{top:18px;right:18px}.lb .p{left:18px;top:50%}.lb .n{right:18px;top:50%}
+@media(max-width:860px){.deal{grid-template-columns:1fr}}
+@media(max-width:640px){.big{font-size:36px}.two{grid-template-columns:1fr}.range{min-width:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <div><h1 id="title">Dashboard</h1><p id="subtitle"></p></div>
+    <div class="filter" role="group" id="filter">
+      <div class="seg" id="seg" role="group"></div>
+      <div class="stepper" id="stepper">
+        <button class="ic" id="prev" type="button">‹</button>
+        <input type="date" id="date">
+        <button class="ic" id="next" type="button">›</button>
+        <button class="ic" id="today" type="button" style="width:auto;padding:0 12px;font-weight:700"></button>
+      </div>
+      <span class="range" id="range"></span>
+      <button class="ic" id="refresh" type="button" aria-label="refresh">↻</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs" aria-label="KPI"></nav>
+  <main id="view" aria-live="polite"></main>
+  <div class="updated" id="updated"></div>
+</div>
+<script>
+(function(){
+"use strict";
+var VI={title:"Dashboard",subtitle:"4 chỉ số chính · dùng chung một bộ lọc thời gian",day:"Ngày",week:"Tuần",month:"Tháng",all:"Toàn thời gian",today:"Hôm nay",
+overview:"Tổng quan",gb:"GB · Bài post",content:"Content",data:"Data · KH tiềm năng",mm:"Match Making",
+gbTitle:"GB · Bài post đã duyệt",contentTitle:"Content · Đã duyệt",dataTitle:"Data · Khách hàng tiềm năng",mmTitle:"Match Making",approvedTitle:"Approved Match Making",
+total:"Tổng bài post",approvedL:"Đã được duyệt",notApproved:"Không được duyệt",unchecked:"Chưa kiểm tra",
+totalContent:"Tổng Content",unapprovedL:"Chưa duyệt",approvedC:"Đã duyệt",archived:"Đã lưu trữ",rejected:"Từ chối",
+prospects:"Khách hàng tiềm năng",newLeads:"Lead mới vào phễu Data",prevDeal:"Kỳ trước",vsPrev:"So với kỳ trước",na:"N/A",
+dealNow:"Deal hiện tại · lần vào MM đầu tiên",dealNowA:"Deal hiện tại · lần được duyệt đầu tiên",detail:"Chi tiết →",
+loading:"Đang tải…",fail:"Chưa xác minh",notConn:"Chưa kết nối social360",refresh:"Làm mới",
+deal:"Deal",from:"Từ",by:"Người bàn giao",at:"Thời điểm",sales:"Sales",stage:"Stage",phone:"Điện thoại",created:"Ngày tạo",
+page:"Trang",prevP:"Trước",nextP:"Sau",empty:"Chưa có dữ liệu trong kỳ này.",updated:"Cập nhật",
+monthView:"Theo tháng",day_:"Ngày",author:"Tác giả",basis:"Cơ sở tính",unverified:"Deal chưa có lịch sử Tracking (không được tính)",
+curDeals:"Deal đang ở Stage",cached:"(bộ nhớ đệm 60 giây)",allRange:"Toàn bộ thời gian",mmList:"Danh sách Deal",mmAllTitle:"Match Making · cột 5 + cột 6",mmAllTotal:"Tổng Match Making (cột 5 + cột 6)",allCols:"Tất cả",col5:"cột 5",col6:"cột 6",company:"Công ty",contact:"Người liên hệ",email:"Email",website:"Website",address:"Địa chỉ",funnel:"Phễu",source:"Nguồn",tags:"Thẻ",noteL:"Ghi chú CRM",
+createdAt:"Tạo lúc",approvedAt:"Duyệt lúc",approvedBy:"Duyệt bởi",enteredMm:"Vào Match Making",enteredAp:"Được duyệt",zalo:"Mở nhóm Zalo ↗",openCrm:"Mở Deal trong CRM ↗",
+evidence:"Ảnh MM · Evidence",noEvidence:"Chưa có ảnh Evidence",imgFail:"Không tải được ảnh",close:"Đóng",prevI:"Ảnh trước",nextI:"Ảnh sau",imgOf:"Ảnh",
+basisMm:"Deal đang ở Stage, tính theo lần vào Stage đầu tiên trong Chatter (mail.message.date)"};
+var EN={title:"Dashboard",subtitle:"4 key KPIs · one shared time filter",day:"Day",week:"Week",month:"Month",all:"All time",today:"Today",
+overview:"Overview",gb:"GB · Posts",content:"Content",data:"Data · Prospects",mm:"Match Making",
+gbTitle:"GB · Approved posts",contentTitle:"Content · Approved",dataTitle:"Data · Prospects",mmTitle:"Match Making",approvedTitle:"Approved Match Making",
+total:"Total posts",approvedL:"Approved",notApproved:"Not approved",unchecked:"Unchecked",
+totalContent:"Total Content",unapprovedL:"Unapproved",approvedC:"Approved",archived:"Archived",rejected:"Rejected",
+prospects:"Prospects",newLeads:"New leads in Data funnels",prevDeal:"Previous period",vsPrev:"vs previous period",na:"N/A",
+dealNow:"Current Deals · first time in MM",dealNowA:"Current Deals · first time approved",detail:"Details →",
+loading:"Loading…",fail:"Not verified",notConn:"social360 not connected",refresh:"Refresh",
+deal:"Deal",from:"From",by:"Handed over by",at:"Time",sales:"Salesperson",stage:"Stage",phone:"Phone",created:"Created",
+page:"Page",prevP:"Previous",nextP:"Next",empty:"No data in this period.",updated:"Updated",
+monthView:"Monthly view",day_:"Day",author:"Author",basis:"Basis",unverified:"Deals without Tracking history (not counted)",
+curDeals:"Deals now in the Stage",cached:"(60 s cache)",allRange:"All time",mmList:"Deals",mmAllTitle:"Match Making · columns 5 + 6",mmAllTotal:"Total Match Making (columns 5 + 6)",allCols:"All",col5:"column 5",col6:"column 6",company:"Company",contact:"Contact person",email:"Email",website:"Website",address:"Address",funnel:"Funnel",source:"Source",tags:"Tags",noteL:"CRM note",
+createdAt:"Created",approvedAt:"Approved at",approvedBy:"Approved by",enteredMm:"Entered Match Making",enteredAp:"Approved",zalo:"Open Zalo group ↗",openCrm:"Open Deal in CRM ↗",
+evidence:"MM evidence images",noEvidence:"No evidence image yet",imgFail:"Image could not be loaded",close:"Close",prevI:"Previous image",nextI:"Next image",imgOf:"Image",
+basisMm:"Deals now in the Stage, dated by their first entry into the Stage in the Chatter (mail.message.date)"};
+var q=new URLSearchParams(location.search);
+var lang=(q.get("lang")||"").toLowerCase()==="en"?"en":"vi";
+try{if(!q.get("lang")){lang=(sessionStorage.getItem("sgtKpiLang")||"vi")==="en"?"en":"vi";}}catch(e){}
+var T=lang==="en"?EN:VI;
+function t(k){return T[k]!==undefined?T[k]:k}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function fmt(n){return n==null?"—":Number(n).toLocaleString(lang==="en"?"en-US":"vi-VN")}
+var ROUTES=["overview","gb","content","data","mm"];
+var PERIODS=["day","week","month","all"];
+var st={period:"week",date:isoToday(),route:"overview",page:{data:1,mm:1,approved_mm:1,mm_all:1},seq:0,cards:null,mmView:"all",deals:{},lb:null};
+try{var s=JSON.parse(sessionStorage.getItem("sgtKpiFilter")||"null");if(s&&PERIODS.indexOf(s.period)>=0&&/^\d{4}-\d\d-\d\d$/.test(s.date||"")){st.period=s.period;st.date=s.date;}}catch(e){}
+function isoToday(){var d=new Date(Date.now()+7*3600*1000);return d.toISOString().slice(0,10)}  // Asia/Ho_Chi_Minh calendar day
+function parse(iso){var p=iso.split("-");return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]))}
+function iso(d){return d.toISOString().slice(0,10)}
+function shift(dir){
+  var d=parse(st.date);
+  if(st.period==="day")d.setUTCDate(d.getUTCDate()+dir);
+  else if(st.period==="week")d.setUTCDate(d.getUTCDate()+7*dir);
+  else if(st.period==="month"){d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()+dir);}
+  st.date=iso(d);
+}
+function save(){try{sessionStorage.setItem("sgtKpiFilter",JSON.stringify({period:st.period,date:st.date}))}catch(e){}}
+function $(id){return document.getElementById(id)}
+
+function drawChrome(){
+  $("title").textContent=t("title");$("subtitle").textContent=t("subtitle");document.documentElement.lang=lang;document.title=t("title")+" | Xinyang";
+  $("seg").innerHTML=PERIODS.map(function(p){return '<button type="button" data-p="'+p+'" aria-pressed="'+(st.period===p)+'">'+esc(t(p))+'</button>'}).join("");
+  $("date").value=st.date;$("date").disabled=st.period==="all";$("prev").disabled=$("next").disabled=st.period==="all";
+  $("today").textContent=t("today");$("today").disabled=st.period==="all";$("refresh").title=t("refresh");
+  $("tabs").innerHTML=ROUTES.map(function(r){return '<a href="#'+r+'"'+(st.route===r?' aria-current="page"':'')+'>'+esc(t(r))+'</a>'}).join("");
+}
+function delta(d){
+  if(!d||d.value==null)return '<span class="delta flat">'+esc(t("vsPrev"))+': '+esc(t("na"))+'</span>';
+  var up=d.direction==="up";
+  return '<span class="delta '+(up?"up":"down")+'">'+(up?"▲ +":"▼ ")+esc(d.value)+'% <span style="font-weight:600;color:var(--muted)">'+esc(t("vsPrev"))+'</span></span>';
+}
+function warn(c){
+  var head=c&&c.not_connected?t("notConn"):t("fail");
+  return '<div class="warn"><b>'+esc(head)+'</b>'+esc(c&&c.reason||"")+'</div>';
+}
+function tile(label,val){return '<div class="tile"><b>'+fmt(val)+'</b><span>'+esc(label)+'</span></div>'}
+
+/* ---------- overview ---------- */
+function cardGb(c){
+  if(!c.available)return warn(c);
+  return '<div class="big">'+fmt(c.approved)+'</div>'+delta(c.previous==null?null:cmp(c.approved,c.previous))+
+   '<div class="sub">'+esc(t("prevDeal"))+': '+fmt(c.previous)+'</div>'+
+   '<div class="tiles">'+tile(t("total"),c.total)+tile(t("notApproved"),c.not_approved)+tile(t("unchecked"),c.unchecked)+'</div>';
+}
+function cardContent(c){
+  if(!c.available)return warn(c);
+  return '<div class="big">'+fmt(c.approved)+'</div>'+delta(c.previous==null?null:cmp(c.approved,c.previous))+
+   '<div class="sub">'+esc(t("prevDeal"))+': '+fmt(c.previous)+'</div>'+
+   '<div class="tiles">'+tile(t("totalContent"),c.total)+tile(t("unapprovedL"),c.unapproved)+tile(t("archived"),c.archived)+'</div>';
+}
+function cardData(c){
+  if(!c.available)return warn(c);
+  var n=c.new_leads&&c.new_leads.available?tile(t("newLeads"),c.new_leads.total):"";
+  return '<div class="big">'+fmt(c.total)+'</div>'+delta(c.delta)+'<div class="sub">'+esc(t("prevDeal"))+': '+fmt(c.previous)+'</div>'+
+   (n?'<div class="tiles">'+n+'</div>':'');
+}
+function cardMm(c,a){
+  var out='';
+  if(!c.available)out+=warn(c);else out+='<div class="big">'+fmt(c.total)+'</div>'+delta(c.delta)+'<div class="sub">'+esc(t("dealNow"))+'</div>';
+  if(a){if(!a.available)out+=warn(a);else out+='<div class="tiles">'+tile(t("approvedTitle"),a.total)+'</div><div class="sub">'+esc(t("dealNowA"))+'</div>'+delta(a.delta);}
+  return out;
+}
+function cmp(cur,prev){
+  if(prev==null)return {value:null,direction:"flat"};
+  if(prev===0)return cur===0?{value:0,direction:"up"}:{value:null,direction:"flat"};
+  var v=Math.round((cur-prev)/prev*1000)/10;return {value:v,direction:v>=0?"up":"down"};
+}
+function overview(cards){
+  var defs=[["gb","gbTitle",cardGb(cards.gb)],["content","contentTitle",cardContent(cards.content)],["data","dataTitle",cardData(cards.data)],["mm","mmTitle",cardMm(cards.mm,cards.approved_mm)]];
+  return '<div class="grid">'+defs.map(function(d){
+    return '<section class="card"><h2><span>'+esc(t(d[1]))+'</span></h2>'+d[2]+'<a class="more" href="#'+d[0]+'">'+esc(t("detail"))+'</a></section>';
+  }).join("")+'</div>';
+}
+
+/* ---------- tables ---------- */
+function pager(key,c){
+  if(!c.page_count||c.page_count<2)return "";
+  return '<div class="pager"><button type="button" data-pg="'+key+'" data-d="-1"'+(c.page<=1?" disabled":"")+'>'+esc(t("prevP"))+'</button><span>'+esc(t("page"))+' '+c.page+' / '+c.page_count+'</span><button type="button" data-pg="'+key+'" data-d="1"'+(c.page>=c.page_count?" disabled":"")+'>'+esc(t("nextP"))+'</button></div>';
+}
+function dealLink(r){return '<a class="lnk" target="_blank" rel="noopener" href="'+esc(r.odoo_url)+'">'+esc(r.name||("#"+r.lead_id))+'</a>'}
+function tableData(c){
+  if(!c.rows||!c.rows.length)return '<div class="empty">'+esc(t("empty"))+'</div>';
+  return '<div class="tw"><table><thead><tr><th>'+esc(t("deal"))+'</th><th>'+esc(t("from"))+'</th><th>'+esc(t("by"))+'</th><th>'+esc(t("at"))+'</th><th>'+esc(t("sales"))+'</th><th>'+esc(t("stage"))+'</th></tr></thead><tbody>'+
+   c.rows.map(function(r){return '<tr><td>'+dealLink(r)+'</td><td>'+esc(r.from)+'</td><td>'+esc(r.handed_by)+'</td><td>'+esc(r.handed_at)+'</td><td>'+esc(r.sales||r.salesperson)+'</td><td>'+esc(r.stage)+'</td></tr>'}).join("")+'</tbody></table></div>'+pager("data",c);
+}
+function row(label,val){return val?'<dt>'+esc(label)+'</dt><dd>'+val+'</dd>':""}
+function dealCard(r,approved){
+  st.deals[r.lead_id]=r;
+  var info=row(t("company"),esc(r.company))+row(t("contact"),esc(r.contact)+(r.function?' · '+esc(r.function):""))+row(t("phone"),esc(r.phone))+row(t("email"),esc(r.email))+
+   row(t("website"),r.website?'<a class="lnk" target="_blank" rel="noopener noreferrer" href="'+esc(r.website)+'">'+esc(r.website.replace(/^https?:\/\//,""))+'</a>':"")+row(t("address"),esc(r.address))+
+   row(t("funnel"),esc(r.funnel))+row(t("source"),esc(r.source))+
+   row(t("tags"),(r.tags||[]).map(function(x){return '<span class="chip tag">'+esc(x)+'</span>'}).join(" "))+row(t("sales"),esc(r.salesperson))+row(t("createdAt"),esc(r.created))+
+   (approved?row(t("approvedAt"),esc(r.approved_at))+row(t("approvedBy"),esc(r.approved_by)):"");
+  var acts=(r.zalo_url?'<a target="_blank" rel="noopener noreferrer" href="'+esc(r.zalo_url)+'">'+esc(t("zalo"))+'</a>':"")+'<a target="_blank" rel="noopener" href="'+esc(r.odoo_url)+'">'+esc(t("openCrm"))+'</a>';
+  var ev=r.evidence||[];
+  var thumbs=ev.length?'<div class="thumbs">'+ev.map(function(e,i){return '<button type="button" class="th" data-lb="'+r.lead_id+'" data-i="'+i+'" aria-label="'+esc(t("imgOf")+" "+(i+1))+'"><img loading="lazy" decoding="async" alt="" src="'+esc(e.thumb)+'"></button>'}).join("")+'</div>':'<div class="noev">'+esc(t("noEvidence"))+'</div>';
+  return '<article class="deal"><div><header><a class="lnk" target="_blank" rel="noopener" href="'+esc(r.odoo_url)+'">#'+esc(r.lead_id)+' · '+esc(r.name||"")+'</a><span class="chip">'+esc(r.stage)+'</span></header>'+
+   '<div class="when">'+esc(t(approved?"enteredAp":"enteredMm"))+': '+esc(r.at)+'</div><dl class="info">'+info+'</dl>'+(r.note?'<p class="note"><b>'+esc(t("noteL"))+':</b> '+esc(r.note)+'</p>':"")+'<div class="acts">'+acts+'</div></div>'+
+   '<div class="ev"><h4>'+esc(t("evidence"))+(ev.length?' · '+ev.length:"")+'</h4>'+thumbs+(r.evidence_note?'<div class="evnote">'+esc(r.evidence_note)+'</div>':"")+'</div></article>';
+}
+function dealList(key,c){
+  if(!c.available)return warn(c);
+  if(!c.rows||!c.rows.length)return '<div class="empty">'+esc(t("empty"))+'</div>';
+  return '<div class="deals">'+c.rows.map(function(r){return dealCard(r,r.column?r.column==="approved":key==="approved_mm")}).join("")+'</div>'+pager(key,c);
+}
+function stageSummary(title,c){
+  if(!c.available)return '<div class="panel"><h3>'+esc(title)+'</h3>'+warn(c)+'</div>';
+  return '<div class="panel"><h3>'+esc(title)+' · '+esc(c.target_stage||"")+'</h3><div class="tiles">'+tile(title,c.total)+tile(t("prevDeal"),c.previous)+tile(t("curDeals"),c.current_stage_deals)+(c.unverified_count?tile(t("unverified"),c.unverified_count):"")+'</div>'+
+   '<p style="margin:14px 0 0">'+delta(c.delta)+'</p><div class="basis">'+esc(t("basis"))+': '+esc(t("basisMm"))+'</div></div>';
+}
+function pageMm(c){
+  if(!c.available)return '<div class="panel">'+warn(c)+'</div>';
+  var on=st.mmView==="mm"||st.mmView==="approved"?st.mmView:"all";
+  function seg(v,label,n){return '<button type="button" data-v="'+v+'" aria-pressed="'+(on===v)+'">'+esc(label)+'<b>'+fmt(n)+'</b></button>';}
+  var sw='<div class="sw"><div class="seg" role="group">'+seg("all",t("allCols"),c.total)+seg("mm",t("mmTitle")+" · "+t("col5"),c.mm_total)+seg("approved",t("approvedTitle")+" · "+t("col6"),c.approved_total)+'</div></div>';
+  var sum='<div class="panel"><h3>'+esc(t("mmAllTitle"))+'</h3><div class="tiles">'+tile(t("mmAllTotal"),c.total)+tile(t("mmTitle")+" · "+t("col5"),c.mm_total)+tile(t("approvedTitle")+" · "+t("col6"),c.approved_total)+tile(t("prevDeal"),c.previous)+(c.unverified_count?tile(t("unverified"),c.unverified_count):"")+'</div>'+
+   '<p style="margin:14px 0 0">'+delta(c.delta)+'</p><div class="basis">'+esc(t("basis"))+': '+esc(t("basisMm"))+'</div></div>';
+  return sum+'<div class="panel"><h3>'+esc(t("mmList"))+'</h3>'+sw+dealList("mm_all",c)+'</div>';
+}
+
+/* ---------- evidence viewer ---------- */
+function closeLb(){var o=document.getElementById("lb");if(o)o.remove();st.lb=null;}
+function showLb(){
+  var o=document.getElementById("lb");if(!o){o=document.createElement("div");o.id="lb";o.className="lb";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");document.body.appendChild(o);}
+  var d=st.lb,r=st.deals[d.lead],ev=(r&&r.evidence)||[],e=ev[d.i];if(!e){closeLb();return;}
+  o.innerHTML='<button type="button" class="x" data-lbx="x" aria-label="'+esc(t("close"))+'">×</button>'+(ev.length>1?'<button type="button" class="p" data-lbx="p" aria-label="'+esc(t("prevI"))+'">‹</button><button type="button" class="n" data-lbx="n" aria-label="'+esc(t("nextI"))+'">›</button>':"")+
+   '<figure><img alt="" src="'+esc(e.large)+'"><figcaption>#'+esc(r.lead_id)+' · '+esc(r.name||"")+' · '+esc(t("imgOf"))+' '+(d.i+1)+' / '+ev.length+'</figcaption></figure>';
+}
+function stepLb(n){var r=st.deals[st.lb.lead],len=(r&&r.evidence||[]).length;if(!len)return;st.lb.i=(st.lb.i+n+len)%len;showLb();}
+
+/* ---------- sub pages ---------- */
+function pageGb(c){
+  if(!c.available)return '<div class="panel">'+warn(c)+'</div>';
+  return '<div class="panel"><h3>'+esc(t("gbTitle"))+'</h3><div class="tiles">'+tile(t("total"),c.total)+tile(t("approvedL"),c.approved)+tile(t("notApproved"),c.not_approved)+tile(t("unchecked"),c.unchecked)+'</div>'+
+   '<p style="margin:14px 0 0">'+delta(cmp(c.approved,c.previous==null?null:c.previous))+' · '+esc(t("prevDeal"))+': '+fmt(c.previous)+'</p>'+
+   '<div class="basis">'+esc(t("basis"))+': '+esc(c.basis||"")+(c.aggregation?' · '+esc(c.aggregation):"")+'</div></div>';
+}
+function pageContent(c){
+  if(!c.available)return '<div class="panel">'+warn(c)+'</div>';
+  var h='<div class="panel"><h3>'+esc(t("contentTitle"))+'</h3><div class="tiles">'+tile(t("totalContent"),c.total)+tile(t("unapprovedL"),c.unapproved)+tile(t("approvedC"),c.approved)+tile(t("archived"),c.archived)+tile(t("rejected"),c.rejected)+'</div>'+
+   '<p style="margin:14px 0 0">'+delta(cmp(c.approved,c.previous==null?null:c.previous))+' · '+esc(t("prevDeal"))+': '+fmt(c.previous)+'</p>';
+  var m=c.month_view;
+  if(m&&m.current){h+='<p class="sub" style="margin:10px 0 0">'+esc(t("monthView"))+' '+esc(m.label)+': '+esc(t("totalContent"))+' '+fmt(m.current.content)+' · '+esc(t("unapprovedL"))+' '+fmt(m.current.unapproved)+' ('+esc(m.previous_label)+': '+fmt(m.previous&&m.previous.content)+' / '+fmt(m.previous&&m.previous.unapproved)+')</p>';}
+  h+='<div class="basis">'+esc(t("basis"))+': '+esc(c.basis||"")+'</div></div>';
+  if(c.daily&&c.daily.length){
+    h+='<div class="panel"><h3>'+esc(t("day_"))+'</h3><div class="tw"><table><thead><tr><th>'+esc(t("day_"))+'</th><th>'+esc(t("totalContent"))+'</th><th>'+esc(t("unapprovedL"))+'</th><th>'+esc(t("approvedC"))+'</th><th>'+esc(t("rejected"))+'</th><th>'+esc(t("archived"))+'</th></tr></thead><tbody>'+
+     c.daily.map(function(r){return '<tr><td>'+esc(r.date)+'</td><td>'+fmt(r.content)+'</td><td>'+fmt(r.unapproved)+'</td><td>'+fmt(r.approved)+'</td><td>'+fmt(r.rejected)+'</td><td>'+fmt(r.archived)+'</td></tr>'}).join("")+'</tbody></table></div></div>';
+  }
+  if(c.creators&&c.creators.length){
+    h+='<div class="panel"><h3>'+esc(t("author"))+'</h3><div class="tw"><table><thead><tr><th>'+esc(t("author"))+'</th><th>'+esc(t("totalContent"))+'</th><th>'+esc(t("unapprovedL"))+'</th><th>'+esc(t("approvedC"))+'</th><th>'+esc(t("rejected"))+'</th><th>'+esc(t("archived"))+'</th></tr></thead><tbody>'+
+     c.creators.map(function(r){return '<tr><td>'+esc(r.name)+'</td><td>'+fmt(r.content)+'</td><td>'+fmt(r.unapproved)+'</td><td>'+fmt(r.approved)+'</td><td>'+fmt(r.rejected)+'</td><td>'+fmt(r.archived)+'</td></tr>'}).join("")+'</tbody></table></div></div>';
+  }
+  return h;
+}
+function pageData(c){
+  if(!c.available)return '<div class="panel">'+warn(c)+'</div>';
+  var n=c.new_leads&&c.new_leads.available?tile(t("newLeads"),c.new_leads.total):"";
+  return '<div class="panel"><h3>'+esc(t("dataTitle"))+'</h3><div class="tiles">'+tile(t("prospects"),c.total)+tile(t("prevDeal"),c.previous)+n+'</div>'+
+   '<p style="margin:14px 0 0">'+delta(c.delta)+'</p><div class="basis">'+esc(t("basis"))+': '+esc(c.basis||"")+'</div></div>'+
+   '<div class="panel"><h3>'+esc(t("deal"))+'</h3>'+tableData(c)+'</div>';
+}
+
+/* ---------- loading ---------- */
+function rangeText(p){return !p?"":(p.period_type==="all"?t("allRange"):(p.label||""))}
+function render(html,period,updated){
+  $("view").innerHTML=html;$("range").textContent=rangeText(period);
+  $("updated").textContent=updated?(t("updated")+": "+String(updated).replace("T"," ").slice(0,19)):"";
+}
+function url(kpi,extra){
+  var u="/sgt_home/kpi/data?kpi="+encodeURIComponent(kpi)+"&period="+st.period+"&date="+st.date+(extra||"");
+  return u;
+}
+function get(u,seq){
+  return fetch(u,{credentials:"same-origin",headers:{"Accept":"application/json"}}).then(function(r){
+    return r.json().catch(function(){return {detail:"HTTP "+r.status}}).then(function(j){
+      if(!r.ok)throw new Error(j.detail||("HTTP "+r.status));
+      return j;
+    });
+  });
+}
+function load(force){
+  var seq=++st.seq,route=st.route,f=force?"&force=1":"";
+  drawChrome();
+  $("range").textContent="";
+  $("view").innerHTML=route==="overview"?'<div class="grid">'+[1,2,3,4].map(function(){return '<section class="card"><div class="skel"></div><div class="skel" style="height:70px"></div></section>'}).join("")+'</div>':'<div class="panel"><div class="skel"></div></div>';
+  var done=function(html,period,upd){if(seq!==st.seq)return;render(html,period,upd);};
+  var fail=function(e){if(seq!==st.seq)return;$("view").innerHTML='<div class="panel">'+warn({reason:e.message})+'</div>';};
+  if(route==="overview"){
+    get(url("overview",f)).then(function(j){var cs=j.cards;done(overview(cs),j.period,(cs.data&&cs.data.updated_at)||(cs.gb&&cs.gb.updated_at));}).catch(fail);
+  }else if(route==="gb"||route==="content"||route==="data"){
+    get(url(route,"&page="+(st.page.data||1)+f)).then(function(j){var c=j.card;done(route==="gb"?pageGb(c):route==="content"?pageContent(c):pageData(c),j.period,c.updated_at);}).catch(fail);
+  }else{
+    var col=st.mmView==="mm"||st.mmView==="approved"?st.mmView:"all";
+    get(url("mm_all","&col="+col+"&detail=1&page_size=10&page="+(st.page.mm_all||1)+f)).then(function(j){
+      st.deals={};
+      done(pageMm(j.card),j.period,j.card.updated_at);
+    }).catch(fail);
+  }
+}
+function route(){
+  var h=(location.hash||"#overview").slice(1);
+  st.route=ROUTES.indexOf(h)>=0?h:"overview";
+  if(st.route==="data")st.page.data=1;
+  load(false);
+}
+document.addEventListener("click",function(ev){
+  var b=ev.target.closest&&ev.target.closest("button");
+  if(!b){var o=document.getElementById("lb");if(o&&ev.target===o)closeLb();return;}
+  if(b.dataset.lb){st.lb={lead:Number(b.dataset.lb),i:Number(b.dataset.i)};showLb();return;}
+  if(b.dataset.lbx){if(b.dataset.lbx==="x")closeLb();else stepLb(b.dataset.lbx==="p"?-1:1);return;}
+  if(b.dataset.v){st.mmView=b.dataset.v==="mm"||b.dataset.v==="approved"?b.dataset.v:"all";st.page.mm_all=1;load(false);return;}
+  if(b.dataset.p){st.period=b.dataset.p;st.page={data:1,mm:1,approved_mm:1,mm_all:1};save();load(false);}
+  else if(b.id==="prev"){shift(-1);st.page={data:1,mm:1,approved_mm:1,mm_all:1};save();load(false);}
+  else if(b.id==="next"){shift(1);st.page={data:1,mm:1,approved_mm:1,mm_all:1};save();load(false);}
+  else if(b.id==="today"){st.date=isoToday();st.page={data:1,mm:1,approved_mm:1,mm_all:1};save();load(false);}
+  else if(b.id==="refresh"){load(true);}
+  else if(b.dataset.pg){var k=b.dataset.pg;st.page[k]=Math.max(1,(st.page[k]||1)+Number(b.dataset.d));load(false);}
+});
+$("date").addEventListener("change",function(ev){if(/^\d{4}-\d\d-\d\d$/.test(ev.target.value)){st.date=ev.target.value;st.page={data:1,mm:1,approved_mm:1,mm_all:1};save();load(false);}});
+window.addEventListener("hashchange",function(){closeLb();route()});
+document.addEventListener("keydown",function(ev){if(!st.lb)return;if(ev.key==="Escape")closeLb();else if(ev.key==="ArrowLeft")stepLb(-1);else if(ev.key==="ArrowRight")stepLb(1);});
+// A thumbnail that cannot be read says so instead of staying a grey box; one that loads stops its shimmer.
+document.addEventListener("error",function(ev){var i=ev.target;if(i&&i.tagName==="IMG"&&i.closest&&i.closest(".th")){var b=i.closest(".th");b.className="th bad";b.removeAttribute("data-lb");b.textContent=t("imgFail");}},true);
+document.addEventListener("load",function(ev){var i=ev.target;if(i&&i.tagName==="IMG"&&i.closest&&i.closest(".th")){i.closest(".th").classList.add("ok");}},true);
+// The Home menu can switch the language without reloading this frame.
+window.XINYANG_KPI={setLang:function(l){lang=l==="en"?"en":"vi";T=lang==="en"?EN:VI;try{sessionStorage.setItem("sgtKpiLang",lang)}catch(e){}drawChrome();load(false);}};
+drawChrome();route();
+})();
+</script>
+</body>
+</html>

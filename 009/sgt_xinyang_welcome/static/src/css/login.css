@@ -1,0 +1,86 @@
+/* UI-009 - login page only. Everything is scoped to .sgt_* classes created by login_templates.xml. */
+:root {
+    --sgt-blue: #0061BD;
+    --sgt-red: #E51922;
+    --sgt-ring: #B3181A;
+    --sgt-ink: #1f2933;
+}
+/* Header = same look as the backend navbar (UI-004): brand blue + one 4px red line flush at the bottom. */
+.sgt_hd {
+    background: var(--sgt-blue);
+    border-bottom: 4px solid var(--sgt-red);
+}
+.sgt_hd_in {
+    padding: 0 14px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+}
+.sgt_hd_logo { display: inline-flex; align-items: center; flex: 0 0 auto; }
+.sgt_hd_logo img { height: 40px; width: auto; display: block; background: #fff; border-radius: 50%; }
+.sgt_hd_in { gap: 18px; }
+.sgt_hd_tag { margin: 0; color: #fff; font-size: 15px; font-weight: 500; line-height: 1.35; letter-spacing: .1px; }
+
+.sgt_login_brand { margin: 8px 0 18px; }
+.sgt_login_brand img { display: inline-block; width: 300px; max-width: 100%; height: auto; }
+
+/* Login form: colours of the brand */
+.oe_login_form .btn-primary,
+.oe_login_form .btn-primary:focus {
+    background-color: var(--sgt-blue);
+    border-color: var(--sgt-blue);
+}
+.oe_login_form .btn-primary:hover,
+.oe_login_form .btn-primary:active {
+    background-color: #004C98;
+    border-color: #004C98;
+}
+.oe_login_form a:not(.btn) { color: var(--sgt-blue); }
+.oe_login_form .form-control:focus {
+    border-color: var(--sgt-blue);
+    box-shadow: 0 0 0 .2rem rgba(0, 97, 189, .20);
+}
+.oe_website_login_container { padding-top: 36px; padding-bottom: 56px; }
+
+.sgt_ft {
+    font-family: inherit;
+    color: #fff;
+    margin: 0;
+}
+.sgt_ft_main {
+    background: var(--sgt-blue);
+    border-top: 4px solid var(--sgt-red);
+}
+.sgt_ft_in {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 34px 15px 26px;
+    display: grid;
+    grid-template-columns: 1.25fr 1.15fr 1.1fr;
+    gap: 38px;
+}
+.sgt_ft h4 { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: #fff; }
+.sgt_ft p { margin: 0 0 7px; line-height: 1.55; font-size: 13px; color: #eaf2fb; }
+.sgt_ft b { color: #fff; font-weight: 600; }
+.sgt_ft a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .45); }
+.sgt_ft .sgt_ft_name { font-size: 16px; font-weight: 700; line-height: 1.35; color: #fff; margin-bottom: 8px; }
+.sgt_ft_logo { display: block; width: 200px; max-width: 100%; height: auto; border-radius: 6px; margin: 0 0 14px; }
+.sgt_ft_br { list-style: none; padding: 0; margin: 0; }
+.sgt_ft_br li { margin: 0 0 6px; font-size: 12.5px; line-height: 1.5; color: #eaf2fb; }
+.sgt_ft_br b { display: inline-block; min-width: 34px; }
+.sgt_ft_bar { background: var(--sgt-ring); font-size: 12.5px; color: #fff; }
+.sgt_ft_bar_in {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 11px;
+    padding-bottom: 11px;
+}
+
+@media (max-width: 820px) {
+    .sgt_hd_in { height: auto; min-height: 48px; padding: 6px 12px; gap: 12px; }
+    .sgt_hd_tag { font-size: 12px; }
+    .sgt_hd_logo img { height: 36px; }
+    .sgt_ft_in { grid-template-columns: 1fr; gap: 24px; }
+}

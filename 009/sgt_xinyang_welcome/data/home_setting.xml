@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="home_setting_default" model="sgt.home.setting">
+        <field name="name">Home settings</field>
+        <field name="autoplay_mode">30</field>
+        <field name="autoplay_custom_seconds">20</field>
+    </record>
+</odoo>

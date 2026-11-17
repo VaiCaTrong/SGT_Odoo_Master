@@ -1,0 +1,255 @@
+# Vietnamese translation of Xinyang Welcome / Home (product showcase).
+# Product title, subtitle and content of the seeded demo products.
+# New products: type the Vietnamese text with the globe icon on the product form.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: vi\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_thermal
+msgid "Temperature-Sensing Air Outlets"
+msgstr "Miệng gió cảm biến nhiệt độ"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_thermal
+msgid "Air distribution with temperature-responsive designs."
+msgstr "Phân phối không khí với thiết kế phản ứng theo nhiệt độ."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_thermal
+msgid "Air outlet families using temperature-responsive airflow concepts for HVAC terminal applications."
+msgstr "Các dòng miệng gió ứng dụng nguyên lý luồng khí phản ứng theo nhiệt độ cho thiết bị đầu cuối HVAC."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_silencer
+msgid "Industrial Silencer Systems"
+msgstr "Hệ thống giảm âm công nghiệp"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_silencer
+msgid "Noise-control solutions for engineered spaces."
+msgstr "Giải pháp kiểm soát tiếng ồn cho không gian kỹ thuật."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_silencer
+msgid "Silencer product families for high air-volume ventilation and noise-control applications, with detailed dimensions and performance tables in the catalog."
+msgstr "Các dòng bộ giảm âm cho hệ thống thông gió lưu lượng lớn và ứng dụng kiểm soát tiếng ồn; bảng kích thước và thông số hiệu năng chi tiết có trong catalog."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_fire
+msgid "Fire, Smoke & Explosion Dampers"
+msgstr "Van chặn lửa, khói & chống nổ"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_fire
+msgid "Dampers for smoke exhaust and fire safety systems."
+msgstr "Van cho hệ thống hút khói và an toàn cháy."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_fire
+msgid "Product families for fire and smoke control in building ventilation systems. Applicable configurations should be checked against the product technical catalog."
+msgstr "Các dòng sản phẩm kiểm soát cháy và khói trong hệ thống thông gió công trình. Cần đối chiếu cấu hình áp dụng với catalog kỹ thuật của sản phẩm."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_aluminum
+msgid "XY-F Aluminum Air Outlets"
+msgstr "Miệng gió nhôm XY-F"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_aluminum
+msgid "Architectural outlets designed to reduce condensation."
+msgstr "Miệng gió kiến trúc được thiết kế để giảm đọng sương."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_aluminum
+msgid "An aluminum alloy air-outlet solution shown in the provided product content. Confirm specifications for each project."
+msgstr "Giải pháp miệng gió hợp kim nhôm như thể hiện trong nội dung sản phẩm được cung cấp. Cần xác nhận thông số cho từng dự án."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_smoke
+msgid "Smoke Control Damper Families"
+msgstr "Các dòng van kiểm soát khói"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_smoke
+msgid "Manual, remote-controlled and automatic variants."
+msgstr "Các phiên bản vận hành thủ công, điều khiển từ xa và tự động."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_smoke
+msgid "Selected smoke exhaust and fire-control damper families listed in the supplied technical catalog."
+msgstr "Một số dòng van hút khói và kiểm soát cháy được liệt kê trong catalog kỹ thuật đã cung cấp."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_eggcrate
+msgid "XY-DG Egg Crate Air Outlet"
+msgstr "Miệng gió hộp trứng XY-DG"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_eggcrate
+msgid "A compact grille design for air distribution."
+msgstr "Thiết kế lưới gọn cho việc phân phối không khí."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_eggcrate
+msgid "Egg crate format air outlet for air distribution and return-air applications. Dimensions and construction details are available in the catalog."
+msgstr "Miệng gió dạng hộp trứng cho phân phối không khí và gió hồi. Kích thước và chi tiết cấu tạo có trong catalog."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_bd1
+msgid "BD1 Butterfly Valve"
+msgstr "Van bướm BD1"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_bd1
+msgid "Flexible airflow control, galvanized steel, for ventilation and air conditioning."
+msgstr "Điều chỉnh luồng khí linh hoạt, thép mạ kẽm, dùng cho thông gió và điều hòa không khí."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_bd1
+msgid ""
+"BD1 butterfly valve for flexible airflow control in ventilation and air-conditioning systems.\n"
+"• Flexible airflow regulation\n"
+"• Galvanized steel construction, corrosion resistant\n"
+"• For ventilation and air-conditioning duct systems\n"
+"Confirm sizes and specifications for each project in the technical catalog."
+msgstr ""
+"Van bướm BD1 để điều chỉnh luồng khí linh hoạt trong hệ thống thông gió và điều hòa không khí.\n"
+"• Điều chỉnh lưu lượng gió linh hoạt\n"
+"• Cấu tạo thép mạ kẽm, chống ăn mòn\n"
+"• Dùng cho hệ thống ống gió thông gió và điều hòa không khí\n"
+"Cần đối chiếu kích thước và thông số cho từng dự án trong catalog kỹ thuật."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_fasu
+msgid "FASU Ceiling Ventilation Solution"
+msgstr "Giải pháp thông gió âm trần FASU"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_fasu
+msgid "Static pressure box, insulated flex duct and diffuser; up to 50% less installation time."
+msgstr "Hộp tĩnh áp, ống gió mềm cách nhiệt và miệng khuếch tán; giảm đến 50% thời gian lắp đặt."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_fasu
+msgid ""
+"FASU ceiling ventilation solution: a static pressure box, insulated flexible duct and diffuser supplied as one system.\n"
+"• Static pressure box with insulated flex duct and diffuser\n"
+"• Up to 50% less installation time, according to the supplied poster\n"
+"• Suited to ceiling-mounted ventilation layouts\n"
+"Confirm project configurations in the technical catalog."
+msgstr ""
+"Giải pháp thông gió âm trần FASU: hộp tĩnh áp, ống gió mềm cách nhiệt và miệng khuếch tán được cung cấp như một hệ thống đồng bộ.\n"
+"• Hộp tĩnh áp kèm ống gió mềm cách nhiệt và miệng khuếch tán\n"
+"• Giảm đến 50% thời gian lắp đặt, theo poster được cung cấp\n"
+"• Phù hợp các bố trí thông gió lắp trên trần\n"
+"Cần đối chiếu cấu hình theo dự án trong catalog kỹ thuật."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_noise
+msgid "HVAC Noise-Control Solutions"
+msgstr "Giải pháp giảm ồn cho hệ thống HVAC"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_noise
+msgid "Large-flow panel, ZP100, ZP200 and straight-duct silencers."
+msgstr "Tấm giảm âm lưu lượng lớn, ZP100, ZP200 và bộ giảm âm ống thẳng."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_noise
+msgid ""
+"Noise-control solutions for HVAC systems, from large-flow panels to duct silencers.\n"
+"• Large-flow panel silencer\n"
+"• ZP100 and ZP200 silencers\n"
+"• Straight-duct silencers\n"
+"Dimensions and performance tables are available in the technical catalog."
+msgstr ""
+"Giải pháp kiểm soát tiếng ồn cho hệ thống HVAC, từ tấm giảm âm lưu lượng lớn đến bộ giảm âm ống gió.\n"
+"• Bộ giảm âm dạng tấm lưu lượng lớn\n"
+"• Bộ giảm âm ZP100 và ZP200\n"
+"• Bộ giảm âm ống thẳng\n"
+"Bảng kích thước và thông số hiệu năng có trong catalog kỹ thuật."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_damper_range
+msgid "Ventilation Damper Range"
+msgstr "Dòng van thông gió"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_damper_range
+msgid "Volume control, constant flow, check, butterfly, fire and smoke dampers."
+msgstr "Van điều chỉnh lưu lượng, lưu lượng không đổi, một chiều, bướm, chặn lửa và chặn khói."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_damper_range
+msgid ""
+"A range of dampers for ventilation, smoke-control and fire-safety systems.\n"
+"• Volume control damper\n"
+"• Constant flow damper\n"
+"• Check damper and butterfly damper\n"
+"• Fire damper and smoke damper\n"
+"• Remote-controlled series\n"
+"• Automatic smoke-exhaust and fire-reduction series\n"
+"Check applicable configurations in the technical catalog."
+msgstr ""
+"Dòng van dùng cho hệ thống thông gió, kiểm soát khói và an toàn cháy.\n"
+"• Van điều chỉnh lưu lượng\n"
+"• Van lưu lượng không đổi\n"
+"• Van một chiều và van bướm\n"
+"• Van chặn lửa và van chặn khói\n"
+"• Dòng điều khiển từ xa\n"
+"• Dòng hút khói tự động và giảm cháy\n"
+"Cần kiểm tra cấu hình áp dụng trong catalog kỹ thuật."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_xywe
+msgid "XY-WE Linear Slot Diffuser"
+msgstr "Miệng gió khe dài XY-WE"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_xywe
+msgid "Adjusts airflow direction automatically by temperature."
+msgstr "Tự động điều chỉnh hướng gió theo nhiệt độ."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_xywe
+msgid ""
+"XY-WE linear slot diffuser that adjusts the direction of airflow automatically according to temperature.\n"
+"• Vertical, horizontal or diagonal blow\n"
+"• Even air distribution across the space\n"
+"• Temperature-responsive airflow direction\n"
+"Confirm sizes and installation details for each project."
+msgstr ""
+"Miệng gió khe dài XY-WE tự động điều chỉnh hướng luồng khí theo nhiệt độ.\n"
+"• Thổi theo phương đứng, ngang hoặc chéo\n"
+"• Phân phối không khí đều trong không gian\n"
+"• Hướng gió phản ứng theo nhiệt độ\n"
+"Cần xác nhận kích thước và chi tiết lắp đặt cho từng dự án."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,name:sgt_xinyang_welcome.home_product_seed_xyyl
+msgid "XYYL Circular Tube Silencer"
+msgstr "Bộ giảm âm ống tròn XYYL"
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,subtitle:sgt_xinyang_welcome.home_product_seed_xyyl
+msgid "Effective noise reduction, stable airflow, galvanized steel."
+msgstr "Giảm ồn hiệu quả, luồng khí ổn định, thép mạ kẽm."
+
+#. module: sgt_xinyang_welcome
+#: model:sgt.home.product,description:sgt_xinyang_welcome.home_product_seed_xyyl
+msgid ""
+"XYYL circular tube silencer for effective noise reduction in ducted systems.\n"
+"• Effective noise reduction\n"
+"• Stable airflow with low pressure loss\n"
+"• Galvanized steel construction for long service life\n"
+"Dimensions and performance data are available in the technical catalog."
+msgstr ""
+"Bộ giảm âm ống tròn XYYL giúp giảm tiếng ồn hiệu quả trong hệ thống ống gió.\n"
+"• Giảm tiếng ồn hiệu quả\n"
+"• Luồng khí ổn định, tổn thất áp suất thấp\n"
+"• Cấu tạo thép mạ kẽm, tuổi thọ dài\n"
+"Kích thước và dữ liệu hiệu năng có trong catalog kỹ thuật."

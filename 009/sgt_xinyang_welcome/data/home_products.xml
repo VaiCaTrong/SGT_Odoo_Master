@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo noupdate="1">
+  <record id="home_product_seed_thermal" model="sgt.home.product">
+    <field name="sequence">10</field>
+    <field name="name">Temperature-Sensing Air Outlets</field>
+    <field name="code">XYWT · XYWE · XY-WC4</field>
+    <field name="subtitle">Air distribution with temperature-responsive designs.</field>
+    <field name="description">Air outlet families using temperature-responsive airflow concepts for HVAC terminal applications.</field>
+    <field name="category">air</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/smart-air-outlets-temperature-sensing.jpg"/>
+  </record>
+  <record id="home_product_seed_silencer" model="sgt.home.product">
+    <field name="sequence">20</field>
+    <field name="name">Industrial Silencer Systems</field>
+    <field name="code">XYPX · ZP100 · ZP200</field>
+    <field name="subtitle">Noise-control solutions for engineered spaces.</field>
+    <field name="description">Silencer product families for high air-volume ventilation and noise-control applications, with detailed dimensions and performance tables in the catalog.</field>
+    <field name="category">silencer</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/jiangsu-xinyang-silencers.jpg"/>
+  </record>
+  <record id="home_product_seed_fire" model="sgt.home.product">
+    <field name="sequence">30</field>
+    <field name="name">Fire, Smoke &amp; Explosion Dampers</field>
+    <field name="code">FVD/FVDH · MEC/MEV</field>
+    <field name="subtitle">Dampers for smoke exhaust and fire safety systems.</field>
+    <field name="description">Product families for fire and smoke control in building ventilation systems. Applicable configurations should be checked against the product technical catalog.</field>
+    <field name="category">fire</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/fire-explosion-limiting-dampers.jpg"/>
+  </record>
+  <record id="home_product_seed_aluminum" model="sgt.home.product">
+    <field name="sequence">40</field>
+    <field name="name">XY-F Aluminum Air Outlets</field>
+    <field name="code">XY-F</field>
+    <field name="subtitle">Architectural outlets designed to reduce condensation.</field>
+    <field name="description">An aluminum alloy air-outlet solution shown in the provided product content. Confirm specifications for each project.</field>
+    <field name="category">air</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/xy-f-aluminium-air-outlet.jpg"/>
+  </record>
+  <record id="home_product_seed_smoke" model="sgt.home.product">
+    <field name="sequence">50</field>
+    <field name="name">Smoke Control Damper Families</field>
+    <field name="code">MEC · BED/BEH · MEECH</field>
+    <field name="subtitle">Manual, remote-controlled and automatic variants.</field>
+    <field name="description">Selected smoke exhaust and fire-control damper families listed in the supplied technical catalog.</field>
+    <field name="category">fire</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/smoke-fire-control-dampers.jpg"/>
+  </record>
+  <record id="home_product_seed_eggcrate" model="sgt.home.product">
+    <field name="sequence">60</field>
+    <field name="name">XY-DG Egg Crate Air Outlet</field>
+    <field name="code">XY-DG</field>
+    <field name="subtitle">A compact grille design for air distribution.</field>
+    <field name="description">Egg crate format air outlet for air distribution and return-air applications. Dimensions and construction details are available in the catalog.</field>
+    <field name="category">air</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/xy-dg-egg-format-air-outlet.jpg"/>
+  </record>
+  <record id="home_product_seed_bd1" model="sgt.home.product">
+    <field name="sequence">70</field>
+    <field name="name">BD1 Butterfly Valve</field>
+    <field name="code">BD1</field>
+    <field name="subtitle">Flexible airflow control, galvanized steel, for ventilation and air conditioning.</field>
+    <field name="description">BD1 butterfly valve for flexible airflow control in ventilation and air-conditioning systems.
+• Flexible airflow regulation
+• Galvanized steel construction, corrosion resistant
+• For ventilation and air-conditioning duct systems
+Confirm sizes and specifications for each project in the technical catalog.</field>
+    <field name="category">other</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/bd1-butterfly-valve.jpg"/>
+  </record>
+  <record id="home_product_seed_fasu" model="sgt.home.product">
+    <field name="sequence">80</field>
+    <field name="name">FASU Ceiling Ventilation Solution</field>
+    <field name="code">FASU</field>
+    <field name="subtitle">Static pressure box, insulated flex duct and diffuser; up to 50% less installation time.</field>
+    <field name="description">FASU ceiling ventilation solution: a static pressure box, insulated flexible duct and diffuser supplied as one system.
+• Static pressure box with insulated flex duct and diffuser
+• Up to 50% less installation time, according to the supplied poster
+• Suited to ceiling-mounted ventilation layouts
+Confirm project configurations in the technical catalog.</field>
+    <field name="category">other</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/fasu-ceiling-ventilation.jpg"/>
+  </record>
+  <record id="home_product_seed_noise" model="sgt.home.product">
+    <field name="sequence">90</field>
+    <field name="name">HVAC Noise-Control Solutions</field>
+    <field name="code">ZP100 · ZP200</field>
+    <field name="subtitle">Large-flow panel, ZP100, ZP200 and straight-duct silencers.</field>
+    <field name="description">Noise-control solutions for HVAC systems, from large-flow panels to duct silencers.
+• Large-flow panel silencer
+• ZP100 and ZP200 silencers
+• Straight-duct silencers
+Dimensions and performance tables are available in the technical catalog.</field>
+    <field name="category">silencer</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/hvac-noise-control-solutions.jpg"/>
+  </record>
+  <record id="home_product_seed_damper_range" model="sgt.home.product">
+    <field name="sequence">100</field>
+    <field name="name">Ventilation Damper Range</field>
+    <field name="subtitle">Volume control, constant flow, check, butterfly, fire and smoke dampers.</field>
+    <field name="description">A range of dampers for ventilation, smoke-control and fire-safety systems.
+• Volume control damper
+• Constant flow damper
+• Check damper and butterfly damper
+• Fire damper and smoke damper
+• Remote-controlled series
+• Automatic smoke-exhaust and fire-reduction series
+Check applicable configurations in the technical catalog.</field>
+    <field name="category">other</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/ventilation-damper-range.jpg"/>
+  </record>
+  <record id="home_product_seed_xywe" model="sgt.home.product">
+    <field name="sequence">110</field>
+    <field name="name">XY-WE Linear Slot Diffuser</field>
+    <field name="code">XY-WE</field>
+    <field name="subtitle">Adjusts airflow direction automatically by temperature.</field>
+    <field name="description">XY-WE linear slot diffuser that adjusts the direction of airflow automatically according to temperature.
+• Vertical, horizontal or diagonal blow
+• Even air distribution across the space
+• Temperature-responsive airflow direction
+Confirm sizes and installation details for each project.</field>
+    <field name="category">air</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/xy-we-linear-slot-diffuser.jpg"/>
+  </record>
+  <record id="home_product_seed_xyyl" model="sgt.home.product">
+    <field name="sequence">120</field>
+    <field name="name">XYYL Circular Tube Silencer</field>
+    <field name="code">XYYL</field>
+    <field name="subtitle">Effective noise reduction, stable airflow, galvanized steel.</field>
+    <field name="description">XYYL circular tube silencer for effective noise reduction in ducted systems.
+• Effective noise reduction
+• Stable airflow with low pressure loss
+• Galvanized steel construction for long service life
+Dimensions and performance data are available in the technical catalog.</field>
+    <field name="category">silencer</field>
+    <field name="active">1</field>
+    <field name="internal_note">Based on the user-provided promotional artwork and Xinyang catalog. Review embedded Vietnamese text before English-language public reuse.</field>
+    <field name="image" type="base64" file="sgt_xinyang_welcome/data/products/xyyl-circular-tube-silencer.jpg"/>
+  </record>
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Starter slides. Wording is deliberately generic: nothing here is a claim about Xinyang that
+        has not been supplied by the user. Edit or replace in Home > Banners (not overwritten on upgrade).
+        Slide 2 sentence = saigontrade.vn slogan, English translation by us (to be confirmed).
+    -->
+    <record id="slide_welcome" model="sgt.home.slide">
+        <field name="sequence">10</field>
+        <field name="theme">blue</field>
+        <field name="tag">XINYANG 新扬</field>
+        <field name="name">Welcome to Xinyang</field>
+        <field name="text">Your workspace for working with Xinyang, in one place.</field>
+    </record>
+    <record id="slide_saigontrade" model="sgt.home.slide">
+        <field name="sequence">20</field>
+        <field name="theme">red</field>
+        <field name="tag">WITH SAIGON TRADE IN VIETNAM</field>
+        <field name="name">Connecting customers in Vietnam with Xinyang</field>
+        <field name="text">Saigon Trade accompanies organizations in and outside Vietnam to expand their business in the Vietnamese market.</field>
+        <field name="button_label">saigontrade.vn</field>
+        <field name="button_url">https://saigontrade.vn/</field>
+    </record>
+</odoo>

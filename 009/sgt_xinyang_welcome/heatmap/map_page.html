@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Bản đồ khách hàng | Xinyang</title>
+  <link rel="icon" href="/sgt_xinyang_welcome/static/src/img/logo_xinyang.png?v=__VERSION__" type="image/png">
+  <link rel="stylesheet" href="/sgt_xinyang_welcome/static/map/vendor/leaflet.css">
+  <link rel="stylesheet" href="/sgt_xinyang_welcome/static/map/vendor/MarkerCluster.css">
+  <link rel="stylesheet" href="/sgt_xinyang_welcome/static/map/vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="/sgt_xinyang_welcome/static/map/xmap-094.css?v=__VERSION__">
+  <script src="/sgt_xinyang_welcome/static/map/i18n-xmap-zh-094.js?v=__VERSION__"></script>
+  <script src="/sgt_xinyang_welcome/static/map/i18n-xmap-094.js?v=__VERSION__"></script>
+  <script defer src="/sgt_xinyang_welcome/static/map/vendor/leaflet.js"></script>
+  <script defer src="/sgt_xinyang_welcome/static/map/vendor/leaflet.markercluster.js"></script>
+  <script defer src="/sgt_xinyang_welcome/static/map/vendor/leaflet-heat.js"></script>
+  <script defer src="/sgt_xinyang_welcome/static/map/vendor/maplibre-gl.js"></script>
+  <script defer src="/sgt_xinyang_welcome/static/map/vendor/leaflet-maplibre-gl.js"></script>
+  <script defer src="/sgt_xinyang_welcome/static/map/xmap-094.js?v=__VERSION__"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <section class="content-layout">
+      <aside class="sidebar" aria-label="Bộ lọc khách hàng">
+        <div class="map-head">
+          <div><h1>Bộ lọc bản đồ</h1><p id="mapSubtitle">Deal CRM có địa chỉ · Xinyang Odoo</p><span id="mapSyncTime"></span></div>
+          <button type="button" class="btn-icon" id="resetFilters" title="Xóa bộ lọc">&#8634;</button>
+        </div>
+        <section class="mode-card" aria-label="Chế độ bản đồ">
+          <div class="toggle-group" role="group" aria-label="Chế độ bản đồ"><button id="modeAll" type="button" data-map-mode="all" class="active" aria-pressed="true">Toàn bộ dữ liệu</button><button id="modePotential" type="button" data-map-mode="potential" aria-pressed="false">Potential Map</button></div>
+          <p class="mode-hint" id="modeHint">Mọi Deal CRM có địa chỉ, tô màu theo Stage.</p>
+        </section>
+        <section class="geo-quick only-all" aria-label="Deal đã lên bản đồ">
+          <span class="mini-label">Hiển thị Deal</span>
+          <div class="toggle-group toggle-3" role="group" aria-label="Hiển thị Deal"><button type="button" data-geo-quick="" class="active" aria-pressed="true">Tất cả <b id="geoAll">0</b></button><button type="button" data-geo-quick="mapped" aria-pressed="false">Đã lên bản đồ <b id="geoMapped">0</b></button><button type="button" data-geo-quick="off" aria-pressed="false">Chưa lên bản đồ <b id="geoOff">0</b></button></div>
+        </section>
+        <section class="layer-card" aria-label="Lớp bản đồ">
+          <div class="layer-title"><strong><i class="mix-dot"></i> Khách hàng</strong><span>LỚP BẢN ĐỒ</span></div>
+          <div class="toggle-group" role="group" aria-label="Chế độ hiển thị"><button id="btnPoints" type="button" class="active" aria-pressed="true">Điểm</button><button id="btnHeat" type="button" aria-pressed="false">Mật độ</button></div>
+          <p class="layer-hint">Bật từng lớp hoặc cả hai. Cụm chia màu theo số deal của từng nhóm.</p>
+          <div id="heatSettings" hidden>
+            <label for="heatRadius">Bán kính vùng nhiệt <output id="heatRadiusValue">30 px</output></label><input id="heatRadius" type="range" min="12" max="60" value="30">
+            <label for="heatIntensity">Độ đậm <output id="heatIntensityValue">1.8×</output></label><input id="heatIntensity" type="range" min="0.5" max="4" step="0.1" value="1.8">
+          </div>
+          <div class="color-by only-all">
+            <span class="mini-label">Tô màu theo</span>
+            <div class="toggle-group toggle-3" role="group" aria-label="Tô màu theo"><button type="button" data-color-by="stage" class="active" aria-pressed="true">Stage</button><button type="button" data-color-by="salesperson" aria-pressed="false">Salesperson</button><button type="button" data-color-by="pipeline" aria-pressed="false">Pipeline</button></div>
+            <button id="openColors" type="button" class="link-btn">&#9881; Đổi màu</button>
+          </div>
+          <label class="range-row" for="clusterRadius">Khoảng cách gom cụm <output id="clusterRadiusValue">46 px</output></label><input id="clusterRadius" type="range" min="25" max="90" value="46">
+          <label class="check-row only-all" hidden><input id="showOrigin" type="checkbox"> <span>Hiện cả deal gốc đã copy sang pipeline khác</span></label>
+        </section>
+        <div class="form-group"><label for="baseMap">Nền bản đồ</label><select id="baseMap"><option value="light">Nền nhạt</option><option value="color">Nền màu</option><option value="osm">OpenStreetMap</option></select></div>
+        <div class="form-group event-search-group only-all">
+          <label for="search">Tìm sự kiện / ngành hàng</label>
+          <div class="input-with-icon"><span>&#9906;</span><input id="search" type="search" autocomplete="off" placeholder="Nhập sự kiện hoặc ngành hàng..."></div>
+          <div id="eventSuggestions" class="event-suggestions" hidden></div>
+        </div>
+        <div class="form-group"><label for="searchText" id="searchTextLabel">Tìm Contact / công ty / địa chỉ</label><input id="searchText" type="search" autocomplete="off" placeholder="Tên Contact, công ty, địa chỉ, #ID..."></div>
+        <div class="section-separator"><span>BỘ LỌC CRM</span></div>
+        <div class="form-group only-all"><label for="filterPipeline">Pipeline</label><select id="filterPipeline"><option value="">Tất cả pipeline</option></select></div>
+        <div class="form-group"><label for="filterStage">Stage</label><select id="filterStage"><option value="">Tất cả stage</option></select></div>
+        <div class="form-group only-all"><label for="filterExpo">Nguồn dữ liệu (x_expo)</label><select id="filterExpo"><option value="">Tất cả</option></select></div>
+        <div class="form-group only-all"><label for="filterEvent">Sự kiện / ngành hàng (x_event)</label><select id="filterEvent"><option value="">Tất cả x_event</option></select></div>
+        <div class="form-group only-all"><label for="filterLocation">Vị trí sự kiện</label><select id="filterLocation"><option value="">Tất cả</option></select></div>
+        <div class="filter-grid"><div class="form-group"><label for="filterProvince">Tỉnh / Thành</label><select id="filterProvince"><option value="">Tất cả</option></select></div><div class="form-group only-all"><label for="filterDistrict">Quận / Huyện</label><select id="filterDistrict"><option value="">Tất cả</option></select></div></div>
+        <div class="form-group only-all"><label for="filterOwner">Salesperson</label><select id="filterOwner"><option value="">Tất cả nhân sự</option></select></div>
+        <div class="form-group only-all"><label for="filterTag">Tags</label><select id="filterTag"><option value="">Tất cả tags</option></select></div>
+        <div class="form-group only-all"><label for="filterProvider">Độ chính xác tọa độ</label><select id="filterProvider"><option value="">Tất cả</option></select></div>
+        <div class="form-group only-all"><label for="filterGeo">Trạng thái tọa độ</label><select id="filterGeo"><option value="">Tất cả</option><option value="mapped">Đã định vị</option><option value="pending">Chờ định vị</option><option value="unmapped">Không tìm thấy</option><option value="invalid">Thiếu hoặc sai tọa độ</option></select></div>
+        <details class="summary-panel"><summary>Tổng hợp theo tỉnh / thành</summary><table><thead><tr><th>Khu vực</th><th>Khách</th><th>Có GPS</th></tr></thead><tbody id="summaryRows"></tbody></table></details>
+        <div class="list-heading"><div><strong id="listTitle">Danh sách khách hàng</strong><span id="visibleCount">0 bản ghi</span></div></div>
+        <div id="recordList" class="record-list" aria-live="polite"></div>
+        <button id="loadMore" type="button" class="load-more" hidden>Xem thêm</button>
+      </aside>
+
+      <main class="map-section" aria-label="Bản đồ">
+        <div id="stageStrip" class="stage-strip" aria-label="Số deal theo pipeline / stage"></div>
+        <div class="map-wrap">
+          <div class="map-toolbar">
+            <div class="map-toolbar-actions"><button id="toggleSidebar" type="button" class="btn btn-soft" aria-expanded="true">Ẩn bộ lọc</button><button id="fitMap" type="button" class="btn btn-soft">&#10561; Toàn bộ điểm</button><button id="reloadData" type="button" class="btn btn-soft" title="Đọc lại dữ liệu mới nhất từ Xinyang Odoo">&#8635; Đọc lại Odoo</button></div>
+          </div>
+          <div id="baseNotice" role="status"></div>
+          <div class="map-legend" id="mapLegend"><button type="button" id="legendToggle" class="legend-toggle" aria-expanded="true"><b id="legendTitle">Stage</b><span aria-hidden="true">▾</span></button><div id="legendItems"></div><span class="legend-row"><i class="mix-dot"></i> Cụm nhiều màu: chia theo số deal</span><span id="heatLegend" class="legend-row" hidden><i class="heat-gradient"></i> Thưa → Dày</span></div>
+          <div id="map" role="application" aria-label="Bản đồ khách hàng Xinyang"></div>
+          <div id="mapEmpty" class="map-empty"><div class="map-empty-icon">&#9906;</div><strong id="emptyTitle">Đang khởi tạo bản đồ</strong><span id="emptyDescription">Dữ liệu từ Xinyang Odoo sẽ xuất hiện tại đây.</span></div>
+        </div>
+        <div class="map-footer"><div><span class="status-dot"></span><span id="syncStatus">Đang tải dữ liệu</span></div><span id="mapSummary">Đang tải dữ liệu…</span></div>
+      </main>
+    </section>
+  </div>
+  <dialog id="colorDialog" class="detail-dialog color-dialog" aria-labelledby="colorTitle">
+    <form method="dialog"><button class="detail-close" type="submit" aria-label="Đóng">&#10005;</button></form>
+    <span class="eyebrow">MÀU TRÊN BẢN ĐỒ</span><h2 id="colorTitle">Màu theo stage</h2>
+    <p class="color-help" id="colorHelp"></p>
+    <div id="colorRows" class="color-rows"></div>
+    <div class="color-actions"><button type="button" id="colorDefault" class="btn btn-soft">Màu mặc định</button><button type="button" id="colorCancel" class="btn btn-soft">Hủy</button><button type="button" id="colorSave" class="btn btn-navy">Lưu màu</button></div>
+  </dialog>
+  <dialog id="recordDialog" class="xy050-dialog" aria-labelledby="detailTitle"><div class="xy050-dlg-card"><div class="xy050-dlg-head"><h3 id="detailTitle"></h3><button type="button" class="xy050-dlg-x" id="detailClose" aria-label="Đóng">×</button></div><div id="detailContent" class="xy050-dlg-body"></div><div id="detailFoot" class="xy050-dlg-foot"></div></div></dialog>
+  <noscript>Bạn cần bật JavaScript để sử dụng bản đồ.</noscript>
+</body>
+</html>

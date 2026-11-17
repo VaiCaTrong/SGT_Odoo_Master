@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sgt_website_switch_form" model="ir.ui.view">
+        <field name="name">sgt.website.switch.form</field>
+        <field name="model">sgt.website.switch</field>
+        <field name="arch" type="xml">
+            <form string="Website" create="0" delete="0" duplicate="0">
+                <header>
+                    <button name="action_turn_on" type="object" string="Active" class="btn-primary"
+                            invisible="website_on"/>
+                    <button name="action_turn_off" type="object" string="Deactivate"
+                            invisible="not website_on"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1>Website</h1></div>
+                    <group>
+                        <field name="website_on" widget="boolean"/>
+                    </group>
+                    <div class="text-muted">
+                        <p><b>Not active (default):</b> the Website app is hidden from the app menu and the
+                        address of this site opens the login page (or the Home app when you are signed in).</p>
+                        <p><b>Active:</b> the Website app is back in the app menu and the address of this site
+                        shows the website homepage again.</p>
+                        <p>Nothing is uninstalled or deleted either way.</p>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sgt_website_switch" model="ir.actions.server">
+        <field name="name">Website</field>
+        <field name="model_id" ref="model_sgt_website_switch"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open()</field>
+    </record>
+
+    <!-- Settings top menu, to the right of "Technical" (sequence 110). -->
+    <menuitem id="menu_sgt_website_switch" name="Website" parent="base.menu_administration"
+              action="action_sgt_website_switch" sequence="120" groups="base.group_system"/>
+</odoo>

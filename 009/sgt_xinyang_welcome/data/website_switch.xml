@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Creating the switch applies its default state: Website hidden, "/" opens the login page. -->
+    <record id="website_switch_default" model="sgt.website.switch">
+        <field name="website_on" eval="False"/>
+    </record>
+</odoo>

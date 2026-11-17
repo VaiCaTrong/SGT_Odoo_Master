@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sgt_home_setting_form" model="ir.ui.view">
+        <field name="name">sgt.home.setting.form</field>
+        <field name="model">sgt.home.setting</field>
+        <field name="arch" type="xml">
+            <form string="Home settings" create="false" delete="false">
+                <sheet>
+                    <div class="oe_title"><h1>Home settings</h1></div>
+                    <group string="Product pictures">
+                        <field name="autoplay_mode" widget="radio"/>
+                        <field name="autoplay_custom_seconds" invisible="autoplay_mode != 'custom'"
+                               required="autoplay_mode == 'custom'"/>
+                        <field name="autoplay_seconds" readonly="1" invisible="autoplay_mode != 'custom'"/>
+                    </group>
+                    <div class="alert alert-warning" role="alert" groups="base.group_system" invisible="not heatmap_group_missing">
+                        The Heat Map group does not exist in this database yet. Open Apps, find "XINYANG | UI-009 Login + Home" and
+                        click Upgrade, then reload this page.
+                    </div>
+                    <field name="heatmap_group_missing" invisible="1" groups="base.group_system"/>
+                    <group string="Heat Map access" groups="base.group_system">
+                        <field name="heatmap_user_ids" widget="many2many_tags_avatar"
+                               options="{'no_create': True, 'no_quick_create': True}"/>
+                        <field name="heatmap_inherited_user_ids" widget="many2many_tags_avatar" readonly="1"/>
+                    </group>
+                    <div class="text-muted" groups="base.group_system">
+                        Only the people listed here, the Home Managers and the Settings Administrators see the "Heat Map" item in
+                        the Home menu. What each person sees on the map still follows their own CRM access rights.
+                    </div>
+                    <div class="alert alert-warning" role="alert" groups="base.group_system" invisible="not dashboard_group_missing">
+                        The Dashboard Viewer group does not exist in this database yet. Open Apps, find "XINYANG | UI-009 Login + Home" and
+                        click Upgrade, then reload this page.
+                    </div>
+                    <field name="dashboard_group_missing" invisible="1" groups="base.group_system"/>
+                    <group string="KPI Dashboard access" groups="base.group_system">
+                        <field name="dashboard_user_ids" widget="many2many_tags_avatar"
+                               options="{'no_create': True, 'no_quick_create': True}"/>
+                        <field name="dashboard_inherited_user_ids" widget="many2many_tags_avatar" readonly="1"/>
+                    </group>
+                    <div class="text-muted" groups="base.group_system">
+                        Only the people listed here, the Home Managers and the Settings Administrators see the "Dashboard" item in the
+                        Home menu. Data and Match Making follow each person's own CRM access rights.
+                    </div>
+                    <group string="KPI Dashboard · social360 connection (GB and Content)" groups="base.group_system">
+                        <field name="kpi_sgt_url" placeholder="https://social360.sge.vn"/>
+                        <field name="kpi_sgt_db"/>
+                        <field name="kpi_sgt_login"/>
+                        <field name="kpi_sgt_key" password="True"/>
+                    </group>
+                    <div class="text-muted" groups="base.group_system">
+                        GB and Content are read from social360 with this one read-only service account (nothing is written there).
+                        Only Settings Administrators can see or change these four fields; the key is never sent to the browser.
+                        The Xinyang server must be allowed to reach the social360 address over HTTPS.
+                    </div>
+                    <div class="text-muted">
+                        When a product has several pictures, the popup changes the picture by itself with this delay.
+                        The change pauses while the pointer is over the picture. Products with a single picture show no
+                        picture buttons. More Home settings will be added on this page.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sgt_home_setting" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">sgt.home.setting</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" eval="ref('sgt_xinyang_welcome.home_setting_default')"/>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem id="menu_sgt_home_settings" name="Settings" parent="menu_sgt_home_root" action="action_sgt_home_setting"
+              sequence="30" groups="sgt_xinyang_welcome.group_home_manager,base.group_system"/>
+</odoo>

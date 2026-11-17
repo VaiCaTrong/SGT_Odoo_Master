@@ -1,0 +1,15 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sgt_home_slide_user,sgt.home.slide user read,model_sgt_home_slide,base.group_user,1,0,0,0
+access_sgt_home_slide_admin,sgt.home.slide admin,model_sgt_home_slide,base.group_system,1,1,1,1
+access_sgt_home_fact_user,sgt.home.fact user read,model_sgt_home_fact,base.group_user,1,0,0,0
+access_sgt_home_fact_admin,sgt.home.fact admin,model_sgt_home_fact,base.group_system,1,1,1,1
+access_sgt_website_switch_admin,sgt.website.switch admin,model_sgt_website_switch,base.group_system,1,1,1,0
+access_sgt_home_product_reader,sgt.home.product reader,model_sgt_home_product,base.group_user,1,0,0,0
+access_sgt_home_product_manager,sgt.home.product Home Manager,model_sgt_home_product,sgt_xinyang_welcome.group_home_manager,1,1,1,1
+access_sgt_home_product_settings_admin,sgt.home.product Settings Administrator,model_sgt_home_product,base.group_system,1,1,1,1
+access_sgt_home_product_image_reader,sgt.home.product.image reader,model_sgt_home_product_image,base.group_user,1,0,0,0
+access_sgt_home_product_image_manager,sgt.home.product.image Home Manager,model_sgt_home_product_image,sgt_xinyang_welcome.group_home_manager,1,1,1,1
+access_sgt_home_product_image_settings_admin,sgt.home.product.image Settings Administrator,model_sgt_home_product_image,base.group_system,1,1,1,1
+access_sgt_home_setting_reader,sgt.home.setting reader,model_sgt_home_setting,base.group_user,1,0,0,0
+access_sgt_home_setting_manager,sgt.home.setting Home Manager,model_sgt_home_setting,sgt_xinyang_welcome.group_home_manager,1,1,0,0
+access_sgt_home_setting_settings_admin,sgt.home.setting Settings Administrator,model_sgt_home_setting,base.group_system,1,1,0,0
