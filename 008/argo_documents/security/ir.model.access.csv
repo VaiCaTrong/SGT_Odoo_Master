@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_argo_document_folder_user,argo.document.folder user,model_argo_document_folder,group_argo_documents_user,1,1,1,1
+access_argo_document_folder_manager,argo.document.folder manager,model_argo_document_folder,group_argo_documents_manager,1,1,1,1
+access_argo_document_user,argo.document user,model_argo_document,group_argo_documents_user,1,1,1,1
+access_argo_document_manager,argo.document manager,model_argo_document,group_argo_documents_manager,1,1,1,1
+access_argo_document_permission_audit_manager,argo.document.permission.audit manager,model_argo_document_permission_audit,group_argo_documents_manager,1,0,0,0
+access_argo_document_folder_system_admin,argo.document.folder Settings Admin,model_argo_document_folder,base.group_system,1,1,1,1
+access_argo_document_system_admin,argo.document Settings Admin,model_argo_document,base.group_system,1,1,1,1
+access_argo_document_permission_audit_system_admin,argo.document.permission.audit Settings Admin,model_argo_document_permission_audit,base.group_system,1,0,0,0
+access_argo_folder_crm_internal,CRM Infor internal folder access,model_argo_document_folder,base.group_user,1,1,1,1
+access_argo_doc_crm_internal,CRM Infor internal document access,model_argo_document,base.group_user,1,1,1,1

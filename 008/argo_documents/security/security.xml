@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_argo_documents" model="res.groups.privilege">
+        <field name="name">Kho tài liệu</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <!-- Update_008: mọi tài khoản Odoo nội bộ mặc định có Documents User. -->
+    <record id="group_argo_documents_user" model="res.groups">
+        <field name="name">Người dùng kho tài liệu</field>
+        <field name="privilege_id" ref="res_groups_privilege_argo_documents"/>
+        <!-- Cực kỳ quan trọng: gỡ liên kết ngược cũ trước khi base.group_user imply nhóm này; tránh vòng lặp. -->
+        <field name="implied_ids" eval="[(3, ref('base.group_user'))]"/>
+        <field name="comment">Mọi User nội bộ sử dụng Documents; quyền folder vẫn kiểm tra bằng Record Rules.</field>
+    </record>
+
+    <!-- Không tạo vòng implied_ids: Documents User KHÔNG imply base.group_user.
+         base.group_user imply Documents User để quyền tự có cho cả user hiện tại & user mới. -->
+    <record id="base.group_user" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('argo_documents.group_argo_documents_user'))]"/>
+    </record>
+
+    <record id="group_argo_documents_manager" model="res.groups">
+        <field name="name">Quản lý kho tài liệu</field>
+        <field name="privilege_id" ref="res_groups_privilege_argo_documents"/>
+        <field name="implied_ids" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Thấy mọi thư mục/file, xóa vĩnh viễn, đổi quyền xem mọi thư mục, cấu hình nén ảnh.</field>
+    </record>
+
+    <!-- Phân quyền chức năng độc lập, không cấp System Admin -->
+    <record id="res_groups_privilege_argo_documents_root" model="res.groups.privilege">
+        <field name="name">Documents - tạo thư mục cấp gốc</field>
+        <field name="sequence">61</field>
+    </record>
+    <record id="res_groups_privilege_argo_documents_share" model="res.groups.privilege">
+        <field name="name">Documents - quản lý chia sẻ</field>
+        <field name="sequence">62</field>
+    </record>
+    <record id="group_argo_documents_root_creator" model="res.groups">
+        <field name="name">Được tạo thư mục cha</field>
+        <field name="privilege_id" ref="res_groups_privilege_argo_documents_root"/>
+        <field name="implied_ids" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="comment">Chỉ tạo folder cấp gốc; không tự động thấy folder riêng tư của người khác.</field>
+    </record>
+    <record id="group_argo_documents_share_manager" model="res.groups">
+        <field name="name">Được quản lý chia sẻ folder có Full Access</field>
+        <field name="privilege_id" ref="res_groups_privilege_argo_documents_share"/>
+        <field name="implied_ids" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="comment">Chỉ sửa chia sẻ những folder đã có Full Access, không được đọc toàn kho.</field>
+    </record>
+
+    <!-- Quyền đọc/sửa/xóa là ba miền độc lập. Rule theo nhóm cộng dồn:
+         model.create/write/unlink cũng kiểm tra lại qua ORM trong Python. -->
+    <record id="rule_argo_folder_user" model="ir.rule">
+        <field name="name">Documents: đọc folder được phép</field>
+        <field name="model_id" ref="model_argo_document_folder"/>
+        <field name="domain_force">['&amp;', '|', ('company_id', '=', False), ('company_id', 'in', company_ids), '|', ('effective_read_public', '=', True), ('effective_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_folder_user_write" model="ir.rule">
+        <field name="name">Documents: sửa folder theo quyền Edit</field>
+        <field name="model_id" ref="model_argo_document_folder"/>
+        <field name="domain_force">['&amp;', '|', ('company_id', '=', False), ('company_id', 'in', company_ids), '|', ('effective_edit_public', '=', True), ('effective_edit_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_folder_user_unlink" model="ir.rule">
+        <field name="name">Documents: xóa folder theo quyền Full</field>
+        <field name="model_id" ref="model_argo_document_folder"/>
+        <field name="domain_force">['&amp;', '|', ('company_id', '=', False), ('company_id', 'in', company_ids), '|', ('effective_full_public', '=', True), ('effective_full_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <!-- Settings Administrators are full Documents administrators without per-folder grants. -->
+    <record id="rule_argo_folder_manager" model="ir.rule">
+        <field name="name">Documents: manager quản lý toàn bộ folder</field>
+        <field name="model_id" ref="model_argo_document_folder"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_manager')), (4, ref('base.group_system'))]"/>
+    </record>
+    <record id="rule_argo_document_user_read" model="ir.rule">
+        <field name="name">Documents: đọc file theo folder</field>
+        <field name="model_id" ref="model_argo_document"/>
+        <field name="domain_force">['&amp;', '|', ('folder_id.company_id', '=', False), ('folder_id.company_id', 'in', company_ids), '|', '|', ('folder_id', '=', False), ('folder_id.effective_read_public', '=', True), ('folder_id.effective_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_document_user_write" model="ir.rule">
+        <field name="name">Documents: sửa file theo folder</field>
+        <field name="model_id" ref="model_argo_document"/>
+        <field name="domain_force">['&amp;', '|', ('folder_id.company_id', '=', False), ('folder_id.company_id', 'in', company_ids), '|', '|', '&amp;', ('folder_id', '=', False), ('create_uid', '=', user.id), ('folder_id.effective_edit_public', '=', True), ('folder_id.effective_edit_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_document_user_unlink" model="ir.rule">
+        <field name="name">Documents: xóa file theo folder Full</field>
+        <field name="model_id" ref="model_argo_document"/>
+        <field name="domain_force">['&amp;', '|', ('folder_id.company_id', '=', False), ('folder_id.company_id', 'in', company_ids), '|', ('folder_id.effective_full_public', '=', True), ('folder_id.effective_full_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_user'))]"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="rule_argo_document_manager" model="ir.rule">
+        <field name="name">Documents: manager quản lý mọi file</field>
+        <field name="model_id" ref="model_argo_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_argo_documents_manager')), (4, ref('base.group_system'))]"/>
+    </record>
+
+    <!-- Update_007: Quyền tối thiểu cho TẤT CẢ tài khoản Odoo nội bộ.
+         ACL nhóm base.group_user là rộng ở tầng model, do đó mỗi Record Rule
+         bắt buộc đóng phạm vi vào CRM Infor + quyền cụ thể trên từng folder.
+         Không thay đổi/không mở tất cả folder legacy ngoài CRM Infor. -->
+    <record id="rule_argo_crm_internal_folder_read" model="ir.rule">
+        <field name="name">CRM Infor: internal read scoped folder</field>
+        <field name="model_id" ref="model_argo_document_folder"/>
+        <field name="domain_force">['&amp;', '|', ('company_id', '=', False), ('company_id', 'in', company_ids), '&amp;', '|', ('crm_shared_root', '=', True), ('crm_tree', '=', True), '|', ('effective_read_public', '=', True), ('effective_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="True"/><field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_crm_internal_folder_write" model="ir.rule">
+        <field name="name">CRM Infor: internal edit scoped folder</field>
+        <field name="model_id" ref="model_argo_document_folder"/>
+        <field name="domain_force">['&amp;', '|', ('company_id', '=', False), ('company_id', 'in', company_ids), '&amp;', ('crm_tree', '=', True), '|', ('effective_edit_public', '=', True), ('effective_edit_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="False"/><field name="perm_write" eval="True"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_crm_internal_folder_unlink" model="ir.rule">
+        <field name="name">CRM Infor: internal full scoped folder</field>
+        <field name="model_id" ref="model_argo_document_folder"/>
+        <field name="domain_force">['&amp;', '|', ('company_id', '=', False), ('company_id', 'in', company_ids), '&amp;', ('crm_tree', '=', True), '|', ('effective_full_public', '=', True), ('effective_full_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="False"/><field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="rule_argo_crm_internal_document_read" model="ir.rule">
+        <field name="name">CRM Infor: internal read scoped documents</field>
+        <field name="model_id" ref="model_argo_document"/>
+        <field name="domain_force">['&amp;', '|', ('folder_id.company_id', '=', False), ('folder_id.company_id', 'in', company_ids), '&amp;', '|', ('folder_id.crm_shared_root', '=', True), ('folder_id.crm_tree', '=', True), '|', ('folder_id.effective_read_public', '=', True), ('folder_id.effective_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="True"/><field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_crm_internal_document_write" model="ir.rule">
+        <field name="name">CRM Infor: internal edit scoped documents</field>
+        <field name="model_id" ref="model_argo_document"/>
+        <field name="domain_force">['&amp;', '|', ('folder_id.company_id', '=', False), ('folder_id.company_id', 'in', company_ids), '&amp;', ('folder_id.crm_tree', '=', True), '|', ('folder_id.effective_edit_public', '=', True), ('folder_id.effective_edit_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="False"/><field name="perm_write" eval="True"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_argo_crm_internal_document_unlink" model="ir.rule">
+        <field name="name">CRM Infor: internal full scoped documents</field>
+        <field name="model_id" ref="model_argo_document"/>
+        <field name="domain_force">['&amp;', '|', ('folder_id.company_id', '=', False), ('folder_id.company_id', 'in', company_ids), '&amp;', ('folder_id.crm_tree', '=', True), '|', ('folder_id.effective_full_public', '=', True), ('folder_id.effective_full_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="False"/><field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>

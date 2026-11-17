@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ Thư mục ============ -->
+    <record id="argo_document_folder_view_form" model="ir.ui.view">
+        <field name="name">argo.document.folder.form</field>
+        <field name="model">argo.document.folder</field>
+        <field name="arch" type="xml">
+            <form string="Thư mục">
+                <sheet>
+                    <widget name="web_ribbon" title="Thùng rác" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="VD: Hình ảnh khách hàng"/></h1>
+                        <field name="complete_name" class="text-muted" readonly="1"/>
+                    </div>
+                    <group>
+                        <group string="Vị trí">
+                            <field name="parent_id" options="{'no_create': True}"/>
+                            <field name="company_id" readonly="1"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Liên kết">
+                            <field name="partner_id"/>
+                            <field name="lead_id"/>
+                        </group>
+                    </group>
+                    <group string="Phân quyền (Admin)">
+                        <field name="access_mode" readonly="1"/>
+                        <field name="public_level" readonly="1" invisible="access_mode != 'public'"/>
+                        <field name="effective_edit_user_ids" widget="many2many_tags" readonly="1" optional="hide"/>
+                        <field name="effective_full_user_ids" widget="many2many_tags" readonly="1" optional="hide"/>
+                        <field name="allowed_department_ids" widget="many2many_tags" options="{'no_create': True}"
+                               readonly="1" placeholder="Phân quyền được quản lý qua Explorer"/>
+                        <field name="allowed_user_ids" widget="many2many_tags"
+                               readonly="1" placeholder="Phân quyền được quản lý qua Explorer"/>
+                        <field name="effective_restricted" readonly="1"/>
+                        <field name="effective_user_ids" widget="many2many_tags" readonly="1"
+                               invisible="not effective_restricted"/>
+                    </group>
+                    <field name="description" placeholder="Ghi chú về thư mục..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="argo_document_folder_view_list" model="ir.ui.view">
+        <field name="name">argo.document.folder.list</field>
+        <field name="model">argo.document.folder</field>
+        <field name="arch" type="xml">
+            <list string="Thư mục">
+                <field name="complete_name"/>
+                <field name="partner_id" optional="show"/>
+                <field name="lead_id" optional="hide"/>
+                <field name="allowed_department_ids" widget="many2many_tags" optional="show"/>
+                <field name="effective_user_ids" widget="many2many_tags" optional="hide"/>
+                <field name="create_uid" optional="show"/>
+                <field name="write_date" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="argo_document_folder_view_search" model="ir.ui.view">
+        <field name="name">argo.document.folder.search</field>
+        <field name="model">argo.document.folder</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="complete_name"/>
+                <field name="partner_id"/>
+                <field name="lead_id"/>
+                <filter name="archived" string="Thùng rác" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ File ============ -->
+    <record id="argo_document_view_form" model="ir.ui.view">
+        <field name="name">argo.document.form</field>
+        <field name="model">argo.document</field>
+        <field name="arch" type="xml">
+            <form string="Tài liệu">
+                <sheet>
+                    <widget name="web_ribbon" title="Thùng rác" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="thumbnail" widget="image" class="oe_avatar" readonly="1" invisible="not has_thumbnail"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Thông tin file">
+                            <field name="folder_id" options="{'no_create': True}"/>
+                            <field name="file_type"/>
+                            <field name="mimetype" readonly="1"/>
+                            <field name="file_size_human" readonly="1"/>
+                            <field name="original_size" readonly="1" invisible="original_size &lt;= 0"/>
+                            <field name="create_uid" string="Người tải lên" readonly="1"/>
+                            <field name="create_date" string="Ngày tải lên" readonly="1"/>
+                            <field name="has_thumbnail" invisible="1"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Liên kết">
+                            <field name="partner_id"/>
+                            <field name="lead_id"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Mô tả file..."/>
+                    <field name="datas" filename="name" invisible="file_type == 'note'" readonly="1"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Form soạn ghi chú online -->
+    <record id="argo_document_view_form_note" model="ir.ui.view">
+        <field name="name">argo.document.form.note</field>
+        <field name="model">argo.document</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <form string="Ghi chú">
+                <div class="o_argo_note_title mb-2">
+                    <field name="name" class="fs-4 fw-bold w-100" placeholder="Tiêu đề ghi chú"/>
+                </div>
+                <field name="note_body" class="o_argo_note_body" widget="html"
+                       options="{'height': 420}" placeholder="Gõ nội dung... (gõ / để chèn bảng, danh sách, ảnh...)"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="argo_document_view_list" model="ir.ui.view">
+        <field name="name">argo.document.list</field>
+        <field name="model">argo.document</field>
+        <field name="arch" type="xml">
+            <list string="Tài liệu">
+                <field name="name"/>
+                <field name="folder_id"/>
+                <field name="file_type"/>
+                <field name="file_size_human" string="Dung lượng"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="lead_id" optional="hide"/>
+                <field name="create_uid" string="Người tải lên"/>
+                <field name="create_date" string="Ngày tải lên"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="argo_document_view_kanban" model="ir.ui.view">
+        <field name="name">argo.document.kanban</field>
+        <field name="model">argo.document</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="has_thumbnail"/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside class="o_kanban_aside_full">
+                            <field name="thumbnail" widget="image" invisible="not has_thumbnail"/>
+                        </aside>
+                        <main class="ms-2">
+                            <field name="name" class="fw-bold text-truncate"/>
+                            <field name="folder_id" class="text-muted small"/>
+                            <field name="file_size_human" class="small"/>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="argo_document_view_search" model="ir.ui.view">
+        <field name="name">argo.document.search</field>
+        <field name="model">argo.document</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="folder_id"/>
+                <field name="partner_id"/>
+                <field name="lead_id"/>
+                <filter name="images" string="Hình ảnh" domain="[('file_type', '=', 'image')]"/>
+                <filter name="docs" string="Văn bản" domain="[('file_type', 'in', ['pdf', 'word', 'excel', 'powerpoint', 'text', 'note'])]"/>
+                <separator/>
+                <filter name="archived" string="Thùng rác" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_folder" string="Thư mục" context="{'group_by': 'folder_id'}"/>
+                    <filter name="group_type" string="Loại file" context="{'group_by': 'file_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Danh sách dạng bảng (cho quản trị / báo cáo) -->
+    <record id="action_argo_document" model="ir.actions.act_window">
+        <field name="name">Tất cả file</field>
+        <field name="res_model">argo.document</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="path">kho-tai-lieu-danh-sach</field>
+    </record>
+
+    <record id="action_argo_document_folder" model="ir.actions.act_window">
+        <field name="name">Thư mục</field>
+        <field name="res_model">argo.document.folder</field>
+        <field name="view_mode">list,form</field>
+        <field name="path">kho-tai-lieu-thu-muc</field>
+    </record>
+    <record id="argo_document_permission_audit_view_list" model="ir.ui.view">
+        <field name="name">argo.document.permission.audit.list</field>
+        <field name="model">argo.document.permission.audit</field>
+        <field name="arch" type="xml">
+            <list string="Nhật ký chia sẻ Documents" create="false" edit="false" delete="false">
+                <field name="create_date" string="Thời gian"/>
+                <field name="actor_id"/>
+                <field name="folder_id"/>
+                <field name="folder_ref_id"/>
+                <field name="action"/>
+                <field name="details"/>
+            </list>
+        </field>
+    </record>
+    <record id="argo_document_permission_audit_action" model="ir.actions.act_window">
+        <field name="name">Nhật ký phân quyền Documents</field>
+        <field name="res_model">argo.document.permission.audit</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

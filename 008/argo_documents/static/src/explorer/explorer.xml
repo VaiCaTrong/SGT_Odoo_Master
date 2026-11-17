@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- ================================================================= -->
+    <!--  KHO TÀI LIỆU - FILE EXPLORER                                     -->
+    <!-- ================================================================= -->
+    <t t-name="argo_documents.Explorer">
+        <div class="o_gx" t-ref="root" tabindex="0" t-on-keydown="onKeydown" t-on-paste="onSystemPaste"
+             t-att-class="{ 'o_gx_sidebar_closed': !state.sidebarOpen }">
+
+            <!-- Thanh địa chỉ -->
+            <div class="o_gx_addressbar">
+                <button class="btn o_gx_iconbtn d-md-none" title="Cây thư mục"
+                        t-on-click="() => state.sidebarOpen = !state.sidebarOpen">
+                    <i class="fa fa-bars"/>
+                </button>
+                <button class="btn o_gx_iconbtn" title="Quay lại (Backspace)" t-att-disabled="!state.back.length"
+                        t-on-click="goBack"><i class="fa fa-arrow-left"/></button>
+                <button class="btn o_gx_iconbtn" title="Tiến tới" t-att-disabled="!state.forward.length"
+                        t-on-click="goForward"><i class="fa fa-arrow-right"/></button>
+                <button class="btn o_gx_iconbtn" title="Lên một cấp (Alt+↑)"
+                        t-att-disabled="(!state.folderId or state.folderId === state.config.crm_root_folder_id) and !state.trash" t-on-click="goUp">
+                    <i class="fa fa-level-up"/></button>
+                <button class="btn o_gx_iconbtn" title="Làm mới" t-on-click="() => this.refresh({ tree: true })">
+                    <i class="fa fa-refresh" t-att-class="{ 'fa-spin': state.loading }"/></button>
+
+                <div class="o_gx_crumbs">
+                    <t t-if="state.trash">
+                        <span class="o_gx_crumb active"><i class="fa fa-trash-o me-1"/>Thùng rác</span>
+                    </t>
+                    <t t-else="">
+                        <span class="o_gx_crumb" t-att-class="{ 'active': !state.folderId, 'o_gx_drop': state.dropTarget === 'crumb:root' }"
+                              t-on-click="() => this.navigate(isCrmLocation ? state.config.crm_root_folder_id : false)"
+                              t-on-dragover="(ev) => this.onTargetDragOver(ev, isCrmLocation ? state.config.crm_root_folder_id : false, 'crumb:root')"
+                              t-on-dragleave="(ev) => this.onTargetDragLeave(ev, 'crumb:root')"
+                              t-on-drop="(ev) => this.onDrop(ev, isCrmLocation ? state.config.crm_root_folder_id : false)">
+                            <i class="fa fa-archive me-1 text-primary"/><t t-if="isCrmLocation">CRM Information</t><t t-else="">Company Information</t>
+                        </span>
+                        <t t-foreach="state.data.breadcrumb" t-as="crumb" t-key="crumb.id">
+                          <t t-if="!(isCrmLocation and crumb.id === state.config.crm_root_folder_id)">
+                            <i class="fa fa-angle-right o_gx_crumb_sep"/>
+                            <span class="o_gx_crumb"
+                                  t-att-class="{ 'active': crumb.id === state.folderId, 'o_gx_drop': state.dropTarget === 'crumb:' + crumb.id }"
+                                  t-on-click="() => this.navigate(crumb.id)"
+                                  t-on-dragover="(ev) => this.onTargetDragOver(ev, crumb.id, 'crumb:' + crumb.id)"
+                                  t-on-dragleave="(ev) => this.onTargetDragLeave(ev, 'crumb:' + crumb.id)"
+                                  t-on-drop="(ev) => this.onDrop(ev, crumb.id)"
+                                  t-esc="crumb.name"/>
+                          </t>
+                        </t>
+                        <i t-if="state.data.folder.restricted" class="fa fa-lock ms-2 text-warning"
+                           title="Thư mục giới hạn người xem"/>
+                    </t>
+                </div>
+
+                <div class="o_gx_search" t-if="!state.trash">
+                    <i class="fa fa-search"/>
+                    <input type="text" class="form-control" t-att-value="state.search"
+                           t-att-placeholder="state.folderId ? 'Tìm tên công ty / MST trong ' + state.data.folder.name : 'Tìm trong Company Information'"
+                           t-on-input="onSearchInput"/>
+                    <i t-if="state.search" class="fa fa-times o_gx_search_clear" t-on-click="clearSearch"/>
+                </div>
+            </div>
+
+            <!-- Thanh lệnh -->
+            <div class="o_gx_commandbar">
+                <t t-if="!state.trash">
+                    <div class="o_gx_dd">
+                        <button class="btn btn-primary o_gx_cmd_new" t-att-disabled="!canCreateHere" t-on-click="(ev) => this.toggleDropdown('new', ev)">
+                            <i class="fa fa-plus me-1"/>Mới <i class="fa fa-caret-down ms-1"/>
+                        </button>
+                        <div t-if="state.dropdown === 'new'" class="o_gx_menu o_gx_dropdown" t-on-click.stop="() => {}">
+                            <t t-call="argo_documents.NewMenuItems"/>
+                        </div>
+                    </div>
+                    <div class="o_gx_dd">
+                        <button class="btn btn-secondary" t-att-disabled="!canUploadHere" t-on-click="(ev) => this.toggleDropdown('upload', ev)">
+                            <i class="fa fa-upload me-1"/>Tải lên <i class="fa fa-caret-down ms-1"/>
+                        </button>
+                        <div t-if="state.dropdown === 'upload'" class="o_gx_menu o_gx_dropdown" t-on-click.stop="() => {}">
+                            <div class="o_gx_menu_item" t-on-click="pickFiles"><i class="fa fa-file-o"/>Tải file lên</div>
+                            <div t-if="canUploadHere" class="o_gx_menu_item" t-on-click="pickFolder"><i class="fa fa-folder-o"/>Tải cả thư mục lên</div>
+                            <div class="o_gx_menu_sep"/>
+                            <div class="o_gx_menu_hint">
+                                <i class="fa fa-clipboard"/> Dán ảnh/file từ máy bằng Ctrl+V hoặc kéo thả.
+                            </div>
+                            <div class="o_gx_menu_hint">
+                                <i class="fa fa-compress"/>
+                                <t t-if="state.config.image_compress">Ảnh tự nén ≤ <t t-esc="state.config.image_max_px"/>px.</t>
+                                Tối đa <t t-esc="state.config.max_file_mb"/> MB/file.
+                            </div>
+                        </div>
+                    </div>
+                    <span class="o_gx_cmd_sep"/>
+                    <button class="btn o_gx_cmd" title="Cắt (Ctrl+X)" t-att-disabled="!canEditSelection" t-on-click="() => this.setClipboard('cut')">
+                        <i class="fa fa-scissors"/><span>Cắt</span></button>
+                    <button class="btn o_gx_cmd" title="Sao chép (Ctrl+C)" t-att-disabled="!selectedCount" t-on-click="() => this.setClipboard('copy')">
+                        <i class="fa fa-files-o"/><span>Sao chép</span></button>
+                    <button class="btn o_gx_cmd" title="Dán (Ctrl+V)" t-att-disabled="!canPaste" t-on-click="() => this.paste()">
+                        <i class="fa fa-clipboard"/><span>Dán</span></button>
+                    <button class="btn o_gx_cmd" title="Đổi tên (F2)" t-att-disabled="selectedCount !== 1 || !canEditSelection" t-on-click="() => this.startRename()">
+                        <i class="fa fa-pencil"/><span>Đổi tên</span></button>
+                    <button class="btn o_gx_cmd" title="Tải xuống" t-att-disabled="!selectedCount" t-on-click="() => this.downloadItems()">
+                        <i class="fa fa-download"/><span>Tải xuống</span></button>
+                    <button class="btn o_gx_cmd" title="Sao chép nội dung ảnh ra clipboard hệ điều hành (dùng để dán vào Zalo hoặc email)"
+                            t-att-disabled="!canCopyImage" t-on-click="() => this.copyImageToClipboard()">
+                        <i class="fa fa-picture-o"/><span>Chép ảnh ra ngoài</span></button>
+                    <button class="btn o_gx_cmd text-danger" title="Xóa (Delete)" t-att-disabled="!canDeleteSelection" t-on-click="() => this.trashItems()">
+                        <i class="fa fa-trash-o"/><span>Xóa</span></button>
+                </t>
+                <t t-else="">
+                    <button class="btn btn-primary" t-att-disabled="!canDeleteSelection" t-on-click="() => this.restoreItems()">
+                        <i class="fa fa-undo me-1"/>Khôi phục</button>
+                    <button class="btn btn-secondary text-danger" t-att-disabled="!canDeleteSelection" t-on-click="() => this.deleteForever()">
+                        <i class="fa fa-times me-1"/>Xóa vĩnh viễn</button>
+                    <button class="btn btn-secondary" t-att-disabled="!state.config.is_manager || !items.length" t-on-click="emptyTrash">
+                        <i class="fa fa-eraser me-1"/>Dọn sạch thùng rác</button>
+                    <span class="o_gx_cmd_hint" t-if="state.config.trash_days &gt; 0">Tự xóa vĩnh viễn sau <t t-esc="state.config.trash_days"/> ngày khi tác vụ dọn rác được bật.</span>
+                    <span class="o_gx_cmd_hint" t-else="">Không tự động xóa thùng rác.</span>
+                </t>
+
+                <span class="flex-grow-1"/>
+                <div class="o_gx_dd">
+                    <button class="btn o_gx_cmd" t-on-click="(ev) => this.toggleDropdown('sort', ev)">
+                        <i class="fa fa-sort-amount-asc"/><span>Sắp xếp</span><i class="fa fa-caret-down ms-1"/>
+                    </button>
+                    <div t-if="state.dropdown === 'sort'" class="o_gx_menu o_gx_dropdown o_gx_dropdown_right" t-on-click.stop="() => {}">
+                        <t t-call="argo_documents.SortMenuItems"/>
+                    </div>
+                </div>
+                <div class="btn-group o_gx_viewswitch">
+                    <button class="btn o_gx_iconbtn" t-att-class="{ 'active': state.view === 'grid' }" title="Biểu tượng lớn"
+                            t-on-click="() => this.setView('grid')"><i class="fa fa-th-large"/></button>
+                    <button class="btn o_gx_iconbtn" t-att-class="{ 'active': state.view === 'list' }" title="Chi tiết"
+                            t-on-click="() => this.setView('list')"><i class="fa fa-list"/></button>
+                </div>
+                <button t-if="state.config.is_manager" class="btn o_gx_iconbtn d-none d-md-inline-block"
+                        title="Danh sách dạng bảng (quản trị: lọc, nhóm, xuất Excel)" t-on-click="openAdminList">
+                    <i class="fa fa-table"/></button>
+                <button class="btn o_gx_iconbtn d-none d-md-inline-block" t-att-class="{ 'active': state.showDetails }"
+                        title="Ngăn chi tiết" t-on-click="toggleDetails"><i class="fa fa-info-circle"/></button>
+            </div>
+
+            <div class="o_gx_body">
+                <!-- Cây thư mục -->
+                <aside class="o_gx_sidebar">
+                    <div class="o_gx_tree">
+                        <div class="o_gx_node o_gx_node_root"
+                             t-att-class="{ 'active': !state.folderId and !state.trash, 'o_gx_drop': state.dropTarget === 'tree:root' }"
+                             t-on-click="() => this.navigate(false)"
+                             t-on-dragover="(ev) => this.onTargetDragOver(ev, false, 'tree:root')"
+                             t-on-dragleave="(ev) => this.onTargetDragLeave(ev, 'tree:root')"
+                             t-on-drop="(ev) => this.onDrop(ev, false)">
+                            <span class="o_gx_twisty"/>
+                            <i class="fa fa-archive text-primary"/>
+                            <span class="o_gx_node_name">Company Information</span>
+                        </div>
+                        <t t-foreach="treeRows" t-as="node" t-key="node.id">
+                            <div class="o_gx_node"
+                                 t-att-style="'padding-left: ' + (node.depth * 14 + 6) + 'px'"
+                                 t-att-class="{ 'active': node.id === state.folderId and !state.trash, 'o_gx_drop': state.dropTarget === 'tree:' + node.id }"
+                                 t-att-title="node.name"
+                                 t-on-click="() => this.navigate(node.id)"
+                                 t-on-dragover="(ev) => this.onTargetDragOver(ev, node.id, 'tree:' + node.id)"
+                                 t-on-dragleave="(ev) => this.onTargetDragLeave(ev, 'tree:' + node.id)"
+                                 t-on-drop="(ev) => this.onDrop(ev, node.id)">
+                                <span class="o_gx_twisty" t-on-click="(ev) => this.toggleNode(node, ev)">
+                                    <i t-if="node.hasChildren" class="fa" t-att-class="node.expanded ? 'fa-angle-down' : 'fa-angle-right'"/>
+                                </span>
+                                <i class="fa o_gx_t_folder" t-att-class="node.expanded ? 'fa-folder-open' : 'fa-folder'"/>
+                                <span class="o_gx_node_name" t-esc="node.name"/>
+                                <i t-if="node.restricted" class="fa fa-lock o_gx_lock"/>
+                            </div>
+                        </t>
+                        <!-- Separate top-level system root: CRM Information is NOT a child of Company Information. -->
+                        <div t-if="state.config.crm_root_folder_id" class="o_gx_node o_gx_node_root o_gx_system_root"
+                             t-att-class="{ 'active': state.folderId === state.config.crm_root_folder_id and !state.trash }"
+                             t-on-click="() => this.navigate(state.config.crm_root_folder_id)">
+                            <span class="o_gx_twisty" t-on-click="(ev) => this.toggleNode({id: state.config.crm_root_folder_id}, ev)">
+                                <i class="fa" t-att-class="state.expanded[state.config.crm_root_folder_id] ? 'fa-angle-down' : 'fa-angle-right'"/>
+                            </span>
+                            <i class="fa fa-folder text-warning"/>
+                            <span class="o_gx_node_name">CRM Information</span>
+                            <i class="fa fa-lock o_gx_lock" title="Kho hệ thống: không được xóa"/>
+                        </div>
+                        <t t-foreach="crmTreeRows" t-as="node" t-key="'crm'+node.id">
+                            <div class="o_gx_node" t-att-style="'padding-left: ' + (node.depth * 14 + 6) + 'px'"
+                                 t-att-class="{ 'active': node.id === state.folderId and !state.trash }"
+                                 t-on-click="() => this.navigate(node.id)"
+                                 t-on-contextmenu="(ev) => this.openTreeMenu(ev, node)">
+                                <span class="o_gx_twisty" t-on-click="(ev) => this.toggleNode(node, ev)">
+                                    <i t-if="node.hasChildren" class="fa" t-att-class="node.expanded ? 'fa-angle-down' : 'fa-angle-right'"/>
+                                </span>
+                                <i class="fa o_gx_t_folder" t-att-class="node.expanded ? 'fa-folder-open' : 'fa-folder'"/>
+                                <span class="o_gx_node_name" t-esc="node.name"/>
+                                <i t-if="node.restricted" class="fa fa-lock o_gx_lock"/>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="o_gx_tree_footer">
+                        <div class="o_gx_node" t-att-class="{ 'active': state.trash }"
+                             t-on-click="() => this.navigate(false, { trash: true })">
+                            <span class="o_gx_twisty"/>
+                            <i class="fa fa-trash-o text-danger"/>
+                            <span class="o_gx_node_name">Thùng rác</span>
+                        </div>
+                    </div>
+                </aside>
+                <div class="o_gx_backdrop d-md-none" t-if="state.sidebarOpen" t-on-click="() => state.sidebarOpen = false"/>
+
+                <!-- Vùng nội dung -->
+                <main class="o_gx_main" t-att-class="{ 'o_gx_dragover': state.dragOver and !state.dropTarget }"
+                      t-on-click="onBlankClick"
+                      t-on-contextmenu="(ev) => this.openMenu(ev, null)"
+                      t-on-dragover="onMainDragOver"
+                      t-on-dragleave="onMainDragLeave"
+                      t-on-drop="(ev) => this.onDrop(ev)">
+
+                    <div t-if="state.search" class="o_gx_searchinfo">
+                        <i class="fa fa-search me-1"/>Kết quả tìm "<b t-esc="state.search"/>":
+                        <t t-esc="items.length"/> mục
+                    </div>
+
+                    <t t-if="!items.length and !state.loading">
+                        <div class="o_gx_empty">
+                            <i class="fa" t-att-class="state.trash ? 'fa-trash-o' : 'fa-folder-open-o'"/>
+                            <p t-esc="emptyText"/>
+                            <div t-if="!state.trash and !state.search" class="d-flex gap-2 justify-content-center flex-wrap">
+                                <button class="btn btn-primary" t-att-disabled="!canUploadHere" t-on-click.stop="pickFiles"><i class="fa fa-upload me-1"/>Tải file lên</button>
+                                <button class="btn btn-secondary" t-att-disabled="!canCreateHere" t-on-click.stop="newFolder"><i class="fa fa-folder me-1"/>Thư mục mới</button>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Chế độ biểu tượng lớn -->
+                    <div t-if="state.view === 'grid' and items.length" class="o_gx_grid">
+                        <t t-foreach="items" t-as="item" t-key="itemKey(item)">
+                            <div class="o_gx_tile" t-att-data-key="itemKey(item)"
+                                 t-att-class="{ 'selected': isSelected(item), 'o_gx_cut': isCut(item), 'o_gx_drop': state.dropTarget === itemKey(item) }"
+                                 t-att-title="item.name + (item.kind === 'file' ? ' · ' + humanSize(item.size) : '')"
+                                 draggable="true"
+                                 t-on-click="(ev) => this.onItemClick(ev, item)"
+                                 t-on-dblclick="() => this.openItem(item)"
+                                 t-on-contextmenu="(ev) => this.openMenu(ev, item)"
+                                 t-on-dragstart="(ev) => this.onItemDragStart(ev, item)"
+                                 t-on-dragend="onItemDragEnd"
+                                 t-on-dragover="(ev) => item.kind === 'folder' and this.onTargetDragOver(ev, item.id, itemKey(item))"
+                                 t-on-dragleave="(ev) => this.onTargetDragLeave(ev, itemKey(item))"
+                                 t-on-drop="(ev) => item.kind === 'folder' ? this.onDrop(ev, item.id) : null">
+                                <div class="o_gx_thumb">
+                                    <t t-if="item.kind === 'file' and item.has_thumbnail">
+                                        <img t-att-src="thumbUrl(item)" loading="lazy" draggable="false" alt=""/>
+                                    </t>
+                                    <t t-else="">
+                                        <i class="fa" t-att-class="iconClass(item) + ' o_gx_t_' + (item.kind === 'folder' ? 'folder' : item.file_type)"/>
+                                        <i t-if="item.kind === 'folder' and item.is_locked" class="fa fa-lock o_gx_tile_lock" title="Folder đã Lock — chống xóa"/>
+                                        <i t-elif="item.kind === 'folder' and item.restricted" class="fa fa-users o_gx_tile_lock" title="Folder có phân quyền"/>
+                                    </t>
+                                    <span t-if="item.kind === 'file' and item.original_size > item.size" class="o_gx_badge_zip"
+                                          t-att-title="compressionText(item)"><i class="fa fa-compress"/></span>
+                                </div>
+                                <t t-if="state.renaming === itemKey(item)">
+                                    <ArgoRenameInput value="item.name" isFile="item.kind === 'file'" multiline="true"
+                                                       onCommit="(v) => this.commitRename(item, v)" onCancel="() => this.cancelRename()"/>
+                                </t>
+                                <div t-else="" class="o_gx_tile_name" t-esc="item.name"/>
+                                <div class="o_gx_tile_meta">
+                                    <t t-if="item.kind === 'folder'"><t t-esc="item.file_count"/> file<t t-if="item.size"> · <t t-esc="humanSize(item.size)"/></t></t>
+                                    <t t-else="" t-esc="humanSize(item.size)"/>
+                                </div>
+                                <div t-if="state.search and item.path" class="o_gx_tile_path" t-esc="item.path"/>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Chế độ chi tiết -->
+                    <table t-if="state.view === 'list' and items.length" class="o_gx_table">
+                        <thead>
+                            <tr>
+                                <th class="o_gx_col_name" t-on-click.stop="() => this.setSort('name')">Tên
+                                    <i t-if="state.sortBy === 'name'" class="fa" t-att-class="state.sortAsc ? 'fa-caret-up' : 'fa-caret-down'"/></th>
+                                <th class="o_gx_col_date" t-on-click.stop="() => this.setSort('date')">
+                                    <t t-esc="state.trash ? 'Ngày xóa' : 'Ngày sửa'"/>
+                                    <i t-if="state.sortBy === 'date'" class="fa" t-att-class="state.sortAsc ? 'fa-caret-up' : 'fa-caret-down'"/></th>
+                                <th class="o_gx_col_type d-none d-lg-table-cell" t-on-click.stop="() => this.setSort('type')">Loại
+                                    <i t-if="state.sortBy === 'type'" class="fa" t-att-class="state.sortAsc ? 'fa-caret-up' : 'fa-caret-down'"/></th>
+                                <th class="o_gx_col_size" t-on-click.stop="() => this.setSort('size')">Dung lượng
+                                    <i t-if="state.sortBy === 'size'" class="fa" t-att-class="state.sortAsc ? 'fa-caret-up' : 'fa-caret-down'"/></th>
+                                <th class="o_gx_col_owner d-none d-xl-table-cell">Người tạo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="items" t-as="item" t-key="itemKey(item)">
+                                <tr t-att-data-key="itemKey(item)"
+                                    t-att-class="{ 'selected': isSelected(item), 'o_gx_cut': isCut(item), 'o_gx_drop': state.dropTarget === itemKey(item) }"
+                                    draggable="true"
+                                    t-on-click="(ev) => this.onItemClick(ev, item)"
+                                    t-on-dblclick="() => this.openItem(item)"
+                                    t-on-contextmenu="(ev) => this.openMenu(ev, item)"
+                                    t-on-dragstart="(ev) => this.onItemDragStart(ev, item)"
+                                    t-on-dragend="onItemDragEnd"
+                                    t-on-dragover="(ev) => item.kind === 'folder' and this.onTargetDragOver(ev, item.id, itemKey(item))"
+                                    t-on-dragleave="(ev) => this.onTargetDragLeave(ev, itemKey(item))"
+                                    t-on-drop="(ev) => item.kind === 'folder' ? this.onDrop(ev, item.id) : null">
+                                    <td class="o_gx_col_name">
+                                        <div class="o_gx_row_name">
+                                            <t t-if="item.kind === 'file' and item.has_thumbnail">
+                                                <img class="o_gx_row_thumb" t-att-src="thumbUrl(item)" loading="lazy" draggable="false" alt=""/>
+                                            </t>
+                                            <i t-else="" class="fa fa-fw" t-att-class="iconClass(item) + ' o_gx_t_' + (item.kind === 'folder' ? 'folder' : item.file_type)"/>
+                                            <t t-if="state.renaming === itemKey(item)">
+                                                <ArgoRenameInput value="item.name" isFile="item.kind === 'file'"
+                                                                   onCommit="(v) => this.commitRename(item, v)" onCancel="() => this.cancelRename()"/>
+                                            </t>
+                                            <span t-else="" class="text-truncate">
+                                                <t t-esc="item.name"/>
+                                                <small t-if="state.search and item.path" class="text-muted ms-2" t-esc="item.path"/>
+                                            </span>
+                                            <i t-if="item.kind === 'folder' and item.restricted" class="fa fa-lock o_gx_lock"/>
+                                            <i t-if="item.kind === 'file' and item.original_size > item.size" class="fa fa-compress o_gx_zip_inline"
+                                               t-att-title="compressionText(item)"/>
+                                        </div>
+                                    </td>
+                                    <td class="o_gx_col_date" t-esc="formatDate(state.trash ? item.trash_date : item.write_date)"/>
+                                    <td class="o_gx_col_type d-none d-lg-table-cell" t-esc="typeLabel(item)"/>
+                                    <td class="o_gx_col_size">
+                                        <t t-if="item.kind === 'folder'"><t t-esc="item.file_count"/> file<t t-if="item.size"> · <t t-esc="humanSize(item.size)"/></t></t>
+                                        <t t-else="" t-esc="humanSize(item.size)"/>
+                                    </td>
+                                    <td class="o_gx_col_owner d-none d-xl-table-cell" t-esc="item.owner"/>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div t-if="state.dragOver and !state.dropTarget" class="o_gx_dropzone">
+                        <i class="fa fa-cloud-upload"/>
+                        <div>Thả để tải lên <b t-esc="state.data.folder.name"/></div>
+                        <small t-if="state.config.image_compress">Ảnh sẽ được tự nén để nhẹ kho</small>
+                    </div>
+                </main>
+
+                <!-- Ngăn chi tiết -->
+                <aside t-if="state.showDetails" class="o_gx_details d-none d-md-flex">
+                    <t t-set="d" t-value="detailsItem"/>
+                    <t t-if="d">
+                        <div class="o_gx_details_preview">
+                            <img t-if="d.kind === 'file' and d.has_thumbnail" t-att-src="thumbUrl(d)" alt=""/>
+                            <i t-else="" class="fa" t-att-class="iconClass(d) + ' o_gx_t_' + (d.kind === 'folder' ? 'folder' : d.file_type)"/>
+                        </div>
+                        <div class="o_gx_details_name" t-esc="d.name"/>
+                        <dl class="o_gx_details_props">
+                            <dt>Loại</dt><dd t-esc="typeLabel(d)"/>
+                            <t t-if="d.kind === 'file'">
+                                <dt>Dung lượng</dt><dd t-esc="humanSize(d.size)"/>
+                                <t t-if="d.original_size > d.size">
+                                    <dt>Đã nén</dt><dd class="text-success" t-esc="compressionText(d)"/>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <dt>Chứa</dt><dd><t t-esc="d.file_count"/> file · <t t-esc="humanSize(d.size)"/></dd>
+                                <dt>Quyền xem</dt>
+                                <dd>
+                                    <t t-if="d.restricted"><i class="fa fa-lock text-warning me-1"/>Giới hạn người xem</t>
+                                    <t t-else=""><i class="fa fa-users me-1"/>Mọi người</t>
+                                </dd>
+                            </t>
+                            <dt>Người tạo</dt><dd t-esc="d.owner"/>
+                            <dt>Ngày tạo</dt><dd t-esc="formatDate(d.create_date)"/>
+                            <dt>Ngày sửa</dt><dd t-esc="formatDate(d.write_date)"/>
+                            <t t-if="d.trash_date"><dt>Ngày xóa</dt><dd t-esc="formatDate(d.trash_date)"/></t>
+                            <t t-if="d.path"><dt>Vị trí</dt><dd t-esc="d.path"/></t>
+                        </dl>
+                        <div class="o_gx_details_actions" t-if="!state.trash">
+                            <button class="btn btn-sm btn-primary" t-on-click="() => this.openItem(d)">
+                                <i class="fa fa-external-link me-1"/>Mở</button>
+                            <button class="btn btn-sm btn-secondary" t-on-click="() => this.downloadItems([d])">
+                                <i class="fa fa-download me-1"/>Tải xuống</button>
+                            <button t-if="d.kind === 'folder' &amp;&amp; d.can_share" class="btn btn-sm btn-secondary" t-on-click="() => this.openShare(d)">
+                                <i class="fa fa-user-plus me-1"/>Quyền xem</button>
+                            <button class="btn btn-sm btn-link" t-on-click="() => this.openProperties(d)">Thuộc tính…</button>
+                            <t t-set="pi" t-value="pushInfo"/>
+                            <button t-if="pi" class="btn btn-sm btn-success o_gx_push_crm" t-on-click="() => this.pushFromInfo()">
+                                <i class="fa fa-share-square-o me-1"/><t t-esc="pi.label"/></button>
+                        </div>
+                    </t>
+                    <t t-elif="selectedCount > 1">
+                        <div class="o_gx_details_preview"><i class="fa fa-clone text-muted"/></div>
+                        <div class="o_gx_details_name"><t t-esc="selectedCount"/> mục đã chọn</div>
+                        <dl class="o_gx_details_props"><dt>Tổng dung lượng</dt><dd t-esc="humanSize(selectedSize)"/></dl>
+                        <div class="o_gx_details_actions" t-if="pushInfo">
+                            <button class="btn btn-sm btn-success o_gx_push_crm" t-on-click="() => this.pushFromInfo()">
+                                <i class="fa fa-share-square-o me-1"/><t t-esc="pushInfo.label"/></button>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="o_gx_details_preview">
+                            <i class="fa" t-att-class="state.trash ? 'fa-trash-o text-danger' : (state.folderId ? 'fa-folder-open o_gx_t_folder' : 'fa-archive text-primary')"/>
+                        </div>
+                        <div class="o_gx_details_name" t-esc="state.trash ? 'Thùng rác' : state.data.folder.name"/>
+                        <dl class="o_gx_details_props">
+                            <dt>Số mục</dt><dd t-esc="items.length"/>
+                            <dt>Dung lượng</dt><dd t-esc="humanSize(totalSize)"/>
+                            <t t-if="savedBytes"><dt>Tiết kiệm nhờ nén</dt><dd class="text-success" t-esc="humanSize(savedBytes)"/></t>
+                            <t t-if="state.folderId and !state.trash">
+                                <dt>Quyền xem</dt>
+                                <dd>
+                                    <t t-if="state.data.folder.restricted">
+                                        <i class="fa fa-lock text-warning me-1"/>
+                                        <t t-esc="folderAccessText"/>
+                                    </t>
+                                    <t t-else=""><i class="fa fa-users me-1"/>Mọi người</t>
+                                </dd>
+                            </t>
+                        </dl>
+                        <div class="o_gx_details_actions" t-if="state.folderId and !state.trash and state.data.folder.can_share">
+                            <button class="btn btn-sm btn-secondary" t-on-click="() => this.openShare()">
+                                <i class="fa fa-user-plus me-1"/>Quyền xem thư mục này</button>
+                        </div>
+                        <div class="o_gx_details_actions" t-if="pushInfo">
+                            <button class="btn btn-sm btn-success o_gx_push_crm" t-on-click="() => this.pushFromInfo()">
+                                <i class="fa fa-share-square-o me-1"/><t t-esc="pushInfo.label"/></button>
+                        </div>
+                        <p class="o_gx_tips">
+                            Mẹo: kéo thả file/thư mục từ máy tính vào đây để tải lên · chuột phải để mở menu ·
+                            Ctrl/Shift + click để chọn nhiều · kéo mục vào thư mục để di chuyển (giữ Ctrl để sao chép).
+                        </p>
+                    </t>
+                </aside>
+            </div>
+
+            <!-- Thanh trạng thái -->
+            <div class="o_gx_statusbar">
+                <span><t t-esc="items.length"/> mục</span>
+                <span t-if="selectedCount"><t t-esc="selectedCount"/> đã chọn · <t t-esc="humanSize(selectedSize)"/></span>
+                <span t-if="state.clipboard" class="text-primary">
+                    <i class="fa fa-clipboard me-1"/><t t-esc="state.clipboard.items.length"/> mục chờ dán
+                    (<t t-esc="state.clipboard.mode === 'cut' ? 'cắt' : 'sao chép'"/>)
+                    <a href="#" class="ms-1" t-on-click.prevent="() => state.clipboard = null">Hủy</a>
+                </span>
+                <span class="flex-grow-1"/>
+                <span class="d-none d-md-inline">
+                    <i class="fa fa-compress me-1"/>
+                    <t t-if="state.config.image_compress">Ảnh tự nén ≤ <t t-esc="state.config.image_max_px"/>px · </t>
+                    Tối đa <t t-esc="state.config.max_file_mb"/> MB/file
+                </span>
+            </div>
+
+            <!-- Menu chuột phải -->
+            <div t-if="state.menu" class="o_gx_menu o_gx_context"
+                 t-att-style="'left:' + state.menu.x + 'px; top:' + state.menu.y + 'px'"
+                 t-on-click.stop="() => {}" t-on-contextmenu.prevent.stop="() => {}">
+                <t t-if="state.menu.type === 'item'">
+                    <t t-call="argo_documents.ItemMenu"/>
+                </t>
+                <t t-elif="state.menu.type === 'tree'">
+                    <t t-call="argo_documents.TreeMenu"/>
+                </t>
+                <t t-else="">
+                    <t t-call="argo_documents.BlankMenu"/>
+                </t>
+            </div>
+
+            <!-- Bảng tiến trình tải lên -->
+            <div t-if="state.uploadPanelOpen and state.uploads.length" class="o_gx_uploads">
+                <t t-set="sum" t-value="uploadSummary"/>
+                <div class="o_gx_uploads_head">
+                    <span t-if="sum.running"><i class="fa fa-circle-o-notch fa-spin me-1"/>Đang tải lên <t t-esc="sum.done"/>/<t t-esc="sum.total"/></span>
+                    <span t-else=""><i class="fa fa-check-circle text-success me-1"/>Đã tải lên <t t-esc="sum.done"/>/<t t-esc="sum.total"/> file</span>
+                    <span t-if="sum.saved" class="text-success ms-2 small">· tiết kiệm <t t-esc="humanSize(sum.saved)"/></span>
+                    <span class="flex-grow-1"/>
+                    <button t-if="!sum.running" class="btn btn-sm o_gx_iconbtn" title="Đóng" t-on-click="clearUploads"><i class="fa fa-times"/></button>
+                </div>
+                <div class="o_gx_uploads_list">
+                    <t t-foreach="state.uploads" t-as="up" t-key="up.id">
+                        <div class="o_gx_upload" t-att-class="'o_gx_up_' + up.status">
+                            <div class="o_gx_upload_line">
+                                <span class="o_gx_upload_name" t-esc="up.name" t-att-title="up.name"/>
+                                <span class="o_gx_upload_state">
+                                    <t t-if="up.status === 'done'">
+                                        <t t-if="up.result and up.result.original_size > up.result.size">
+                                            <t t-esc="humanSize(up.result.original_size)"/> → <b t-esc="humanSize(up.result.size)"/>
+                                        </t>
+                                        <t t-else="" t-esc="humanSize(up.size)"/>
+                                        <i class="fa fa-check text-success ms-1"/>
+                                    </t>
+                                    <t t-elif="up.status === 'error'"><i class="fa fa-exclamation-triangle text-danger"/></t>
+                                    <t t-elif="up.status === 'uploading'"><t t-esc="up.progress"/>%</t>
+                                    <t t-else="">Chờ…</t>
+                                </span>
+                            </div>
+                            <div t-if="up.status === 'uploading'" class="progress"><div class="progress-bar" t-att-style="'width:' + up.progress + '%'"/></div>
+                            <div t-if="up.status === 'error'" class="o_gx_upload_error" t-esc="up.error"/>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <input type="file" class="d-none" multiple="multiple" t-ref="fileInput" t-on-change="onFilesPicked"/>
+            <input type="file" class="d-none" webkitdirectory="" directory="" multiple="multiple" t-ref="dirInput" t-on-change="onFolderPicked"/>
+            <input type="file" class="d-none" t-ref="replaceInput" t-on-change="onReplacePicked"/>
+        </div>
+    </t>
+
+    <!-- Mục "Mới" -->
+    <t t-name="argo_documents.NewMenuItems">
+        <div class="o_gx_menu_item" t-if="canCreateHere" t-on-click="newFolder"><i class="fa fa-folder o_gx_t_folder"/>Thư mục
+            <span class="o_gx_kbd">Ctrl+Shift+N</span></div>
+        <div class="o_gx_menu_sep"/>
+        <t t-foreach="canUploadHere ? NEW_FILE_ITEMS : []" t-as="nf" t-key="nf.kind">
+            <div class="o_gx_menu_item" t-on-click="() => this.newFile(nf.kind)">
+                <i class="fa" t-att-class="nf.icon + ' o_gx_t_' + nf.cls"/><t t-esc="nf.label"/>
+            </div>
+        </t>
+    </t>
+
+    <t t-name="argo_documents.SortMenuItems">
+        <t t-foreach="[['name', 'Tên'], ['date', 'Ngày sửa'], ['type', 'Loại'], ['size', 'Dung lượng']]" t-as="opt" t-key="opt[0]">
+            <div class="o_gx_menu_item" t-on-click="() => this.setSort(opt[0])">
+                <i class="fa" t-att-class="state.sortBy === opt[0] ? (state.sortAsc ? 'fa-sort-amount-asc' : 'fa-sort-amount-desc') : ''"/>
+                <t t-esc="opt[1]"/>
+            </div>
+        </t>
+    </t>
+
+    <!-- Menu chuột phải trên mục -->
+    <t t-name="argo_documents.ItemMenu">
+        <t t-set="sel" t-value="selectedItems"/>
+        <t t-set="one" t-value="sel.length === 1 ? sel[0] : null"/>
+        <t t-if="state.trash">
+            <div class="o_gx_menu_item" t-att-disabled="!canDeleteSelection" t-on-click="() => this.restoreItems()"><i class="fa fa-undo"/>Khôi phục</div>
+            <div class="o_gx_menu_item text-danger" t-att-disabled="!canDeleteSelection" t-on-click="() => this.deleteForever()"><i class="fa fa-times"/>Xóa vĩnh viễn</div>
+            <t t-if="one">
+                <div class="o_gx_menu_sep"/>
+                <div class="o_gx_menu_item" t-on-click="() => this.menuAction(this.openProperties, one)"><i class="fa fa-info-circle"/>Thuộc tính</div>
+            </t>
+        </t>
+        <t t-else="">
+            <t t-if="one">
+                <div class="o_gx_menu_item fw-bold" t-on-click="() => this.menuAction(this.openItem, one)">
+                    <i class="fa fa-external-link"/><t t-esc="one.kind === 'folder' ? 'Mở' : (one.file_type === 'note' or (one.file_type === 'text' and one.text_editable) ? 'Mở / sửa' : 'Mở')"/>
+                </div>
+                <div t-if="one.kind === 'file' and one.file_type === 'text'" class="o_gx_menu_item" t-on-click="() => this.menuAction(this.viewItem, one)">
+                    <i class="fa fa-eye"/>Xem</div>
+            </t>
+            <div class="o_gx_menu_item" t-on-click="() => this.menuAction(this.downloadItems)">
+                <i class="fa fa-download"/><t t-esc="sel.length > 1 or (one and one.kind === 'folder') ? 'Tải xuống (.zip)' : 'Tải xuống'"/>
+            </div>
+            <div t-if="one and one.kind === 'file' and one.file_type === 'image'" class="o_gx_menu_item"
+                 t-on-click="() => this.copyImageToClipboard(one)">
+                <i class="fa fa-picture-o"/>Chép ảnh ra ngoài (clipboard)
+            </div>
+            <div t-if="one and one.kind === 'file' and one.file_type !== 'note'" class="o_gx_menu_item"
+                 t-on-click="() => this.pickReplace(one)">
+                <i class="fa fa-exchange"/>Thay bằng file mới…</div>
+            <t t-set="pi" t-value="pushInfo"/>
+            <div t-if="pi" class="o_gx_menu_item o_gx_menu_crm" t-on-click="() => this.pushFromInfo()">
+                <i class="fa fa-share-square-o"/><t t-esc="pi.label"/></div>
+            <div class="o_gx_menu_sep"/>
+            <div t-if="canEditSelection" class="o_gx_menu_item" t-on-click="() => this.setClipboard('cut')"><i class="fa fa-scissors"/>Cắt<span class="o_gx_kbd">Ctrl+X</span></div>
+            <div class="o_gx_menu_item" t-on-click="() => this.setClipboard('copy')"><i class="fa fa-files-o"/>Sao chép<span class="o_gx_kbd">Ctrl+C</span></div>
+            <div t-if="one and one.kind === 'folder' and canPaste" class="o_gx_menu_item" t-on-click="() => this.paste(one.id)">
+                <i class="fa fa-clipboard"/>Dán vào thư mục này</div>
+            <div class="o_gx_menu_sep"/>
+            <div t-if="one and one.can_edit" class="o_gx_menu_item" t-on-click="() => this.startRename(one)"><i class="fa fa-pencil"/>Đổi tên<span class="o_gx_kbd">F2</span></div>
+            <div t-if="canDeleteSelection" class="o_gx_menu_item text-danger" t-on-click="() => this.trashItems()"><i class="fa fa-trash-o"/>Xóa<span class="o_gx_kbd">Del</span></div>
+            <t t-if="one">
+                <div class="o_gx_menu_sep"/>
+                <div t-if="one.kind === 'folder' and state.config.is_manager" class="o_gx_menu_item"
+                     t-on-click="() => this.menuAction(this.toggleFolderLock, one)">
+                    <i class="fa" t-att-class="one.is_locked ? 'fa-unlock' : 'fa-lock'"/>
+                    <t t-esc="one.is_locked ? 'Unlock Folder' : 'Lock Folder'"/>
+                </div>
+                <div t-if="one.kind === 'folder' and one.can_share" class="o_gx_menu_item" t-on-click="() => this.openShare(one)"><i class="fa fa-user-plus"/>Quyền xem…</div>
+                <div class="o_gx_menu_item" t-on-click="() => this.menuAction(this.openProperties, one)"><i class="fa fa-info-circle"/>Thuộc tính</div>
+            </t>
+        </t>
+    </t>
+
+    <!-- Update_010: menu chuột phải trên cây thư mục (nhánh CRM Information) -->
+    <t t-name="argo_documents.TreeMenu">
+        <t t-set="tn" t-value="state.menu.node"/>
+        <div class="o_gx_menu_item fw-bold" t-on-click="() => this.menuAction(this.navigate, tn.id)"><i class="fa fa-external-link"/>Mở</div>
+        <div class="o_gx_menu_item" t-on-click="() => this.menuAction(this.downloadItems, [{ kind: 'folder', id: tn.id, name: tn.name }])">
+            <i class="fa fa-download"/>Tải xuống (.zip)</div>
+        <t t-if="treePushAvailable">
+            <div class="o_gx_menu_sep"/>
+            <div class="o_gx_menu_item o_gx_menu_crm" t-on-click="() => this.pushImagesToCrm(tn.id, null)">
+                <i class="fa fa-share-square-o"/>Cập nhật ảnh lên CRM</div>
+        </t>
+        <div class="o_gx_menu_sep"/>
+        <div class="o_gx_menu_item" t-on-click="() => this.openShare({ id: tn.id })"><i class="fa fa-user-plus"/>Quyền xem…</div>
+        <div class="o_gx_menu_item" t-on-click="() => this.menuAction(this.openProperties, { kind: 'folder', id: tn.id })">
+            <i class="fa fa-info-circle"/>Thuộc tính</div>
+    </t>
+
+    <!-- Update_010: chọn Deal nhận ảnh -->
+    <t t-name="argo_documents.CrmTargetDialog">
+        <Dialog title="'Cập nhật ảnh lên CRM'" size="'md'">
+            <div class="o_gx_share">
+                <p class="mb-2">Thư mục này dùng chung cho nhiều Deal (cùng MST). Chọn Deal sẽ nhận <b t-esc="props.summary"/>:</p>
+                <t t-foreach="props.leads" t-as="lead" t-key="lead.id">
+                    <label class="o_gx_share_opt" t-att-class="{ 'text-muted': !lead.can_write }">
+                        <input type="radio" name="gx_crm_target" t-att-checked="state.leadId === lead.id"
+                               t-att-disabled="!lead.can_write" t-on-change="() => this.choose(lead)"/>
+                        <div><b t-esc="lead.ref"/> · <span t-esc="lead.stage"/>
+                            <div class="small" t-esc="lead.name"/>
+                            <div t-if="!lead.can_write" class="small text-danger">Bạn không có quyền sửa Deal này</div>
+                        </div>
+                    </label>
+                </t>
+                <div class="text-muted small mt-3">
+                    Ảnh được thêm vào Image Gallery. Ảnh cũ giữ nguyên, ảnh trùng nội dung bị bỏ qua. Cần quyền sửa Deal.
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-success" t-att-disabled="!state.leadId or state.busy" t-on-click="confirm">Cập nhật lên CRM</button>
+                <button class="btn btn-secondary" t-on-click="() => props.close()">Hủy</button>
+            </t>
+        </Dialog>
+    </t>
+
+    <!-- Menu chuột phải trên vùng trống -->
+    <t t-name="argo_documents.BlankMenu">
+        <div class="o_gx_menu_item o_gx_has_sub"><i class="fa fa-eye"/>Xem<i class="fa fa-caret-right ms-auto"/>
+            <div class="o_gx_menu o_gx_submenu">
+                <div class="o_gx_menu_item" t-on-click="() => this.setView('grid')">
+                    <i class="fa" t-att-class="state.view === 'grid' ? 'fa-dot-circle-o' : ''"/>Biểu tượng lớn</div>
+                <div class="o_gx_menu_item" t-on-click="() => this.setView('list')">
+                    <i class="fa" t-att-class="state.view === 'list' ? 'fa-dot-circle-o' : ''"/>Chi tiết</div>
+            </div>
+        </div>
+        <div class="o_gx_menu_item o_gx_has_sub"><i class="fa fa-sort"/>Sắp xếp theo<i class="fa fa-caret-right ms-auto"/>
+            <div class="o_gx_menu o_gx_submenu"><t t-call="argo_documents.SortMenuItems"/></div>
+        </div>
+        <div class="o_gx_menu_item" t-on-click="() => this.menuAction(this.refresh, { tree: true })"><i class="fa fa-refresh"/>Làm mới</div>
+        <t t-if="!state.trash">
+            <div class="o_gx_menu_sep"/>
+            <div class="o_gx_menu_item" t-att-class="{ 'disabled': !canPaste }" t-on-click="() => canPaste and this.paste()">
+                <i class="fa fa-clipboard"/>Dán<span class="o_gx_kbd">Ctrl+V</span></div>
+            <div class="o_gx_menu_sep"/>
+            <div class="o_gx_menu_item o_gx_has_sub"><i class="fa fa-plus"/>Mới<i class="fa fa-caret-right ms-auto"/>
+                <div class="o_gx_menu o_gx_submenu"><t t-call="argo_documents.NewMenuItems"/></div>
+            </div>
+            <div t-if="canUploadHere" class="o_gx_menu_item" t-on-click="pickFiles"><i class="fa fa-upload"/>Tải file lên</div>
+            <div t-if="canUploadHere" class="o_gx_menu_item" t-on-click="pickFolder"><i class="fa fa-folder-o"/>Tải cả thư mục lên</div>
+            <t t-if="state.folderId">
+                <div class="o_gx_menu_sep"/>
+                <div class="o_gx_menu_item" t-on-click="() => this.downloadItems([{ kind: 'folder', id: state.folderId, name: state.data.folder.name }])">
+                    <i class="fa fa-file-archive-o"/>Tải thư mục này (.zip)</div>
+                <div t-if="state.data.folder.can_share" class="o_gx_menu_item" t-on-click="() => this.openShare()">
+                    <i class="fa fa-user-plus"/>Quyền xem thư mục này…</div>
+                <div class="o_gx_menu_item" t-on-click="() => this.menuAction(this.openProperties, { kind: 'folder', id: state.folderId })">
+                    <i class="fa fa-info-circle"/>Thuộc tính</div>
+            </t>
+        </t>
+        <t t-else="">
+            <div class="o_gx_menu_sep"/>
+            <div class="o_gx_menu_item text-danger" t-on-click="emptyTrash"><i class="fa fa-eraser"/>Dọn sạch thùng rác</div>
+        </t>
+    </t>
+
+    <!-- ===== Dialogs ===== -->
+    <t t-name="argo_documents.TextEditorDialog">
+        <Dialog title="props.title" size="'lg'">
+            <textarea t-ref="textarea" class="form-control o_gx_texteditor" spellcheck="false"
+                      t-att-value="state.content" t-on-input="onInput" t-on-keydown="onKeydown"/>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-att-disabled="state.saving" t-on-click="save">
+                    <i class="fa fa-save me-1"/>Lưu <small class="opacity-75">(Ctrl+S)</small></button>
+                <button class="btn btn-secondary" t-on-click="props.close">Đóng</button>
+                <span t-if="state.dirty" class="text-muted small ms-2">Có thay đổi chưa lưu</span>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="argo_documents.ShareDialog">
+        <Dialog title="'Phân quyền: ' + props.folderName" size="'lg'">
+            <div class="o_gx_share">
+                <div class="alert alert-info small mb-3">
+                    <i class="fa fa-shield me-1"/> Chỉ Admin/người được ủy quyền quản lý chia sẻ có thể lưu.
+                    View = xem/tải xuống; Edit = thêm/sửa/di chuyển; Full = được xóa.
+                    Folder con không được vượt quyền của folder cha.
+                </div>
+                <label class="o_gx_share_opt">
+                    <input type="radio" name="gx_share_mode" t-att-checked="state.mode === 'private'"
+                           t-on-change="() => state.mode = 'private'"/>
+                    <div><b><i class="fa fa-lock me-1"/>Riêng tư (Private)</b>
+                        <div class="text-muted small">Chỉ người tạo (Edit) và Admin. Không tự cấp quyền xóa.</div>
+                    </div>
+                </label>
+                <label class="o_gx_share_opt">
+                    <input type="radio" name="gx_share_mode" t-att-checked="state.mode === 'restricted'"
+                           t-on-change="() => state.mode = 'restricted'"/>
+                    <div><b><i class="fa fa-users me-1"/>User / Phòng ban</b>
+                        <div class="text-muted small">Chọn từng đối tượng và mức quyền; kết hợp User và Phòng ban.</div>
+                    </div>
+                </label>
+                <label class="o_gx_share_opt">
+                    <input type="radio" name="gx_share_mode" t-att-checked="state.mode === 'public'"
+                           t-on-change="() => state.mode = 'public'"/>
+                    <div><b><i class="fa fa-globe me-1"/>Public nội bộ</b>
+                        <div class="text-muted small">Chỉ người dùng Odoo có quyền Documents, không công khai Internet.</div>
+                    </div>
+                </label>
+                <div t-if="state.mode === 'public'" class="d-flex align-items-center gap-3 ms-4 my-3">
+                    <label class="mb-0 fw-semibold">Mức quyền Public</label>
+                    <select class="form-select form-select-sm w-auto" t-att-value="state.publicLevel"
+                            t-on-change="(ev) => state.publicLevel = ev.target.value">
+                        <option value="view">Chỉ xem (View)</option>
+                        <option value="edit">Được sửa (Edit)</option>
+                        <option value="full">Toàn quyền (Full: được xóa)</option>
+                    </select>
+                </div>
+                <t t-if="state.mode === 'restricted'">
+                    <div class="o_gx_share_title"><i class="fa fa-building-o me-1"/>Phòng ban</div>
+                    <input type="text" class="form-control my-2" placeholder="Tìm phòng ban…"
+                           t-att-value="state.searchDepartment" t-on-input="(ev) => state.searchDepartment = ev.target.value"/>
+                    <div class="o_gx_share_users o_gx_share_departments">
+                        <t t-foreach="filteredDepartments" t-as="d" t-key="d.id">
+                            <div class="d-flex align-items-center gap-2 px-2 py-1">
+                                <label class="o_gx_share_user flex-grow-1 mb-0">
+                                    <input type="checkbox" t-att-checked="state.selectedDepartments.has(d.id)" t-on-change="() => this.toggleDepartment(d)"/>
+                                    <span t-esc="d.name"/>
+                                    <span class="text-muted small ms-auto"><t t-esc="d.user_count"/> người</span>
+                                </label>
+                                <select t-if="state.selectedDepartments.has(d.id)" class="form-select form-select-sm w-auto"
+                                        t-att-value="state.departmentLevels[d.id] || 'view'"
+                                        t-on-change="(ev) => state.departmentLevels[d.id] = ev.target.value">
+                                    <option value="view">View</option><option value="edit">Edit</option><option value="full">Full</option>
+                                </select>
+                            </div>
+                        </t>
+                        <div t-if="!filteredDepartments.length" class="text-muted small p-2">Không có phòng ban.</div>
+                    </div>
+                    <div t-if="emptyDepartmentsWarning" class="alert alert-warning small mt-2 mb-0">
+                        Phòng ban được chọn chưa có tài khoản Odoo liên kết.
+                    </div>
+                    <div class="o_gx_share_title mt-3"><i class="fa fa-user me-1"/>User</div>
+                    <input type="text" class="form-control my-2" placeholder="Tìm nhân viên…"
+                           t-att-value="state.search" t-on-input="(ev) => state.search = ev.target.value"/>
+                    <div class="o_gx_share_users">
+                        <t t-foreach="filteredUsers" t-as="u" t-key="u.id">
+                            <div class="d-flex align-items-center gap-2 px-2 py-1">
+                                <label class="o_gx_share_user flex-grow-1 mb-0">
+                                    <input type="checkbox" t-att-checked="state.selected.has(u.id)" t-on-change="() => this.toggle(u)"/>
+                                    <span t-esc="u.name"/>
+                                </label>
+                                <select t-if="state.selected.has(u.id)" class="form-select form-select-sm w-auto"
+                                        t-att-value="state.userLevels[u.id] || 'view'"
+                                        t-on-change="(ev) => state.userLevels[u.id] = ev.target.value">
+                                    <option value="view">View</option><option value="edit">Edit</option><option value="full">Full</option>
+                                </select>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+                <div t-if="props.inherited.length" class="alert alert-secondary small mt-3 mb-0">
+                    Phân quyền cha: <t t-esc="props.inherited.join(', ')"/>. Phân quyền con không vượt quyền cha.
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-att-disabled="!canSave" t-on-click="save">
+                    <i class="fa fa-save me-1"/>Lưu phân quyền</button>
+                <button class="btn btn-secondary" t-on-click="props.close">Hủy</button>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="argo_documents.RenameInput">
+        <input t-ref="input" type="text" class="form-control form-control-sm o_gx_rename" t-att-value="props.value"
+               t-on-keydown="onKeydown" t-on-blur="commit" t-on-click.stop="() => {}" t-on-dblclick.stop="() => {}"
+               t-on-mousedown.stop="() => {}" t-on-dragstart.prevent.stop="() => {}"/>
+    </t>
+</templates>

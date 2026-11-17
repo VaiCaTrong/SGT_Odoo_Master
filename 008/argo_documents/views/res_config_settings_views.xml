@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.argo.documents</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='general_settings']" position="inside">
+                <block title="Kho tài liệu" name="argo_documents_settings"
+                       groups="argo_documents.group_argo_documents_manager,base.group_system">
+                    <setting string="Xử lý ảnh khi tải lên"
+                             help="Ảnh lớn được thu nhỏ; ảnh không trong suốt đổi sang JPEG để giảm dung lượng (thường giảm 80-90%).">
+                        <field name="argo_doc_image_mode" widget="radio"/>
+                        <div class="mt-2" invisible="argo_doc_image_mode != 'compress'">
+                            <div class="row">
+                                <label for="argo_doc_image_max_px" class="col-lg-5 o_light_label"/>
+                                <field name="argo_doc_image_max_px" class="col-lg-3"/>
+                            </div>
+                            <div class="row">
+                                <label for="argo_doc_image_quality" class="col-lg-5 o_light_label"/>
+                                <field name="argo_doc_image_quality" class="col-lg-3"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Giới hạn dung lượng"
+                             help="File vượt giới hạn sẽ bị chặn khi tải lên (ảnh được tính sau khi nén).">
+                        <div class="row">
+                            <label for="argo_doc_max_file_mb" class="col-lg-5 o_light_label"/>
+                            <field name="argo_doc_max_file_mb" class="col-lg-3"/>
+                        </div>
+                        <div class="row">
+                            <label for="argo_doc_trash_days" class="col-lg-5 o_light_label"/>
+                            <field name="argo_doc_trash_days" class="col-lg-3"/>
+                        </div>
+                    </setting>
+                    <setting string="Dung lượng kho hiện tại">
+                        <field name="argo_doc_storage_info" readonly="1"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Update_008: hệ thống tự tạo và bảo vệ CRM Information.
+         XML ID ổn định, không dựa vào tên hoặc ID nhập tay. Không đụng folder cũ. -->
+    <record id="folder_crm_information_root" model="argo.document.folder">
+        <field name="name">CRM Information</field>
+        <field name="access_mode">public</field>
+        <field name="public_level">view</field>
+        <field name="company_id" eval="False"/>
+        <field name="crm_shared_root" eval="True"/>
+        <field name="is_locked" eval="True"/>
+        <field name="system_root" eval="True"/>
+    </record>
+    <record id="param_max_file_mb" model="ir.config_parameter">
+        <field name="key">argo_documents.max_file_mb</field>
+        <field name="value">25</field>
+    </record>
+    <record id="param_image_mode" model="ir.config_parameter">
+        <field name="key">argo_documents.image_mode</field>
+        <field name="value">keep</field>
+    </record>
+    <record id="param_image_max_px" model="ir.config_parameter">
+        <field name="key">argo_documents.image_max_px</field>
+        <field name="value">1920</field>
+    </record>
+    <record id="param_image_quality" model="ir.config_parameter">
+        <field name="key">argo_documents.image_quality</field>
+        <field name="value">80</field>
+    </record>
+    <record id="param_trash_days" model="ir.config_parameter">
+        <field name="key">argo_documents.trash_days</field>
+        <field name="value">0</field>
+    </record>
+</odoo>

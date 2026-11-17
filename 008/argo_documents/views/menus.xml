@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_argo_explorer" model="ir.actions.client">
+    <field name="name">Company Information</field>
+    <field name="tag">argo_documents.explorer</field>
+    <field name="path">argo-document-hub</field>
+  </record>
+  <!-- Update_003: đặt Documents cạnh Technical trong Discuss; dùng chính action 008. -->
+  <menuitem id="menu_argo_documents_root" name="Company Information"
+      action="action_argo_explorer" parent="mail.menu_root_discuss"
+      groups="base.group_user,base.group_system" sequence="11"/>
+  <menuitem id="menu_argo_documents_audit" name="Documents: Nhật ký phân quyền"
+      parent="mail.discuss_technical" action="argo_document_permission_audit_action"
+      groups="argo_documents.group_argo_documents_manager,base.group_system" sequence="30"/>
+</odoo>
