@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sgt_crm_yellowpages_profile.DocumentsPanel">
+        <div class="sgt_crm005_docs_panel">
+            <div t-if="state.loading" class="sgt_crm005_docs_hint">Đang tải Documents-008…</div>
+            <div t-elif="!leadId" class="sgt_crm005_docs_hint">Vui lòng lưu Deal trước khi tạo Documents.</div>
+            <div t-elif="state.error" class="sgt_crm005_docs_warning">
+                <span t-esc="state.error"/>
+                <button type="button" class="btn btn-outline-secondary btn-sm ms-2" t-on-click="refresh">Thử lại</button>
+            </div>
+            <div t-elif="!state.configured" class="sgt_crm005_docs_warning">
+                Chưa khởi tạo được CRM Information. Admin cần nâng cấp Documents-008 và tải lại trang.
+            </div>
+            <div t-elif="state.linked and !state.folder" class="sgt_crm005_docs_warning">
+                <span t-esc="state.reason || 'Bạn chưa được cấp quyền truy cập Documents của Deal này.'"/>
+            </div>
+            <t t-elif="state.folder">
+                <div class="sgt_crm005_docs_toolbar">
+                    <div class="sgt_crm005_docs_heading">
+                        <i class="fa fa-folder-open-o" aria-hidden="true"/>
+                        <span t-esc="state.folder.name"/>
+                        <small t-esc="'ID '+ state.folder.id"/>
+                    </div>
+                    <div class="sgt_crm005_docs_buttons">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" t-on-click="refresh" t-att-disabled="state.busy">Làm mới</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" t-on-click="openDocuments">Open in Documents</button>
+                        <button t-if="state.folder.can_upload" type="button"
+                                class="btn btn-outline-success btn-sm" t-on-click="syncGallery"
+                                t-att-disabled="!canSyncGallery" title="Sao chép tất cả ảnh Image Gallery sang folder Documents, bỏ qua ảnh trùng">
+                            <i class="fa fa-picture-o me-1" aria-hidden="true"/>
+                            <t t-if="state.gallerySyncing">Đang đồng bộ…</t>
+                            <t t-else="">Đồng bộ ảnh Gallery</t>
+                        </button>
+                        <button t-if="imageCount" type="button"
+                                class="btn btn-success btn-sm" t-on-click="pushToGallery"
+                                t-att-disabled="!canPushToGallery" title="Thêm ảnh của folder Documents vào Image Gallery của Deal (giữ ảnh cũ, bỏ qua ảnh trùng)">
+                            <i class="fa fa-share-square-o me-1" aria-hidden="true"/>
+                            <t t-if="state.pushing">Đang cập nhật…</t>
+                            <t t-else="">Đưa ảnh lên Gallery</t>
+                        </button>
+                    </div>
+                </div>
+                <div t-if="state.galleryProgress" class="sgt_crm005_docs_progress" role="status" t-esc="state.galleryProgress"/>
+                <div t-if="state.gallerySummary" class="sgt_crm005_docs_summary" role="status" t-esc="state.gallerySummary"/>
+                <div class="sgt_crm005_docs_path" t-esc="state.folder.path"/>
+                <input type="file" t-ref="crm005DocumentsInput" multiple="multiple" class="d-none" t-on-change="onFilesChanged"/>
+                <div t-if="state.folder.can_upload" class="sgt_crm005_docs_drop"
+                     t-on-dragover="onDragOver" t-on-drop="onDrop">
+                    <i class="fa fa-cloud-upload fa-lg" aria-hidden="true"/>
+                    <div>Kéo Catalog, ảnh hoặc file vào đây</div>
+                    <button type="button" class="btn btn-primary btn-sm mt-2" t-on-click="chooseFiles" t-att-disabled="state.busy">
+                        <t t-if="state.busy">Đang tải lên…</t><t t-else="">Chọn file để tải lên</t>
+                    </button>
+                </div>
+                <div t-else="" class="sgt_crm005_docs_hint">Bạn có quyền xem nhưng chưa được cấp quyền Edit để upload file.</div>
+                <!-- Update_058: file list is collapsed on entry, expands only when clicked. -->
+                <details class="sgt_crm005_docs_files">
+                    <summary class="sgt_crm005_docs_files_toggle">
+                        <i class="fa fa-files-o me-2" aria-hidden="true"/>
+                        <span>Danh sách tài liệu (<t t-esc="state.files.length"/><t t-if="state.truncated">+</t>)</span>
+                        <span class="sgt_crm005_docs_files_toggle_hint">Bấm để xem / thu gọn</span>
+                        <i class="fa fa-chevron-down sgt_crm005_docs_chevron" aria-hidden="true"/>
+                    </summary>
+                    <div class="sgt_crm005_docs_files_content">
+                        <div t-if="!state.files.length" class="sgt_crm005_docs_hint">Folder đang trống.</div>
+                        <div t-foreach="state.files" t-as="file" t-key="file.id" class="sgt_crm005_docs_file">
+                            <span class="sgt_crm005_docs_filename"><i class="fa fa-file-o me-2" aria-hidden="true"/><span t-esc="file.name"/></span>
+                            <span class="sgt_crm005_docs_size" t-esc="fileSize(file.size)"/>
+                            <a t-att-href="fileHref(file)" class="btn btn-outline-secondary btn-sm">Tải xuống</a>
+                        </div>
+                        <div t-if="state.truncated" class="sgt_crm005_docs_hint">Danh sách chỉ hiện 300 file đầu tiên. Mở Documents để xem toàn bộ.</div>
+                    </div>
+                </details>
+            </t>
+            <t t-else="">
+                <div class="sgt_crm005_docs_hint">Thư mục đích: <b t-esc="state.rootName || 'CRM Infor'"/></div>
+                <div t-if="state.suggestedName" class="sgt_crm005_docs_hint">
+                    Tên folder theo công ty và MST: <strong t-esc="state.suggestedName"/>
+                </div>
+                <div t-else="" class="sgt_crm005_docs_warning">
+                    Deal cần có tên công ty và mã số thuế. Hãy bổ sung và lưu Deal trước khi tạo folder.
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-2 me-2" t-on-click="refresh" t-att-disabled="state.busy">Refresh</button>
+                <button type="button" class="btn btn-primary btn-sm mt-2" t-on-click="createFolder"
+                        t-att-disabled="state.busy || !state.suggestedName">
+                    <i class="fa fa-folder-o me-1"/>Create Folder
+                </button>
+            </t>
+        </div>
+    </t>
+</templates>

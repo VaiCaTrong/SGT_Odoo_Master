@@ -1,0 +1,25 @@
+/* CRM-005 Update_010: narrow-form behaviour of the Yellow Pages profile.
+ * Kept in a plain .css asset (not SCSS) so the container-query syntax is passed
+ * through to the browser untouched.  The form column is narrower than the
+ * window because of the Chatter, so a container query is used instead of a
+ * media query.  Browsers without container queries keep the media-query
+ * fallback of yellowpages_profile.scss. */
+@container sgt-yp (max-width: 760px) {
+    .o_form_view .sgt_yp_page { grid-template-columns: minmax(0, 1fr); }
+    .o_form_view .sgt_yp_side { position: static; }
+}
+@container sgt-yp (max-width: 560px) {
+    .o_form_view .sgt_yp_stats { grid-template-columns: minmax(0, 1fr); }
+    .o_form_view .sgt_yp_links_grid { grid-template-columns: minmax(0, 1fr); }
+    .o_form_view .sgt_yp_links_grid .sgt_yp_row:nth-child(2) { border-top: 1px solid var(--border-color, #dee2e6); }
+}
+
+/* Update_022: English | Vietnamese introductions stack (English first) on a narrow form */
+@container sgt-yp-pair (max-width: 640px) {
+    .o_form_view .sgt_yp_pair {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .o_form_view .sgt_yp_pair > .sgt_yp_gbox {
+        min-height: 0;
+    }
+}

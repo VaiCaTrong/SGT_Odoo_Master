@@ -1,0 +1,404 @@
+<odoo>
+  <!-- CRM-005 Update_017 (Vietnamese Notes also a fold-able box; Update_016 = English box; Update_014 = Image Gallery as a box between Notes and Detail Fields, Products & Services tab removed; Update_013 = Update_012 + sgt_marq class for the hover text slide; Update_011 + wrapped industries, even gallery grid, Notes rule; layout of Update_010 + ID fields under Source/Address).
+       Targets only nodes that exist in the BASE crm.lead Form (crm.crm_lead_view_form)
+       or that this same view creates.  The separately inherited legacy Deal Import
+       Fields notebook (a View without External ID) is hidden by a child view created
+       in the post-init hook / Upgrade script.
+       Every field displayed already exists in Xinyang, except the four CRM-005 fields
+       x_yp_tax_code, x_yp_founded_year, x_yp_employee_range, x_yp_gallery_html, x_yp_intro_en, x_yp_partners_html,
+       x_yp_logo_upload, x_yp_evidence_html (Update_032). -->
+  <record id="view_crm005_yellowpages_lead_form" model="ir.ui.view">
+    <field name="name">crm.lead.form.crm005.yellowpages</field>
+    <field name="model">crm.lead</field>
+    <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+    <field name="priority" eval="95"/>
+    <field name="arch" type="xml">
+
+      <!-- ===== TOP BLOCK: Source under Phone + VN Odoo ID under Source; Address under Tags + Deal ID under Address ===== -->
+      <xpath expr="//group[@name='opportunity_partner']/div[.//field[@name='phone']]" position="after">
+        <field name="source_id" string="Source"/>
+        <field name="x_getfly_id" string="VN Odoo ID" readonly="1"/>
+      </xpath>
+      <!-- Lead mode has no Source row: VN Odoo ID goes at the end of the left group -->
+      <xpath expr="//group[@name='lead_partner']/field[@name='website']" position="after">
+        <field name="x_getfly_id" string="VN Odoo ID" readonly="1"/>
+      </xpath>
+      <xpath expr="//group[@name='lead_priority']/field[@name='tag_ids']" position="after">
+        <field name="street" string="Address"/>
+        <field name="x_deal_id" string="Deal ID" readonly="1"/>
+      </xpath>
+      <xpath expr="//group[field[@name='user_id']]/field[@name='tag_ids']" position="after">
+        <field name="street" string="Address"/>
+        <field name="x_deal_id" string="Deal ID" readonly="1"/>
+      </xpath>
+
+      <!-- ===== NEW INTERFACE (Yellow Pages layout) replaces the old "Customer Info" group ===== -->
+      <xpath expr="//group[@name='customer_info']" position="replace">
+        <group name="customer_info" colspan="2" col="1" class="sgt_yp_group">
+          <div class="sgt_yp_root sgt_marq" colspan="1">
+            <!-- Company card: FULL WIDTH (Update_020) -->
+            <div class="sgt_yp_card sgt_yp_profile">
+              <div class="sgt_yp_logo_col">
+                <!-- Update_023: the logo shown is the picture uploaded by hand (x_yp_logo_upload) when there is one,
+                     otherwise the link written by the extension (x_image), exactly as before. -->
+                <div class="sgt_yp_logo">
+                  <span class="sgt_yp_nolabel"><label for="crm005_x_image" string=""/></span>
+                  <field name="x_image" id="crm005_x_image" widget="image_url" readonly="1" nolabel="1" invisible="x_yp_logo_upload" options="{'size': [120, 120]}"/>
+                  <span class="sgt_yp_nolabel"><label for="crm005_x_yp_logo_view" string=""/></span>
+                  <field name="x_yp_logo_upload" id="crm005_x_yp_logo_view" widget="image" readonly="1" nolabel="1" invisible="not x_yp_logo_upload" options="{'size': [120, 120]}"/>
+                </div>
+                <div class="sgt_yp_logo_up">
+                  <span class="sgt_yp_nolabel"><label for="crm005_x_yp_logo_upload" string="Upload Logo"/></span>
+                  <field name="x_yp_logo_upload" id="crm005_x_yp_logo_upload" widget="binary" nolabel="1" options="{'accepted_file_extensions': 'image/*'}"/>
+                </div>
+              </div>
+              <div class="sgt_yp_profile_body">
+                <div class="sgt_yp_kicker"><label for="crm005_partner_name" string="Company"/></div>
+                <field name="partner_name" id="crm005_partner_name" nolabel="1" class="sgt_yp_name" placeholder="Company name"/>
+                <!-- Update_031: the whole address is visible on the card: line 1 = Street, line 2 = Street 2, City, State, ZIP, Country
+                     (State / ZIP / Country were only in Detail Fields).  Same fields, no new field. -->
+                <div class="sgt_yp_line sgt_yp_line_street">
+                  <i class="fa fa-map-marker sgt_yp_icon" title="Address" role="img" aria-label="Address"/>
+                  <span class="sgt_yp_nolabel"><label for="crm005_street" string=""/></span><field name="street" id="crm005_street" nolabel="1" placeholder="Street"/>
+                </div>
+                <div class="sgt_yp_line sgt_yp_line_geo">
+                  <span class="sgt_yp_nolabel"><label for="crm005_street2" string=""/></span><field name="street2" id="crm005_street2" nolabel="1" placeholder="Street 2"/>
+                  <span class="sgt_yp_nolabel"><label for="crm005_city" string=""/></span><field name="city" id="crm005_city" nolabel="1" placeholder="City"/>
+                  <span class="sgt_yp_nolabel"><label for="crm005_state_id" string=""/></span><field name="state_id" id="crm005_state_id" nolabel="1" placeholder="State" options="{'no_open': True}"/>
+                  <span class="sgt_yp_nolabel"><label for="crm005_zip" string=""/></span><field name="zip" id="crm005_zip" nolabel="1" placeholder="ZIP"/>
+                  <span class="sgt_yp_nolabel"><label for="crm005_country_id" string=""/></span><field name="country_id" id="crm005_country_id" nolabel="1" placeholder="Country" options="{'no_open': True, 'no_create': True}"/>
+                </div>
+                <!-- Update_057: one-line, compact Geolocation.  No change to the
+                     existing geocoding logic, stored fields or server action. -->
+                <div class="sgt_yp_geoloc_card sgt_yp_geoloc_compact">
+                  <i class="fa fa-map-marker sgt_yp_geoloc_pin" title="Geolocation" role="img" aria-label="Geolocation"/>
+                  <div class="sgt_yp_geoloc_fields">
+                    <div class="sgt_yp_geoloc_field">
+                      <label for="crm005_geo_lat" string="Lat"/>
+                      <field name="x_yp_latitude" id="crm005_geo_lat" nolabel="1"
+                             options="{'enable_formatting': false}"/>
+                    </div>
+                    <div class="sgt_yp_geoloc_field">
+                      <label for="crm005_geo_lon" string="Lon"/>
+                      <field name="x_yp_longitude" id="crm005_geo_lon" nolabel="1"
+                             options="{'enable_formatting': false}"/>
+                    </div>
+                  </div>
+                  <div class="sgt_yp_geoloc_controls">
+                    <button name="action_crm005_geolocate_now" string="Get Coordinates"
+                            type="object" icon="fa-map-marker"
+                            class="btn btn-secondary btn-sm sgt_yp_geoloc_get"/>
+                    <!-- UI-only widget: copies coordinates/opens Google Maps directly
+                         on click, with no RPC and no new database field. -->
+                    <field name="x_yp_geo_precision" widget="sgt_crm005_geo_actions"
+                           nolabel="1" readonly="1" class="sgt_yp_geoloc_actions_widget"/>
+                  </div>
+                  <field name="x_yp_geo_status" invisible="1" readonly="1"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="sgt_yp_page">
+
+              <!-- MAIN COLUMN -->
+              <div class="sgt_yp_main">
+
+                <!-- Three information cards -->
+                <div class="sgt_yp_stats">
+                  <div class="sgt_yp_card sgt_yp_stat">
+                    <div class="sgt_yp_label"><i class="fa fa-briefcase" title="Business Type" role="img" aria-label="Business Type"/> <label for="crm005_x_type_contact" string="Business Type"/></div>
+                    <field name="x_type_contact" id="crm005_x_type_contact" nolabel="1" placeholder="e.g. Manufacturer"/>
+                  </div>
+                  <div class="sgt_yp_card sgt_yp_stat">
+                    <div class="sgt_yp_label"><i class="fa fa-globe" title="Main Market" role="img" aria-label="Main Market"/> <label for="crm005_x_country" string="Main Market"/></div>
+                    <field name="x_country" id="crm005_x_country" nolabel="1" placeholder="e.g. Vietnam"/>
+                  </div>
+                  <div class="sgt_yp_card sgt_yp_stat">
+                    <div class="sgt_yp_label"><i class="fa fa-users" title="Employee Size" role="img" aria-label="Employee Size"/> <label for="crm005_x_yp_employee_range" string="Employee Size"/></div>
+                    <field name="x_yp_employee_range" id="crm005_x_yp_employee_range" nolabel="1" placeholder="e.g. 50 - 100"/>
+                  </div>
+                </div>
+
+                <!-- Industries -->
+                <div class="sgt_yp_card sgt_yp_industries">
+                  <div class="sgt_yp_label"><i class="fa fa-tags" title="Business Industries" role="img" aria-label="Business Industries"/> <label for="crm005_x_fb_industry" string="Business Industries"/></div>
+                  <field name="x_fb_industry" id="crm005_x_fb_industry" widget="text" nolabel="1" placeholder="Business industries"/>
+                </div>
+
+                <!-- Update_020: Profile Link box = 4 existing fields (Link Zalo Group, Link Profile,
+                     Group URL, Post URL).  ID and the post picture are not shown here. -->
+                <div class="sgt_yp_card sgt_yp_links">
+                  <div class="sgt_yp_label"><i class="fa fa-link" title="Profile Link" role="img" aria-label="Profile Link"/> Profile Link</div>
+                  <div class="sgt_yp_links_grid">
+                    <div class="sgt_yp_row">
+                      <span class="sgt_yp_row_label"><label for="crm005_x_url_zalo_group" string="Link Zalo Group"/></span>
+                      <field name="x_url_zalo_group" id="crm005_x_url_zalo_group" widget="url" nolabel="1" placeholder="https://"/>
+                    </div>
+                    <div class="sgt_yp_row">
+                      <span class="sgt_yp_row_label"><label for="crm005_x_url_fb_profile" string="Link Profile"/></span>
+                      <field name="x_url_fb_profile" id="crm005_x_url_fb_profile" widget="url" nolabel="1" placeholder="https://"/>
+                    </div>
+                    <div class="sgt_yp_row">
+                      <span class="sgt_yp_row_label"><label for="crm005_x_group_link" string="Group URL"/></span>
+                      <field name="x_group_link" id="crm005_x_group_link" widget="url" nolabel="1" placeholder="https://"/>
+                    </div>
+                    <div class="sgt_yp_row">
+                      <span class="sgt_yp_row_label"><label for="crm005_x_group_post_link" string="Post URL"/></span>
+                      <field name="x_group_post_link" id="crm005_x_group_post_link" widget="url" nolabel="1" placeholder="https://"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SIDE COLUMN -->
+              <div class="sgt_yp_side">
+                <div class="sgt_yp_card sgt_yp_contact">
+                  <div class="sgt_yp_label">Contact</div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_x_phone" string="Hotline"/> <span class="sgt_yp_zalo">Zalo</span></span>
+                    <field name="x_phone" id="crm005_x_phone" widget="phone" nolabel="1" placeholder="Hotline (Zalo)"/>
+                  </div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_email_from" string="Email"/></span>
+                    <field name="email_from" id="crm005_email_from" widget="email" nolabel="1" placeholder="Email"/>
+                  </div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_website" string="Website"/></span>
+                    <field name="website" id="crm005_website" widget="url" nolabel="1" placeholder="https://"/>
+                  </div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_contact_name" string="Contact"/></span>
+                    <field name="contact_name" id="crm005_contact_name" nolabel="1" placeholder="Contact person"/>
+                  </div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_function" string="Position"/></span>
+                    <field name="function" id="crm005_function" nolabel="1" placeholder="Job position"/>
+                  </div>
+                </div>
+                <div class="sgt_yp_card sgt_yp_quick">
+                  <div class="sgt_yp_label">Quick Info</div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_x_yp_tax_code" string="Tax Code"/></span>
+                    <field name="x_yp_tax_code" id="crm005_x_yp_tax_code" nolabel="1" placeholder="Tax code"/>
+                  </div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_x_yp_founded_year" string="Founded Year"/></span>
+                    <field name="x_yp_founded_year" id="crm005_x_yp_founded_year" nolabel="1" options="{'enable_formatting': false}"/>
+                  </div>
+                  <div class="sgt_yp_row">
+                    <span class="sgt_yp_row_label"><label for="crm005_referred" string="Referred By"/></span>
+                    <field name="referred" id="crm005_referred" widget="url" nolabel="1" placeholder="Source link"/>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </group>
+      </xpath>
+
+      <!-- ===== BOXES (Yellow Pages sections) =====
+           Update_017: the Notes page (native `description`) is no longer a tab: its field is MOVED
+           into a box of its own, same look and fold button as the English introduction and the
+           Image Gallery.  The now empty Notes page and the Contacts page are hidden (their fields
+           are in the profile card and in Detail Fields).  Third-party pages (History stage change)
+           are untouched and stay in the notebook, which now sits under the three boxes. -->
+      <xpath expr="//sheet/notebook[1]/page[@name='internal_notes']" position="attributes">
+        <attribute name="invisible">1</attribute>
+      </xpath>
+      <xpath expr="//sheet/notebook[1]/page[@name='lead']" position="attributes">
+        <attribute name="invisible">1</attribute>
+      </xpath>
+      <xpath expr="//sheet/notebook[1]" position="before">
+        <!-- Update_022: the two company introductions are ALWAYS visible (no accordion, no button to press),
+             side by side and the same size: English on the LEFT, Vietnamese on the RIGHT.  They stack
+             (English first) only when the form is narrow.  Pure XML + CSS, no JS. -->
+        <div class="sgt_yp_pair_wrap">
+          <div class="sgt_yp_pair">
+            <!-- Update_016: English company introduction (editable on purpose: the user pastes the text) -->
+            <div class="sgt_yp_gbox sgt_yp_ebox" name="sgt_crm005_intro_en_box">
+              <div class="sgt_yp_gbox_head"><i class="fa fa-language" title="Company Introduction (English)" role="img" aria-label="Company Introduction (English)"/> <span class="sgt_yp_gbox_title"><label for="crm005_x_yp_intro_en" string="Company Introduction (English)"/></span></div>
+              <field name="x_yp_intro_en" id="crm005_x_yp_intro_en" nolabel="1" widget="html" class="sgt_yp_intro_en" placeholder="Paste the English company introduction here."/>
+            </div>
+            <!-- Update_017: Vietnamese company introduction = Notes (description) -->
+            <div class="sgt_yp_gbox sgt_yp_nbox" name="sgt_crm005_intro_vi_box">
+              <div class="sgt_yp_gbox_head"><i class="fa fa-file-text-o" title="Company Introduction (Vietnamese)" role="img" aria-label="Company Introduction (Vietnamese)"/> <span class="sgt_yp_gbox_title"><label for="description" string="Company Introduction (Vietnamese)"/></span></div>
+            </div>
+          </div>
+        </div>
+        <details class="sgt_yp_gbox sgt_yp_gallerybox" name="sgt_crm005_gallery_box" open="open">
+          <summary class="sgt_yp_gbox_head"><i class="fa fa-picture-o" title="Image Gallery" role="img" aria-label="Image Gallery"/> <label for="crm005_x_yp_gallery_html" string="Image Gallery"/></summary>
+          <!-- Update_015: READ-ONLY.  Pictures are written by the Chrome extension; an editable Html
+               field mounts the Odoo editor for every record (41 pictures = 2 MB), shows the picture
+               toolbar (delete!), turns the form dirty and then sends the whole 2 MB on Save. -->
+          <field name="x_yp_gallery_html" id="crm005_x_yp_gallery_html" nolabel="1" widget="sgt_gallery_manage" readonly="1" class="sgt_yp_gallery"/>
+        </details>
+        <!-- Update_020: Partners box (logos of partners / customers), same grid as the gallery.
+             Empty: the text "No partners yet." (pure CSS, hidden as soon as the field holds a picture). -->
+        <details class="sgt_yp_gbox sgt_yp_pbox" name="sgt_crm005_partners_box" open="open">
+          <summary class="sgt_yp_gbox_head"><i class="fa fa-handshake-o" title="Partners" role="img" aria-label="Partners"/> <label for="crm005_x_yp_partners_html" string="Partners"/></summary>
+          <field name="x_yp_partners_html" id="crm005_x_yp_partners_html" nolabel="1" widget="html" readonly="1" class="sgt_yp_gallery sgt_yp_partners"/>
+          <div class="sgt_yp_partners_empty">No partners yet.</div>
+        </details>
+        <!-- Update_042: Documents đặt giữa Partners và Evidence (dùng field chuẩn name). -->
+        <div class="sgt_yp_gbox sgt_yp_documents_box" name="crm005_documents_box">
+          <div class="sgt_yp_gbox_head"><i class="fa fa-folder-open-o" title="Documents" role="img" aria-label="Documents"/> <span class="sgt_yp_gbox_title">DOCUMENTS</span></div>
+          <field name="name" id="crm005_documents_widget" widget="sgt_crm005_documents"
+                 nolabel="1" readonly="1" class="sgt_crm005_documents_box"/>
+        </div>
+        <!-- Update_032: Evidence box (below Partners, above Detail Fields).  Pictures are PASTED BY HAND
+             (click in the box, Ctrl+V), so the field is editable on purpose; always open (not a fold-able box).
+             The status chip ("No picture yet" / "Picture attached") is pure CSS on :has(img), no JS.
+             CRM-002 frames this box in red when it holds no picture (bell click, or automatically in
+             5.Match Making / 6.Approved Match Making). -->
+        <div class="sgt_yp_gbox sgt_yp_evbox" name="sgt_crm005_evidence_box">
+          <div class="sgt_yp_gbox_head"><i class="fa fa-camera" title="Evidence" role="img" aria-label="Evidence"/> <span class="sgt_yp_gbox_title"><label for="crm005_x_yp_evidence_html" string="Evidence"/></span>
+            <span class="sgt_yp_ev_state sgt_yp_ev_none">No picture yet</span><span class="sgt_yp_ev_state sgt_yp_ev_ok">Picture attached</span></div>
+          <field name="x_yp_evidence_html" id="crm005_x_yp_evidence_html" nolabel="1" widget="html" class="sgt_yp_evidence" placeholder="Click here, then press Ctrl+V to paste the evidence picture."/>
+        </div>
+      </xpath>
+      <!-- the native Notes field moves into its box (kept as is: placeholder, collaborative option) -->
+      <xpath expr="//div[contains(@class,'sgt_yp_nbox')]" position="inside">
+        <xpath expr="//page[@name='internal_notes']//field[@name='description']" position="move"/>
+      </xpath>
+      <xpath expr="//div[contains(@class,'sgt_yp_nbox')]//field[@name='description']" position="attributes">
+        <attribute name="nolabel">1</attribute>
+        <attribute name="class">sgt_yp_notes</attribute>
+      </xpath>
+
+      <!-- ===== DETAIL FIELDS button: below the boxes and the History tab, above the existing Sync blocks ===== -->
+      <xpath expr="//sheet/notebook[1]" position="after">
+        <div class="sgt_crm005_import_container sgt_yp_detail">
+          <details class="sgt_crm005_import_details sgt_yp_detail_details">
+            <summary class="sgt_crm005_import_summary"><i class="fa fa-list-alt" title="Detail Fields" role="img" aria-label="Detail Fields"/> Detail Fields</summary>
+            <div class="sgt_crm005_import_body" name="sgt_yp_detail_body">
+              <group col="2">
+                <group string="Contact &amp; Address">
+                  <field name="contact_name"/>
+                  <field name="function"/>
+                  <field name="street2"/>
+                  <field name="city"/>
+                  <field name="state_id" options="{'no_open': True}"/>
+                  <field name="zip"/>
+                  <field name="country_id" options="{'no_open': True, 'no_create': True}"/>
+                </group>
+                <group string="Marketing &amp; Ownership">
+                  <field name="team_id" options="{'no_open': True, 'no_create': True}"/>
+                  <field name="campaign_id" options="{'create_name_field': 'title'}"/>
+                  <field name="medium_id"/>
+                  <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
+                </group>
+              </group>
+
+              <!-- Original Deal Import Fields (all legacy fields; moved here, nothing deleted) -->
+              <group col="2">
+
+                <group string="Deal Key / Pipeline">
+                  <field name="x_deal_id"/>
+                  <field name="x_dealname"/>
+                  <field name="x_pipeline"/>
+                  <field name="x_dealstage"/>
+                  <field name="x_amount"/>
+                  <field name="x_createdate"/>
+                  <field name="x_closedate"/>
+                  <field name="x_hs_lastmodifieddate"/>
+                  <field name="x_hubspot_owner_id"/>
+                  <field name="x_hs_lead_source"/>
+                </group>
+
+                <group string="Associations">
+                  <field name="x_associatedcontacts"/>
+                  <field name="x_associatedcompanies"/>
+                  <field name="x_customer_name"/>
+                  <field name="x_company_name"/>
+                </group>
+
+                <group string="Contact Info">
+                  <field name="x_firstname"/>
+                  <field name="x_lastname"/>
+                  <field name="x_email01"/>
+                  <field name="x_phone"/>
+                  <field name="x_mobilephone"/>
+                  <field name="x_company"/>
+                  <field name="x_jobtitle"/>
+                  <field name="x_country"/>
+                  <field name="x_website"/>
+                  <field name="x_salutation"/>
+                </group>
+
+                <group string="Marketing / Source">
+                  <field name="x_type_contact"/>
+                  <field name="x_expo"/>
+                  <field name="x_groupname"/>
+                  <field name="x_email_status"/>
+                  <field name="x_uptogetfly"/>
+                  <field name="x_getfly_id"/>
+                </group>
+
+              </group>
+
+              <group col="2">
+
+                <group string="Social / Groups">
+                  <field name="x_url_whatsapp_group"/>
+                  <field name="x_email_report"/>
+                </group>
+
+                <group string="Event">
+                  <field name="x_event"/>
+                  <field name="x_event_location"/>
+                </group>
+
+              </group>
+
+              <group col="2">
+
+                <group string="Product / Industry">
+                  <field name="x_fb_industry"/>
+                  <field name="x_product_category"/>
+                  <field name="x_product_details" colspan="2"/>
+                </group>
+
+                <group string="Notes">
+                  <field name="x_notes" colspan="2"/>
+                  <field name="x_addnotes" colspan="2"/>
+                </group>
+
+                <group string="Zalo Group Post">
+                  <field name="x_group_image_binary" widget="image" nolabel="1" class="sgt_yp_group_post_image" options="{'zoom': true, 'preview_image': 'x_group_image_binary'}"/>
+                </group>
+              </group>
+
+              <group col="3">
+
+                <group string="Email Tracking">
+                  <field name="x_emailopen"/>
+                  <field name="x_timeopen"/>
+                  <field name="x_statusopen"/>
+                  <field name="x_device"/>
+                  <field name="x_ip"/>
+                </group>
+
+                <group string="Images / Files (logo = Image)">
+                  <field name="x_image" string="Logo (Image)"/>
+                  <field name="x_image01"/>
+                  <field name="x_image02"/>
+                </group>
+
+                <group string="Sync / Audit">
+                  <field name="x_id_syn"/>
+                  <field name="x_crm_flag"/>
+                </group>
+
+              </group>
+            </div>
+          </details>
+        </div>
+      </xpath>
+      <!-- Update_020: the original "Group Post Image" group (Group URL, Post URL, Link Profile) is REPLACED:
+           its fields are in the Profile Link box of the profile card (no longer in Detail Fields). -->
+      <xpath expr="//group[@name='group_images_parent']" position="replace"/>
+
+    </field>
+  </record>
+</odoo>

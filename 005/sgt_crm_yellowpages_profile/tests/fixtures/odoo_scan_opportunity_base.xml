@@ -1,0 +1,164 @@
+<kanban highlight_color="color" default_group_by="stage_id" class="o_kanban_small_column o_opportunity_kanban" on_create="quick_create" quick_create_view="crm.quick_create_opportunity_form" archivable="false" sample="1" js_class="crm_kanban">
+
+    <field name="stage_id" options="{&quot;group_by_tooltip&quot;: {&quot;requirements&quot;: &quot;Description&quot;}}"/>
+    <field name="probability"/>
+    <field name="active"/>
+    <field name="company_currency"/>
+    <field name="recurring_revenue_monthly"/>
+    <field name="team_id"/>
+    <field name="won_status"/>
+
+    <!-- ✅ MUST ADD THESE TO AVOID undefined.raw_value -->
+    <field name="name"/>
+    <field name="expected_revenue"/>
+    <field name="recurring_revenue"/>
+    <field name="recurring_plan"/>
+    <field name="partner_id"/>
+    <field name="contact_name"/>
+    <field name="partner_name"/>
+
+    <!-- ✅ YOUR CUSTOM FIELDS -->
+    <field name="x_firstname"/>
+    <field name="x_groupname"/>
+    <field name="x_company"/>
+    <field name="x_event_location"/>
+    <field name="x_website"/>
+    <field name="x_phone"/>
+    <field name="x_notes"/>
+    <field name="x_url_fb_profile"/>
+    <field name="x_getfly_id"/>
+
+    <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}" sum_field="expected_revenue" recurring_revenue_sum_field="recurring_revenue_monthly" help="This bar allows to filter the opportunities based on scheduled activities."/>
+
+    <templates>
+        <t t-name="menu">
+            <t t-if="widget.editable"><a role="menuitem" type="open" class="dropdown-item">Edit</a></t>
+            <t t-if="widget.deletable"><a role="menuitem" type="delete" class="dropdown-item">Delete</a></t>
+            <div role="separator" class="dropdown-divider"/>
+            <field name="color" widget="kanban_color_picker"/>
+        </t>
+
+        <t t-name="card">
+            <widget name="web_ribbon" id="lost_ribbon" title="Lost" bg_color="text-bg-danger" invisible="won_status != 'lost'"/>
+            <widget name="web_ribbon" id="archived_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active or won_status in ['lost', 'won']"/>
+
+            <!-- ✅ TITLE: CUSTOMER NAME -->
+            <div class="fw-bold fs-5 d-flex align-items-center text-truncate" invisible="not x_firstname">
+                <i class="fa fa-user-circle me-1 text-primary" title="Customer"/>
+                <div class="flex-grow-1 text-truncate">
+                    <field name="x_firstname"/>
+                </div>
+            </div>
+
+            
+
+            <!-- ✅ SUB TITLE: DEAL NAME -->
+            <div class="d-flex align-items-center mb-1" invisible="not name">
+                <i class="fa fa-briefcase me-1" style="color:#6c757d;font-size:14px;" title="Deal"/>
+                <span style="font-weight:400;color:#6c757d;font-size:13px;">
+                    <field name="name"/>
+                </span>
+            </div>
+
+            <div class="o_kanban_card_crm_lead_revenue">
+                <t t-if="record.expected_revenue and record.expected_revenue.raw_value">
+                    <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                    <span t-if="record.recurring_revenue and record.recurring_revenue.raw_value" groups="crm.group_use_recurring_revenues"> + </span>
+                </t>
+                <t t-if="record.recurring_revenue and record.recurring_revenue.raw_value">
+                    <field class="me-1" name="recurring_revenue" widget="monetary" options="{'currency_field': 'company_currency'}" groups="crm.group_use_recurring_revenues"/>
+                    <field name="recurring_plan" groups="crm.group_use_recurring_revenues"/>
+                </t>
+            </div>
+
+            <div class="d-flex" invisible="not partner_id">
+                <field name="partner_id" widget="many2one_avatar" class="text-truncate" readonly="1" options="{'no_create': 1, 'no_open': 1}"/>
+                <field name="partner_id" class="ms-2 text-truncate"/>
+            </div>
+
+            <field name="contact_name" invisible="partner_id"/>
+            <field name="partner_name" invisible="partner_id or contact_name"/>
+
+            <!-- COMPANY -->
+            <div class="d-flex align-items-center text-truncate" invisible="not x_company">
+                <i class="fa fa-fw me-1 fa-building" style="color:#0dcaf0;" title="Company"/>
+                <div class="flex-grow-1 text-truncate">
+                    <field name="x_company"/>
+                </div>
+            </div>
+
+            <!-- EVENT LOCATION -->
+            <div class="d-flex align-items-center text-truncate" invisible="not x_event_location">
+                <i class="fa fa-fw me-1 fa-map-marker" style="color:#fd7e14;" title="Location"/>
+                <div class="flex-grow-1 text-truncate">
+                    <field name="x_event_location"/>
+                </div>
+            </div>
+
+            <!-- FACEBOOK (OPEN NEW TAB) -->
+            <!-- Ưu tiên x_url_fb_profile, fallback x_website -->
+            <t t-if="record.x_url_fb_profile and record.x_url_fb_profile.raw_value">
+                <div class="d-flex align-items-center text-truncate">
+                    <i class="fa fa-fw me-1 fa-facebook-square" style="color:#1877F2;" title="Facebook"/>
+            
+                    <div class="flex-grow-1 text-truncate">
+                        <field name="x_url_fb_profile" widget="CopyClipboardChar" class="text-truncate d-inline-block" style="max-width:100%;"/>
+                    </div>
+                </div>
+            </t>
+            <t t-elif="record.x_website and record.x_website.raw_value">
+                <div class="d-flex align-items-center text-truncate">
+                    <i class="fa fa-fw me-1 fa-facebook-square" style="color:#1877F2;" title="Website/Facebook"/>
+                    <div class="flex-grow-1 text-truncate">
+                        <a t-att-href="record.x_website.raw_value" target="_blank" rel="noopener noreferrer" class="text-truncate d-inline-block" style="max-width:100%; text-decoration:none;">
+                            <t t-esc="record.x_website.raw_value"/>
+                        </a>
+                    </div>
+                </div>
+            </t>
+
+            <!-- PHONE -->
+            <div class="d-flex align-items-center text-truncate" invisible="not x_phone">
+                <i class="fa fa-fw me-1 fa-phone" style="color:#198754;" title="Phone"/>
+            
+                <div class="flex-grow-1 text-truncate">
+                    <field name="x_phone" widget="CopyClipboardChar" class="text-truncate d-inline-block" style="max-width:100%; cursor:pointer;"/>
+                </div>
+            </div>
+
+            <!-- NOTES -->
+            <t t-if="record.x_notes and record.x_notes.raw_value">
+                <div class="d-flex align-items-center text-truncate">
+                    <i class="fa fa-fw me-1 fa-sticky-note" style="color:#0d6efd;" title="Notes"/>
+                    <div class="flex-grow-1 text-truncate">
+                        <field name="x_notes"/>
+                    </div>
+                </div>
+            </t>
+            
+            <!-- ✅ GROUP NAME -->
+            <div class="d-flex align-items-center text-truncate" invisible="not x_getfly_id">
+                <i class="fa fa-fw me-1 fa-id-badge" style="color:#6610f2;" title="ID"/>
+                <div class="flex-grow-1 text-truncate">
+                    <field name="x_getfly_id"/>
+                </div>
+            </div>
+
+            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+            <field name="lead_properties" widget="properties"/>
+
+            <footer class="pt-1">
+                <div class="d-flex mt-auto align-items-center">
+                    <field name="priority" widget="priority" groups="base.group_user" class="me-2"/>
+                    <field name="activity_ids" widget="kanban_activity"/>
+                </div>
+                <div class="ms-auto d-flex">
+                    <field name="is_rotting" invisible="1"/>
+                    <field name="rotting_days" class="d-flex" widget="rotting"/>
+                    <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" class="ms-2"/>
+                </div>
+            </footer>
+
+        </t>
+    </templates>
+</kanban>

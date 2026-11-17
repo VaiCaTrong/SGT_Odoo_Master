@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sgt_crm_yellowpages_profile.GalleryManageField">
+        <div class="o_readonly sgt_yp_gallery_managed" t-ref="root" t-att-class="{ sgt_yp_select_mode: state.select }" t-on-click="onGalleryClick">
+            <!-- Update_066: developer-mode bar. A <section> (not div/span/p/a) so the gallery grid rules do not flatten it. -->
+            <section t-if="canSelect" class="sgt_yp_select_bar">
+                <t t-if="!state.select">
+                    <button type="button" class="sgt_yp_bar_btn" t-on-click.stop="startSelect">&#9744; Select images</button>
+                </t>
+                <t t-else="">
+                    <strong class="sgt_yp_bar_count" t-out="selectedCount + ' selected'"/>
+                    <button type="button" class="sgt_yp_bar_btn" t-on-click.stop="selectAll" t-out="selectAllLabel"/>
+                    <button type="button" class="sgt_yp_bar_btn" t-on-click.stop="clearSelection" t-att-disabled="selectedCount === 0">Clear</button>
+                    <button type="button" class="sgt_yp_bar_btn sgt_yp_bar_danger" t-on-click.stop="confirmDeleteSelected"
+                            t-att-disabled="selectedCount === 0" t-out="'&#128465; ' + deleteSelectedLabel"/>
+                    <button type="button" class="sgt_yp_bar_btn" t-on-click.stop="endSelect">Done</button>
+                    <em class="sgt_yp_bar_hint">Click a picture to tick it · Shift+click ticks a range</em>
+                </t>
+            </section>
+            <t t-out="galleryMarkup"/>
+        </div>
+    </t>
+</templates>

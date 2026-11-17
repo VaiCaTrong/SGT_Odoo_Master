@@ -1,0 +1,114 @@
+/* Safe additive CRM-005 Kanban draft. No base view XPath removal.
+   Hide old UI only with local CSS; original Odoo fields remain intact. */
+/* Update_063 — Reuse the native Odoo footer for responsive Source/quick links.
+   When Source exists: Source left, bell/avatar right, links on the next line.
+   When Source is absent: links LEFT on the SAME line as bell/avatar RIGHT.
+   Native footer widgets and Odoo's event/permission logic are unchanged. */
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  min-height: 26px;
+  padding: 2px 0 0 !important;
+  margin: 3px 0 0 !important;
+  gap: 6px;
+}
+/* The default first footer group held Priority + Activity, both intentionally
+   hidden on CRM-005. Hide its now-empty container to reclaim vertical space. */
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer > .d-flex.mt-auto {
+  display: none !important;
+}
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer > .sgt_crm005_safe_source {
+  order: -1;
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 4px;
+  overflow: hidden;
+  font-size: 12px;
+  color: #52647c;
+  white-space: nowrap;
+}
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer > .sgt_crm005_safe_source .o_field_widget {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+/* In the absence of Source, shortcuts take the flexible LEFT slot; the
+   untouched native bell + salesperson widgets keep the RIGHT slot. */
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer > .ms-auto.d-flex {
+  order: 1;
+  flex: 0 0 auto;
+  align-items: center;
+  margin-left: auto !important;
+  gap: 4px;
+}
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer > .sgt_crm005_safe_shortcuts {
+  order: 0;
+  flex: 1 1 0%;
+  display: block;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+/* Source is conditionally rendered by Odoo. Its presence switches shortcuts
+   into the full-width SECOND line, without JS DOM relocation or extra XPath. */
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer > .sgt_crm005_safe_source ~ .sgt_crm005_safe_shortcuts {
+  order: 2;
+  flex: 0 0 100%;
+  margin-top: 2px;
+}
+/* A hidden/invalid URL or a Documents folder without read permission must not
+   reserve a blank footer row. This also responds when permissions resolve. */
+.o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer > .sgt_crm005_safe_shortcuts:not(:has(.sgt_crm005_safe_link[data-sgt-crm005-ready="1"], .sgt_crm005_safe_folder:not([hidden]))) {
+  display: none;
+}
+.o_opportunity_kanban .o_kanban_record .sgt_crm005_safe_links {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.o_opportunity_kanban .sgt_crm005_safe_link {
+  display:inline-flex; align-items:center; justify-content:center; gap:3px;
+  min-width:27px; min-height:27px; padding:3px 6px;
+  border:1px solid #d7e2ec; border-radius:5px;
+  background:#f7f9fc; color:#315986; font-size:13px; text-decoration:none; cursor:pointer;
+}
+.o_opportunity_kanban .sgt_crm005_safe_link:hover,
+.o_opportunity_kanban .sgt_crm005_safe_link:focus-visible { background:#edf4fd; border-color:#9eb7d6; color:#205186; text-decoration:none; }
+.o_opportunity_kanban .sgt_crm005_safe_zalo { color:#0875c5; font-size:11px; font-weight:700; }
+.o_opportunity_kanban .sgt_crm005_safe_link[data-sgt-crm005-kind]:not([data-sgt-crm005-ready="1"]),
+.o_opportunity_kanban .sgt_crm005_safe_folder[hidden] { display:none !important; }
+/* Keep the palette while the old Edit command stays visually hidden.
+   Unlike fragile XPath, a DOM change simply leaves the native Edit option visible. */
+.o_opportunity_kanban .o_kanban_record .dropdown-menu a.dropdown-item[type="open"] { display:none !important; }
+/* These are presentation-only hides. If another module changes its DOM,
+   the old content may reappear rather than crashing Odoo view loading. */
+.o_opportunity_kanban .o_kanban_record .sgt_crm005_activity_readonly,
+.o_opportunity_kanban .o_kanban_record [name="tag_ids"],
+.o_opportunity_kanban .o_kanban_record .o_field_many2many_tags,
+.o_opportunity_kanban .o_kanban_record .o_field_tags,
+.o_opportunity_kanban .o_kanban_record .o_field_priority,
+.o_opportunity_kanban .o_kanban_record .o_priority,
+.o_opportunity_kanban .o_kanban_record [name="priority"],
+.o_opportunity_kanban .o_kanban_record div.d-flex.align-items-center.text-truncate:has(> i.fa-map-marker),
+.o_opportunity_kanban .o_kanban_record div.d-flex.align-items-center.text-truncate:has(> i.fa-id-badge),
+.o_opportunity_kanban .o_kanban_record div.d-flex.align-items-center.text-truncate:has(> i.fa-facebook-square)
+{ display:none !important; }
+@media (max-width: 600px) {
+  .o_opportunity_kanban .o_kanban_record footer.sgt_crm005_compact_footer { gap: 4px; }
+  .o_opportunity_kanban .o_kanban_record .sgt_crm005_safe_links { flex-wrap: wrap; }
+}
+
+/* Best effort only: suppress the old menu Edit action while retaining native
+   kanban_color_picker. No XPath is applied to the Odoo menu. */
+.o_opportunity_kanban .o_kanban_record a.dropdown-item[type="open"] { display:none !important; }

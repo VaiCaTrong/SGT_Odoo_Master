@@ -1,0 +1,16 @@
+task_id,model,technical_field,field_type,purpose,reason_new_field,scan_20261011_checked_no_existing_field,created_in_addon
+CRM-005,crm.lead,x_yp_tax_code,Char,Tax Code,"crm.lead has no tax-code field (res.partner.vat exists only on Contact)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_founded_year,Integer,Founded Year,"no founding-year field; x_createdate = HubSpot deal creation date",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_employee_range,Char,Employee Size,"no staff-size field",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_gallery_html,Html,Image Gallery (several images side by side),"every existing image field holds one image; only Html field (description) holds the introduction",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_intro_en,Html,Company Introduction (English) pasted by the user,"description is the Vietnamese introduction; x_notes / x_addnotes are plain text (legacy import data)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_partners_html,Html,Partners (partner / customer logos),"x_yp_gallery_html mixes all pictures of the listing and cannot be split without JS; no other field holds several images (approved by user 2026-10-27 16:41)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_logo_upload,Binary,Company Logo (Upload),"x_image is a Char link written by the extension and cannot take an uploaded file; no existing crm.lead binary field fits (x_group_image_binary belongs to crm_sync_contact_odoo2) (approved by user 2026-10-30 14:3x)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_evidence_html,Html,Evidence (pictures pasted by hand),"no crm.lead field holds several pasted pictures; gallery / partners are written by the extension and read-only (approved by user 2026-10-31 08:50)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_latitude,Float,Deal latitude,"Independent Deal geolocation without creating a Contact (Update_047)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_longitude,Float,Deal longitude,"Independent Deal geolocation without creating a Contact (Update_047)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_geo_status,Selection,Status of Deal geolocation,"Independent Deal geolocation without creating a Contact (Update_047)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_geo_updated_at,Datetime,Last geolocation time,"Independent Deal geolocation without creating a Contact (Update_047)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_geo_attempted_at,Datetime,Last geolocation attempt,"Independent Deal geolocation without creating a Contact (Update_047)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_geo_attempt_count,Integer,Geolocation attempt count,"Independent Deal geolocation without creating a Contact (Update_047)",YES,sgt_crm_yellowpages_profile
+CRM-005,crm.lead,x_yp_geo_address_key,Char,Address signature for consistency,"Independent Deal geolocation without creating a Contact (Update_047)",YES,sgt_crm_yellowpages_profile

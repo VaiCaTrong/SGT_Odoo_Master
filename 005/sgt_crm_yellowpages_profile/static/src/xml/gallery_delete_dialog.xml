@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sgt_crm_yellowpages_profile.GalleryDeleteDialog">
+        <Dialog size="'lg'" title="props.title">
+            <p class="sgt_yp_del_msg" t-out="message"/>
+            <p t-if="deletesAll" class="sgt_yp_del_all">This is EVERY picture of the gallery (<t t-out="props.total"/>).</p>
+            <div class="sgt_yp_del_thumbs" t-att-class="{ sgt_yp_del_single: single }">
+                <img t-foreach="props.thumbs" t-as="src" t-key="src_index" class="sgt_yp_del_thumb" t-att-src="src" alt=""/>
+                <span t-if="extra" class="sgt_yp_del_more">+<t t-out="extra"/> more</span>
+            </div>
+            <t t-set-slot="footer">
+                <button type="button" class="btn btn-danger sgt_yp_del_ok" t-att-disabled="state.busy" t-on-click="onConfirm" t-out="props.confirmLabel"/>
+                <button type="button" class="btn btn-secondary sgt_yp_del_cancel" t-att-disabled="state.busy" t-on-click="onCancel">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

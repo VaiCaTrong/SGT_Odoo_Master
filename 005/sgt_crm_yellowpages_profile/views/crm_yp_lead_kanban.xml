@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- CRM-005 Update_059: open Deal detail in a new browser tab on Ctrl/Cmd/middle click.
+         Preserve Update_046 wrapped logo/name, all Kanban business rules.
+         The company row keeps type='open' for normal Odoo navigation and
+         has a real Odoo 19 model route for browser-native new-tab navigation.
+         New Lead via full form and record drag between stages are restored; actual CRM permissions are unchanged.
+         Keep all other Kanban rows, columns and the Deal form intact. -->
+    <record id="view_crm005_yellowpages_lead_kanban" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.crm005.company.logo</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="priority" eval="80"/>
+        <field name="arch" type="xml">
+            <!-- Update_045: enable full-form New and moving Deal cards between stages.
+                 Keep quick-create, deletes, moving stage columns,
+                 and group create/edit/delete disabled. Opening Deal remains enabled. -->
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="can_open">true</attribute>
+                <attribute name="create">true</attribute>
+                <attribute name="edit">true</attribute>
+                <attribute name="delete">false</attribute>
+                <attribute name="quick_create">false</attribute>
+                <attribute name="records_draggable">true</attribute>
+                <attribute name="groups_draggable">false</attribute>
+                <attribute name="group_create">false</attribute>
+                <attribute name="group_edit">false</attribute>
+                <attribute name="group_delete">false</attribute>
+            </xpath>
+            <xpath expr="//kanban/templates" position="before">
+                <!-- Fields for logo source selection; no new ORM columns. -->
+                <field name="x_yp_logo_upload"/>
+                <field name="x_image"/>
+                <field name="activity_state"/>
+            <field name="source_id"/><field name="website"/><field name="referred"/><field name="x_url_fb_profile"/><field name="x_link_fanpage"/><field name="x_website"/><field name="x_url_zalo_group"/></xpath>
+            <xpath expr="//kanban/templates/t[@t-name='card']/div[.//field[@name='x_company']]" position="replace">
+                <!-- Odoo 19's KanbanCompiler otherwise can generate a placeholder link to <a type="open">.
+                     This model route opens the exact record even in a new browser tab,
+                     without hardcoding a Pipeline action ID or server hostname. -->
+                <a type="open" class="sgt_crm005_kanban_company d-flex align-items-center" t-att-href="'/odoo/crm.lead/' + record.id.raw_value" title="Mở chi tiết Deal" aria-label="Mở chi tiết Deal">
+                    <span class="sgt_crm005_kanban_logo" aria-hidden="true">
+                        <!-- Fallback remains when logo is missing or cannot load. -->
+                        <i class="fa fa-building-o sgt_crm005_kanban_logo_placeholder"/>
+                        <t t-if="record.x_yp_logo_upload and record.x_yp_logo_upload.raw_value">
+                            <img class="sgt_crm005_kanban_logo_img" t-att-src="'/web/image/crm.lead/' + record.id.raw_value + '/x_yp_logo_upload'" alt="" loading="lazy"/>
+                        </t>
+                        <t t-elif="record.x_image and record.x_image.raw_value">
+                            <img class="sgt_crm005_kanban_logo_img" t-att-src="record.x_image.raw_value" alt="" loading="lazy"/>
+                        </t>
+                    </span>
+                    <!-- The name wraps naturally in the column to the RIGHT of the logo.
+                         No sgt_marq: hovering the card never scrolls its company name. -->
+                    <div class="sgt_crm005_kanban_company_name flex-grow-1">
+                        <t t-if="record.x_company and record.x_company.raw_value">
+                            <field name="x_company" readonly="1"/>
+                        </t>
+                        <t t-else="">
+                            <span class="sgt_crm005_kanban_no_company">Chưa có tên công ty</span>
+                        </t>
+                    </div>
+                </a>
+            </xpath>
+            <!-- Activity clock on the historical Kanban opens an edit/schedule popover.
+                 Show its current state as a passive label instead. Users can manage
+                 activities after opening the Deal form. -->
+            <xpath expr="//kanban/templates/t[@t-name='card']//footer//field[@name='activity_ids' and @widget='kanban_activity']" position="replace">
+                <span class="sgt_crm005_activity_readonly" title="Trạng thái hoạt động">
+                    <i class="fa fa-clock-o" aria-hidden="true"/>
+                    <t t-if="record.activity_state and record.activity_state.raw_value">
+                        <t t-esc="record.activity_state.value"/>
+                    </t>
+                    <t t-else="">—</t>
+                </span>
+            </xpath>
+            <!-- Update_063: keep Source and native bell/Salesperson in the existing
+                 footer. Place shortcuts in that SAME footer: alongside the bell when
+                 Source is absent, or on the next left-aligned row when present.
+                 All changes are additive; native footer widgets are retained. -->
+            <xpath expr="//kanban/templates/t[@t-name='card']/footer" position="attributes"><attribute name="class" add="sgt_crm005_compact_footer" separator=" "/></xpath><xpath expr="//kanban/templates/t[@t-name='card']/footer" position="inside"><div class="sgt_crm005_safe_source" t-if="record.source_id and record.source_id.raw_value">
+      <i class="fa fa-database" aria-hidden="true"/>
+      <span>Source:</span>
+      <field name="source_id" readonly="1"/>
+    </div>
+    </xpath><xpath expr="//kanban/templates/t[@t-name='card']/footer" position="inside"><div class="sgt_crm005_safe_shortcuts" aria-label="Deal quick links"><div class="sgt_crm005_safe_links">
+      <t t-if="(record.website and record.website.raw_value) or (record.x_website and record.x_website.raw_value)">
+        <a class="sgt_crm005_safe_link" data-sgt-crm005-kind="website" t-att-data-sgt-crm005-url="record.website and record.website.raw_value ? record.website.raw_value : ''" title="Website" aria-label="Website" t-att-data-sgt-crm005-alt="record.x_website and record.x_website.raw_value ? record.x_website.raw_value : ''">
+          <i class="fa fa-globe" aria-hidden="true"/>
+        </a>
+      </t>
+      <t t-if="(record.x_url_fb_profile and record.x_url_fb_profile.raw_value) or (record.x_link_fanpage and record.x_link_fanpage.raw_value) or (record.x_website and record.x_website.raw_value)">
+        <a class="sgt_crm005_safe_link" data-sgt-crm005-kind="facebook" t-att-data-sgt-crm005-url="record.x_url_fb_profile and record.x_url_fb_profile.raw_value ? record.x_url_fb_profile.raw_value : ''" title="Facebook / Fanpage" aria-label="Facebook / Fanpage" t-att-data-sgt-crm005-alt="record.x_link_fanpage and record.x_link_fanpage.raw_value ? record.x_link_fanpage.raw_value : ''" t-att-data-sgt-crm005-alt2="record.x_website and record.x_website.raw_value ? record.x_website.raw_value : ''">
+          <i class="fa fa-facebook-square" aria-hidden="true"/>
+        </a>
+      </t>
+      <t t-if="record.referred and record.referred.raw_value">
+        <a class="sgt_crm005_safe_link" data-sgt-crm005-kind="yellowpages" t-att-data-sgt-crm005-url="record.referred.raw_value" title="Trang Vàng" aria-label="Trang Vàng">
+          <i class="fa fa-book" aria-hidden="true"/>
+        </a>
+      </t>
+      <t t-if="record.x_url_zalo_group and record.x_url_zalo_group.raw_value">
+        <a class="sgt_crm005_safe_link sgt_crm005_safe_zalo" data-sgt-crm005-kind="zalo" t-att-data-sgt-crm005-url="record.x_url_zalo_group.raw_value" title="Zalo Group" aria-label="Zalo Group">
+          <i class="fa fa-comments-o" aria-hidden="true"/><span>Zalo</span>
+        </a>
+      </t>
+      <button type="object" name="action_crm005_kanban_open_folder" class="sgt_crm005_safe_link sgt_crm005_safe_folder" data-sgt-crm005-documents="1" title="Open Deal Documents" aria-label="Open Deal Documents" hidden="hidden">
+        <i class="fa fa-folder-open" aria-hidden="true"/>
+      </button>
+    </div>
+  </div></xpath></field>
+    </record>
+</odoo>

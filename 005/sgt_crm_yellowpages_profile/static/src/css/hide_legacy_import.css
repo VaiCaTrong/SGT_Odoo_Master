@@ -1,0 +1,9 @@
+/* CRM-005 Update_007 fallback.
+ * Hides the original single-tab "Deal Import Fields" notebook of the CRM Deal
+ * form if it is ever rendered.  Scope: only Deal forms that contain the CRM-005
+ * "Details - Deal Import Fields" control, and only a direct-child notebook that
+ * has exactly ONE tab.  The CRM-005 notebook (5 tabs) and other forms are not
+ * affected.  Data and fields are untouched; this is a visual rule only. */
+.o_form_sheet:has(.sgt_crm005_import_details) > .o_notebook:has(> .o_notebook_headers .nav-tabs > .nav-item:only-child) {
+    display: none !important;
+}

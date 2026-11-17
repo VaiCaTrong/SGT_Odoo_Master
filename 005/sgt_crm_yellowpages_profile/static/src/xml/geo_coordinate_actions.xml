@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sgt_crm_yellowpages_profile.GeoCoordinateActions">
+        <div class="sgt_crm005_geo_actions" role="group" aria-label="Coordinate actions">
+            <button type="button" class="btn btn-outline-secondary btn-sm"
+                    t-att-disabled="!coordinates" t-on-click="copyCoordinates"
+                    title="Copy Latitude, Longitude" aria-label="Copy coordinates">
+                <i class="fa fa-copy" aria-hidden="true"/> Copy
+            </button>
+            <a t-if="coordinates" class="btn btn-outline-secondary btn-sm"
+               t-att-href="mapUrl" target="_blank" rel="noopener noreferrer"
+               title="Open coordinates in Google Maps" aria-label="Open in Google Maps">
+                <i class="fa fa-external-link" aria-hidden="true"/> Google Maps
+            </a>
+            <button t-else="" type="button" class="btn btn-outline-secondary btn-sm"
+                    disabled="disabled" title="Get coordinates first"
+                    aria-label="Google Maps unavailable without coordinates">
+                <i class="fa fa-external-link" aria-hidden="true"/> Google Maps
+            </button>
+        </div>
+    </t>
+</templates>

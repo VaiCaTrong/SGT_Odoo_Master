@@ -1,0 +1,18 @@
+no,yellow_pages_information,decision,field_used,new_field
+1,Logo,text in existing field,x_image,no
+2,Tax code,new field,x_yp_tax_code,YES
+3,Founded year,new field,x_yp_founded_year,YES
+4,Employee size,new field,x_yp_employee_range,YES
+5,Business type,existing field,x_type_contact,no
+6,Business industries,existing field,x_fb_industry,no
+7,Main market,existing field,x_country,no
+8,Office address,existing field,street / street2 / city,no
+9,Main customers,dropped,-,no
+10,Hotline / Zalo,existing field,x_phone,no
+11,Company introduction,existing field (Notes),description,no
+12,Yellow Pages link,existing field (label kept),referred,no
+13,Yellow Pages listing ID,dropped,-,no
+14,Products and services,existing field,x_product_details,no
+15,Project list,dropped,-,no
+16,Image list,new field (Html),x_yp_gallery_html,YES
+17,English company introduction (pasted),new field (Html),x_yp_intro_en,YES

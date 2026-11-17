@@ -1,0 +1,41 @@
+/* CRM-005 Update_039 — Documents-008 integration panel. */
+.sgt_crm005_documents_box .sgt_crm005_docs_panel { width: 100%; min-width: 0; padding: 8px 0 12px; }
+.sgt_crm005_docs_toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.sgt_crm005_docs_heading { display:flex; align-items:center; gap:8px; min-width:0; font-weight:700; overflow-wrap:anywhere; }
+.sgt_crm005_docs_heading small, .sgt_crm005_docs_size { font-size:11px; color:var(--o-gray-600, #666); font-weight:400; }
+.sgt_crm005_docs_path { color:var(--o-gray-600, #666); font-size:12px; overflow-wrap:anywhere; margin:5px 0 10px; }
+.sgt_crm005_docs_buttons { display:flex; flex-wrap:wrap; gap:8px; }
+.sgt_crm005_docs_hint { color:var(--o-gray-600, #666); padding:12px 0; font-size:13px; }
+.sgt_crm005_docs_warning { padding:12px; border:1px solid #efc087; background:#fff8eb; color:#735119; border-radius:8px; }
+.sgt_crm005_docs_drop { border:1.5px dashed #94abc5; border-radius:8px; background:rgba(60,121,183,.045); padding:20px; text-align:center; font-size:13px; }
+.sgt_crm005_docs_drop i { display:block; margin:0 auto 8px; color:#527da5; }
+.sgt_crm005_docs_file { display:flex; gap:12px; align-items:center; padding:8px 0; border-bottom:1px solid var(--o-gray-200,#eee); }
+.sgt_crm005_docs_filename { flex:1; min-width:0; overflow-wrap:anywhere; font-size:13px; }
+.sgt_crm005_docs_files { margin-top:12px; }
+.sgt_crm005_docs_create { margin-top:14px; max-width:700px; }
+.sgt_crm005_docs_create .form-label { margin-bottom:5px; font-size:12px; font-weight:600; }
+@media (max-width:600px) {
+ .sgt_crm005_docs_file { flex-wrap:wrap; }
+ .sgt_crm005_docs_filename { flex-basis:100%; }
+}
+
+/* Update_042: Documents được đặt giữa Partners và Evidence; không thay đổi hai box kề bên. */
+.sgt_yp_documents_box .sgt_crm005_docs_panel { padding: 8px 12px 14px; }
+.sgt_yp_documents_box .o_field_widget { width: 100%; }
+
+/* Update_044 — manual Image Gallery -> Documents copy status. */
+.sgt_crm005_docs_progress { margin:8px 0; font-size:12px; color:#386b45; }
+.sgt_crm005_docs_summary { white-space:pre-wrap; font-size:12px; padding:9px 12px; margin:8px 0; border:1px solid #cbded0; background:#f4fbf5; border-radius:7px; }
+
+/* Update_058: collapse bulky folder file lists; native details requires no JS. */
+.sgt_crm005_docs_files { margin-top: 12px; border: 1px solid var(--o-gray-300, #d7dce2); border-radius: 7px; overflow: hidden; }
+.sgt_crm005_docs_files_toggle { cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 10px 12px; font-size: 13px; font-weight: 600; list-style-position: inside; }
+.sgt_crm005_docs_files_toggle:hover { background: var(--o-gray-100, #f6f7f9); }
+.sgt_crm005_docs_files_toggle:focus-visible { outline: 2px solid var(--o-brand-primary, #0061bd); outline-offset: -2px; }
+.sgt_crm005_docs_files_toggle_hint { color: var(--o-gray-600, #666); font-weight: normal; font-size: 11px; margin-left: auto; }
+.sgt_crm005_docs_files_content { padding: 0 12px 10px; border-top: 1px solid var(--o-gray-200, #eee); max-height: 420px; overflow-y: auto; }
+@media (max-width: 600px) {
+  .sgt_crm005_docs_files_toggle_hint { font-size: 10px; }
+}
+.sgt_crm005_docs_chevron { font-size: 11px; transition: transform .15s ease; }
+.sgt_crm005_docs_files[open] .sgt_crm005_docs_chevron { transform: rotate(180deg); }
