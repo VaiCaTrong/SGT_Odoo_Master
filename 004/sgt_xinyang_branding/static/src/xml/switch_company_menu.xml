@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- UI-004: only replace the visible company name; never replace the button,
+         Dropdown, state hooks, or the existing company selection menu. -->
+    <t t-name="sgt_xinyang_branding.SwitchCompanyMenuLogo"
+       t-inherit="web.SwitchCompanyMenu" t-inherit-mode="extension">
+        <xpath expr="//span[contains(concat(' ', normalize-space(@class), ' '), ' oe_topbar_name ')]" position="replace">
+            <span class="o_xinyang_branding_company d-none d-lg-flex align-items-center justify-content-center">
+                <img class="o_xinyang_branding_company_logo"
+                     src="/sgt_xinyang_branding/static/src/img/saigontrade_xinyang_logo_v3.png"
+                     alt="Saigon Trade x Xinyang 新扬"/>
+                <!-- Keep the real active company name available to screen readers.
+                     The parent button still carries the original company tooltip. -->
+                <span class="visually-hidden" t-esc="user.activeCompany.name"/>
+            </span>
+        </xpath>
+    </t>
+</templates>
