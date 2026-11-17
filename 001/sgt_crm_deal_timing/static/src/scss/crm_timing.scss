@@ -1,0 +1,52 @@
+/* CRM-001 V03: one slim line on top of the card; additive, no override of CRM/Kanban widgets.
+   Left: Stage badge (green / yellow / red).  Right: clock icon + total days. Plain CSS-compatible. */
+.sgt-crm001-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.sgt-crm001-stage {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 0.45rem;
+    border-radius: 0.6rem;
+    font-weight: 700;
+    color: #555;
+    background-color: #eceff2;
+}
+.sgt-crm001-stage.sgt-crm001-stage--green {
+    color: #155d33;
+    background-color: #dcfce7;
+}
+.sgt-crm001-stage.sgt-crm001-stage--yellow {
+    color: #735000;
+    background-color: #fef3c7;
+}
+.sgt-crm001-stage.sgt-crm001-stage--red {
+    color: #991b1b;
+    background-color: #fee2e2;
+}
+.sgt-crm001-total {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-weight: 600;
+    color: #555;
+}
+.sgt-crm001-box .o_field_widget {
+    display: inline;
+    min-width: 0;
+    width: auto;
+}
+/* Form: same badges, a little larger, left aligned. */
+.sgt-crm001-form {
+    justify-content: flex-start;
+    gap: 0.75rem;
+    margin: -0.25rem 0 0.75rem;
+    font-size: 0.85rem;
+}

@@ -1,0 +1,15 @@
+{
+    'name': 'SGT CRM-001 - Deal Stage & Total Age',
+    'version': '19.0.2.1.0',
+    'category': 'Sales/CRM',
+    'summary': 'Cumulative CRM Stage days (Stage: Nd) with 3-color badge and total Deal age (clock icon, Nd)',
+    'description': 'Read-only day counters on CRM Kanban and Form. Uses existing CRM Chatter history; no stage mutation, cron, or custom history tables.',
+    'author': 'SaiGon Trade',
+    'license': 'LGPL-3',
+    'depends': ['crm'],
+    'data': ['views/crm_timing_views.xml'],
+    'assets': {'web.assets_backend': ['sgt_crm_deal_timing/static/src/scss/crm_timing.scss']},
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+}

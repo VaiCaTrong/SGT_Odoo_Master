@@ -1,0 +1,4 @@
+CRM-001 sgt_crm_deal_timing 19.0.2.1.0 - BÁO CÁO KIỂM TRA (2026-10-25)
+ĐÃ CHẠY (sandbox, KHÔNG có Odoo): 18 unit test OK (thuật toán: Won/Lost/bàn giao không dừng đếm, quay lại Stage cộng dồn, màu 0-3/4-7/8+; hợp đồng nguồn: chữ "Stage: Nd" và "Nd", 3 icon fa-clock-o, không còn "Đã dừng"/stopped, CSS một dòng nowrap, không động create/write/action_set_won/lost). py_compile + parse XML OK. Render thẻ bằng Chromium với CSS thật: CRM-001_V03_card.png.
+CHƯA KIỂM TRA: upgrade/hiển thị thật trên Odoo 19, hiệu năng Kanban.
+TEST TRÊN DEMO 2: (1) Upgrade, Ctrl+Shift+R. (2) Kanban Leads/Opportunities: dòng mỏng "Stage: Nd" trái, đồng hồ + "Nd" phải. (3) Deal Won: vẫn "Stage: Nd" đếm tiếp, không còn "Won — Đã dừng". (4) Deal Lost/archive: tiếp tục đếm. (5) Bàn giao sang Sale (CRM-002): thẻ trong phễu New/Renew giữ nguyên số ngày. (6) MM Approval: không hiển thị. (7) Form: dòng giống Kanban.

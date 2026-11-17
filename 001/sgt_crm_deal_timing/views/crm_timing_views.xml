@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- CRM Leads Kanban: prepend small indicators, preserve existing card footer. -->
+    <record id="sgt_crm001_kanban_leads" model="ir.ui.view">
+        <field name="name">sgt.crm001.crm.lead.kanban.leads</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_lead_kanban"/>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="inside">
+                <field name="sgt_crm001_visible"/>
+                <field name="sgt_crm001_stage_text"/>
+                <field name="sgt_crm001_stage_color"/>
+                <field name="sgt_crm001_total_text"/>
+            </xpath>
+            <xpath expr="//templates/t[@t-name='card']/*[1]" position="before">
+                <div t-if="record.sgt_crm001_visible.raw_value" class="sgt-crm001-box">
+                    <span t-att-class="'sgt-crm001-stage sgt-crm001-stage--' + (record.sgt_crm001_stage_color.raw_value || 'green')"><field name="sgt_crm001_stage_text"/></span>
+                    <span class="sgt-crm001-total" title="Total days since the Deal was created"><i class="fa fa-clock-o" role="img" aria-label="Total days"/> <field name="sgt_crm001_total_text"/></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- CRM Opportunities Kanban: same card view also used by MM Approval.
+         Context flag from the MM action makes the indicators invisible. -->
+    <record id="sgt_crm001_kanban_opportunities" model="ir.ui.view">
+        <field name="name">sgt.crm001.crm.lead.kanban.opportunities</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="inside">
+                <field name="sgt_crm001_visible"/>
+                <field name="sgt_crm001_stage_text"/>
+                <field name="sgt_crm001_stage_color"/>
+                <field name="sgt_crm001_total_text"/>
+            </xpath>
+            <xpath expr="//templates/t[@t-name='card']/*[1]" position="before">
+                <div t-if="record.sgt_crm001_visible.raw_value" class="sgt-crm001-box">
+                    <span t-att-class="'sgt-crm001-stage sgt-crm001-stage--' + (record.sgt_crm001_stage_color.raw_value || 'green')"><field name="sgt_crm001_stage_text"/></span>
+                    <span class="sgt-crm001-total" title="Total days since the Deal was created"><i class="fa fa-clock-o" role="img" aria-label="Total days"/> <field name="sgt_crm001_total_text"/></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- CRM Form: insert read-only labels below the title, outside MM mode. -->
+    <record id="sgt_crm001_form" model="ir.ui.view">
+        <field name="name">sgt.crm001.crm.lead.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="sgt_crm001_visible" invisible="1"/>
+                <field name="sgt_crm001_stage_color" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[contains(@class, 'oe_title')]" position="after">
+                <div class="sgt-crm001-box sgt-crm001-form" invisible="not sgt_crm001_visible">
+                    <span class="sgt-crm001-stage sgt-crm001-stage--green" invisible="sgt_crm001_stage_color != 'green'"><field name="sgt_crm001_stage_text" readonly="1" nolabel="1"/></span>
+                    <span class="sgt-crm001-stage sgt-crm001-stage--yellow" invisible="sgt_crm001_stage_color != 'yellow'"><field name="sgt_crm001_stage_text" readonly="1" nolabel="1"/></span>
+                    <span class="sgt-crm001-stage sgt-crm001-stage--red" invisible="sgt_crm001_stage_color != 'red'"><field name="sgt_crm001_stage_text" readonly="1" nolabel="1"/></span>
+                    <span class="sgt-crm001-total" title="Total days since the Deal was created"><i class="fa fa-clock-o" role="img" aria-label="Total days"/> <field name="sgt_crm001_total_text" readonly="1" nolabel="1"/></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
