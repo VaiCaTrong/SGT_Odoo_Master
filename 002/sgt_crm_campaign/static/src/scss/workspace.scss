@@ -1,0 +1,126 @@
+/* CRM-002 sidebar (Update_007) — ONLY the sidebar layout; Kanban/cards/fonts stay Odoo-native.
+   No custom card or column styling whatsoever.
+   Plain CSS-compatible SCSS (no variables/functions). */
+.sgt002-native-kanban {
+    display: grid !important;
+    grid-template-columns: 236px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    width: 100%; min-width: 0; min-height: 0;
+    overflow: hidden;
+
+    > .sgt002-native-sidebar {
+        grid-column: 1; grid-row: 1 / span 2;
+        min-height: 0; min-width: 0;
+        overflow: auto;
+        display: flex; flex-direction: column; gap: 4px;
+        background: var(--o-view-background-color, #fff);
+        border-right: 1px solid var(--o-border-color, #dee2e6);
+        padding: 8px;
+    }
+    > .o_control_panel { grid-column: 2; grid-row: 1; min-width: 0; }
+    > .o_content { grid-column: 2; grid-row: 2; min-width: 0; min-height: 0; overflow: auto; }
+
+    /* Collapsed: a thin rail that only keeps the expand button. */
+    &.sgt002-collapsed {
+        grid-template-columns: 44px minmax(0, 1fr);
+        > .sgt002-native-sidebar { padding: 8px 4px; align-items: center; }
+    }
+
+    /* Top row (Update_015): logo + title CENTRED in the sidebar; the collapse button sits at the
+       right edge without pushing the brand off-centre. */
+    .sgt002-native-top {
+        position: relative;
+        display: flex; align-items: center; justify-content: center;
+        gap: 6px; padding: 2px 34px 8px; min-width: 0;
+    }
+    .sgt002-native-brand {
+        display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;
+        min-width: 0; flex: 1 1 auto;
+    }
+    .sgt002-native-brand-logo {
+        display: block; width: 38px; height: auto; max-height: 52px;
+        object-fit: contain; flex: 0 0 auto;
+    }
+    .sgt002-native-brand-title {
+        font-weight: 700; line-height: 1.2; color: inherit;
+        overflow-wrap: anywhere; letter-spacing: .04em;
+    }
+    .sgt002-native-toggle {
+        position: absolute; right: 2px; top: 6px;
+        flex: 0 0 auto; width: 28px; height: 28px; padding: 0; line-height: 1;
+        border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer;
+    }
+    /* collapsed rail: the expand button is the only content, keep it in the flow */
+    &.sgt002-collapsed .sgt002-native-top { padding: 2px 0 8px; }
+    &.sgt002-collapsed .sgt002-native-toggle { position: static; }
+    /* Flat outline look (Update_009): no borders, bold titles, children indented. */
+    .sgt002-native-section {
+        font-weight: 700; padding: 14px 8px 4px; font-size: .8em;
+        letter-spacing: .05em; color: var(--o-main-text-color, inherit); opacity: .75;
+    }
+    .sgt002-native-parent,
+    .sgt002-native-item,
+    .sgt002-native-chevron,
+    .sgt002-native-btn {
+        border: 0; border-radius: 4px;
+        background: transparent; color: inherit; cursor: pointer;
+    }
+    .sgt002-native-parent {
+        display: block; width: 100%; text-align: left;
+        padding: 6px 8px; font-weight: 700; margin-top: 2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sgt002-native-item {
+        display: block; width: 100%; text-align: left;
+        padding: 4px 8px 4px 30px; font-weight: 400;
+    }
+    .sgt002-native-all { padding-left: 8px; font-weight: 600; }
+    /* Update_024: number of Deals at the end of every funnel row (child) and group row (parent). */
+    .sgt002-native-has-count { display: flex; align-items: center; gap: .5rem; }
+    .sgt002-native-has-count > .sgt002-native-name {
+        flex: 1 1 auto; min-width: 0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sgt002-native-count {
+        flex: 0 0 auto; min-width: 2rem; text-align: center;
+        font-size: .72rem; font-weight: 700; line-height: 1.5;
+        padding: 0 .5rem; border-radius: 10px;
+        background: #e9ecef; color: #495057;
+    }
+    .sgt002-native-parent > .sgt002-native-count { background: #d5dae0; color: #212529; }
+    .sgt002-native-item.active > .sgt002-native-count { background: #0061BD; color: #fff; }
+
+    .sgt002-native-item:hover, .sgt002-native-parent:hover,
+    .sgt002-native-chevron:hover, .sgt002-native-btn:hover, .sgt002-native-toggle:hover {
+        background: var(--o-gray-100, #f0f2f5);
+    }
+    .sgt002-native-item.active {
+        background: #e8f1fb;
+        color: var(--o-xinyang-brand-blue, #0061BD);
+        font-weight: 700;
+    }
+    .sgt002-native-dept { display: flex; width: 100%; align-items: stretch; gap: 4px; }
+    .sgt002-native-dept > .sgt002-native-item { flex: 1 1 auto; min-width: 0; padding-left: 8px; }
+    .sgt002-native-chevron { padding: 0 8px; }
+    .sgt002-native-person { padding-left: 46px; }
+    .sgt002-native-muted { opacity: .65; padding: 6px 10px; }
+
+    /* The ONLY two action buttons: Phân quyền, Cài đặt (pinned at the bottom). */
+    .sgt002-native-settings {
+        display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto;
+        position: sticky; bottom: 0; padding: 10px 0 2px;
+        background: var(--o-view-background-color, #fff);
+    }
+    /* Update_018: light grey background (fixed colours, not the theme's near-white --o-gray-100). */
+    .sgt002-native-settings > .sgt002-native-btn {
+        flex: 1 1 auto; padding: 6px 4px; text-align: center; font-weight: 700;
+        background: #e3e6ea;
+        white-space: nowrap; font-size: 13px;
+    }
+    .sgt002-native-settings > .sgt002-native-btn:hover { background: #d3d7dd; }
+
+    @media(max-width: 880px) {
+        grid-template-columns: 200px minmax(0,1fr);
+        &.sgt002-collapsed { grid-template-columns: 44px minmax(0,1fr); }
+    }
+}

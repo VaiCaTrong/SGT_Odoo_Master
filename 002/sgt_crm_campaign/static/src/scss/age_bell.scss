@@ -1,0 +1,112 @@
+// CRM-002 Update_016: bell (missing data), "Nd" stage-age label, column bar numbers.
+$sgt002-green: #28a745;
+$sgt002-yellow: #f0ad00;
+$sgt002-red: #dc3545;
+
+.sgt002-bell {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    color: #fff;
+    border-radius: 10px;
+    padding: 0 .45rem;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1.5;
+    cursor: default;
+}
+.sgt002-bell-bad { background: $sgt002-red; }
+.sgt002-bell-ok { background: $sgt002-green; }
+
+
+// Kanban column bar: numbers inside the segments, total at the tail
+.o_column_progress .progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+.o_column_progress .progress-bar .sgt002-seg-count {
+    font-size: .7rem;
+    font-weight: 700;
+    line-height: 1;
+}
+.o_kanban_group .o_column_progress:has(.sgt002-seg-count) { width: 60% !important; }   // room for the numbers
+.sgt002-bar-total {
+    margin-left: .5rem;
+    font-weight: 700;
+    font-size: .85rem;
+}
+
+// List: "Nd" after the number, row tint + left bar by age, bell column
+.o_list_view .sgt002-age-cell::after { content: "d"; }
+.o_list_view tr:has(td.sgt002-age-cell.text-warning) { background-color: rgba($sgt002-yellow, .12); }
+.o_list_view tr:has(td.sgt002-age-cell.text-danger) { background-color: rgba($sgt002-red, .10); }
+.o_list_view tr:has(td.sgt002-age-cell.text-success) > td:first-child + td { box-shadow: inset 4px 0 $sgt002-green; }
+.o_list_view tr:has(td.sgt002-age-cell.text-warning) > td:first-child + td { box-shadow: inset 4px 0 $sgt002-yellow; }
+.o_list_view tr:has(td.sgt002-age-cell.text-danger) > td:first-child + td { box-shadow: inset 4px 0 $sgt002-red; }
+.o_list_view td.sgt002-bell-cell {
+    font-size: 0;                       // names of the missing fields only on hover
+    white-space: nowrap;
+}
+.o_list_view td.sgt002-bell-cell::before {
+    content: "\f0f3";
+    font-family: FontAwesome;
+    font-size: .72rem;
+    color: #fff;
+    background: $sgt002-green;
+    border-radius: 10px;
+    padding: 0 .5rem;
+    line-height: 1.5;
+}
+.o_list_view td.sgt002-bell-cell.text-danger::before { background: $sgt002-red; }
+.o_list_view td.sgt002-bell-cell:hover { font-size: .8rem; }
+.o_list_view td.sgt002-bell-cell:hover::before { margin-right: .4rem; }
+
+// Form: bell on its own line above the title.  Red bell = NUMBER of missing items (CSS counter over the
+// .sgt002-miss flag spans, rendered only while their field is empty); click (focus) = red frame on every
+// empty required field.  No JavaScript, no tooltip.
+.o_form_view .sgt002-bellrow { counter-reset: sgt002miss; margin-bottom: .35rem; }
+// The flags must generate a box (display:none elements do not count), but stay invisible.
+.o_form_view .sgt002-miss {
+    counter-increment: sgt002miss;
+    display: block;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+.o_form_view .sgt002-bell-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: $sgt002-red;
+    color: #fff;
+    border-radius: 10px;
+    padding: .1rem .6rem;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+}
+.o_form_view .sgt002-bell-num::after { content: counter(sgt002miss); }
+// Update_025: the same red frames appear WITHOUT a click while the Deal is in 5.Match Making /
+// 6.Approved Match Making (.sgt002-gate-on exists only then).  A frame disappears as soon as the field is filled.
+@each $f in (partner_id, email_from, phone, source_id, x_getfly_id, street) {
+    .o_form_view:has(.sgt002-bell-btn:focus):has(.sgt002-miss-#{$f}) .o_field_widget[name="#{$f}"],
+    .o_form_view:has(.sgt002-gate-on):has(.sgt002-miss-#{$f}) .o_field_widget[name="#{$f}"] {
+        box-shadow: 0 0 0 2px $sgt002-red;
+        border-radius: .3rem;
+    }
+}
+
+// Update_025: Evidence box of CRM-005 (.sgt_yp_evbox).  No picture = counted by the bell and framed in red
+// (click on the bell, or automatically in columns 5 / 6).  Pasting a picture removes the frame at once.
+// (:has() cannot be nested, hence two separate :has on the form.)  Without CRM-005 nothing matches.
+.o_form_view .sgt002-miss.sgt002-miss-evidence { display: none; }
+.o_form_view:has(.sgt_yp_evbox):not(:has(.sgt_yp_evbox img)) .sgt002-miss.sgt002-miss-evidence { display: block; }
+.o_form_view:has(.sgt002-bell-btn:focus):not(:has(.sgt_yp_evbox img)) .sgt_yp_evbox,
+.o_form_view:has(.sgt002-gate-on):not(:has(.sgt_yp_evbox img)) .sgt_yp_evbox {
+    border-color: $sgt002-red;
+    box-shadow: 0 0 0 2px $sgt002-red;
+    background: #fff8f8;
+}

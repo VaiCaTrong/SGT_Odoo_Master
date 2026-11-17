@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- EXACT native Xinyang CRM opportunity Kanban card and CRM-001 badges.
+         Only the column group, creation mode and controller change. -->
+    <record id="view_crm002_intake_kanban" model="ir.ui.view">
+        <field name="name">sgt.crm002.intake.kanban.native</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="95"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="js_class">sgt_crm002_intake</attribute>
+                <attribute name="default_group_by">sgt_crm002_step</attribute>
+                <attribute name="quick_create">false</attribute>
+                <attribute name="on_create"/>
+                <attribute name="group_create">false</attribute>
+                <attribute name="group_edit">false</attribute>
+                <attribute name="group_delete">false</attribute>
+                <attribute name="groups_draggable">false</attribute>
+                <attribute name="sample">false</attribute>
+            </xpath>
+            <xpath expr="//kanban/field[1]" position="before">
+                <field name="sgt_crm002_step"/>
+                <field name="sgt_crm002_funnel_id"/>
+            </xpath>
+        </field>
+    </record>
+    <!-- Sale funnels (New / Renew): the SAME native card; columns are the funnel's own
+         stages (sgt_crm002_sale_stage_id).  Cards drag between those columns only. -->
+    <record id="view_crm002_sale_kanban" model="ir.ui.view">
+        <field name="name">sgt.crm002.sale.kanban.native</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="96"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="js_class">sgt_crm002_intake</attribute>
+                <attribute name="default_group_by">sgt_crm002_sale_stage_id</attribute>
+                <attribute name="quick_create">false</attribute>
+                <attribute name="on_create"/>
+                <attribute name="group_create">false</attribute>
+                <attribute name="group_edit">false</attribute>
+                <attribute name="group_delete">false</attribute>
+                <attribute name="groups_draggable">false</attribute>
+                <attribute name="sample">false</attribute>
+            </xpath>
+            <xpath expr="//kanban/field[1]" position="before">
+                <field name="sgt_crm002_sale_stage_id"/>
+                <field name="sgt_crm002_sale_funnel_id"/>
+            </xpath>
+        </field>
+    </record>
+    <!-- Update_014: List of the funnels = the stock opportunity list (every column, every other addon's
+         extension) with the CRM Stage column ("1.Opportunity") replaced by the funnel's own stage. -->
+    <record id="view_crm002_intake_list" model="ir.ui.view">
+        <field name="name">sgt.crm002.intake.list</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="95"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="replace">
+                <field name="sgt_crm002_step" string="Stage" optional="show" widget="badge"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_crm002_sale_list" model="ir.ui.view">
+        <field name="name">sgt.crm002.sale.list</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="96"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="replace">
+                <field name="sgt_crm002_sale_stage_id" string="Stage" optional="show" widget="badge"
+                       options="{'no_open': True}"/>
+            </xpath>
+        </field>
+    </record>
+    <!-- Pending intake only is hidden from the main CRM Pipeline. Completed
+         Potential belongs to BOTH the intake history and the SAME CRM Deal.
+         Scoped to official CRM Pipeline; MM Approval actions stay intact. -->
+    <record id="crm.crm_lead_action_pipeline" model="ir.actions.act_window">
+        <field name="domain">[('type','=','opportunity'), '|', ('sgt_crm002_funnel_id','=',False), ('sgt_crm002_step','=','potential')]</field>
+    </record>
+</odoo>

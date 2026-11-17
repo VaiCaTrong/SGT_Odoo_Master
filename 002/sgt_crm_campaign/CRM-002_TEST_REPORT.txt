@@ -1,0 +1,32 @@
+CRM-002 sgt_crm_campaign Update_010 (19.0.1.6.3, gồm Update_007/008/009) - BÁO CÁO KIỂM TRA
+Sửa lỗi Demo 2 (2026-10-25 15:32 GMT): AttributeError 'Char' object has no attribute 'ondelete' khi upgrade -> pre-script xoá dòng ir.model.fields.selection cũ của funnel.code (Selection->Char).
+Ngày: 2026-10-25
+
+ĐÃ CHẠY (trong sandbox, KHÔNG có Odoo server):
+- 56 unit test (unittest discover): OK
+  * test_update007_contract.py    : hợp đồng nguồn (version, ACL, data XML, guard tạo phễu, tên stage chính xác,
+                                    không copy Deal, nút áp dụng admin-only, sidebar đúng 2 nút, logo <= 48px, không field CRM-005)
+  * test_update007_handoff_mock.py: chạy CODE THẬT của luật bàn giao và _transition_intake với đối tượng giả:
+                                    Potential->MM, Approved->Sale/New, idempotent, không lùi, chỉ luật Sale đầu tiên,
+                                    luật tắt, sai Sales Team báo lỗi, _run_for_safe không chặn, kéo ngược sau Potential bị chặn
+  * test_update003_contract.py / test_timing_unittest.py: giữ lại, cập nhật cho sidebar động
+- py_compile toàn bộ .py (kể cả upgrades), node --check native_pipeline.js, parse toàn bộ XML: OK
+- Mockup giao diện bằng Chromium (CSS thật của addon): CRM-002_Update_007_mockup.png
+
+CHƯA KIỂM TRA ĐƯỢC (cần Demo 2):
+- Cài/upgrade thực trên Odoo 19 (pre/post script, load XML, ACL, view arch, domain trong form luật)
+- Kéo thả thật trong Kanban Sale; group_expand theo context; soft_reload sau nút "Áp dụng"
+- Tương tác với CRM-001 và automation khi stage_id đổi
+- Tên Stage CRM thật trên Demo 2 (luật mặc định chỉ tạo nếu tên khớp chính xác)
+
+TEST ĐỀ NGHỊ TRÊN DEMO 2 (backup trước):
+1. Upgrade module -> Cài đặt: có New, Renew (mỗi phễu 1 cột 1.Data), 4 phễu Data cũ, Match Making.
+2. Cài đặt > Luật bàn giao: thấy 2 luật mặc định (hoặc cảnh báo log nếu thiếu Stage đúng tên).
+3. Kéo 1 Deal Data Funnel tới 3.Potential: Deal xuất hiện ở MM 1.Opportunity, log note còn nguyên.
+4. Kéo 1 Deal MM tới 6.Approved Match Making: Deal xuất hiện ở New > 1.Data (cùng Deal, cùng log note).
+5. Tạo luật mới, bấm "Áp dụng cho Deal đang có"; thêm cột mới ở New, kéo Deal giữa các cột.
+6. Phân quyền: cấp New cho 1 Department, đăng nhập user thuộc Department đó kiểm tra sidebar.
+7. Thu/mở sidebar, F5 giữ trạng thái; chỉ còn 2 nút Phân quyền / Cài đặt.
+
+UPDATE_009: giao diện sidebar phẳng; nút Permissions/Settings nowrap (đo bằng Chromium: cao 27px = 1 dòng ở viewport 1100 và 700). 56 test OK. Chưa thử trên Odoo thật.
+UPDATE_010: đổi "Outbound hunter" -> "Outbound Hunter" (data + post-migrate an toàn). Tag/mã hunter giữ nguyên.

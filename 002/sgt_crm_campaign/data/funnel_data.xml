@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Group Data Funnel: four existing funnels (new ones can be added in Settings). -->
+    <record id="funnel_hunter" model="sgt.crm002.funnel">
+        <field name="name">Outbound Hunter</field><field name="code">hunter</field>
+        <field name="group_key">data</field>
+        <field name="sequence">10</field><field name="filter_mode">tag</field>
+        <field name="initial_tag_name">hunter</field><field name="is_main" eval="False"/>
+    </record>
+    <record id="funnel_pool" model="sgt.crm002.funnel">
+        <field name="name">Inbound Pool</field><field name="code">pool</field>
+        <field name="group_key">data</field>
+        <field name="sequence">20</field><field name="filter_mode">tag</field>
+        <field name="initial_tag_name">pool</field><field name="is_main" eval="False"/>
+    </record>
+    <record id="funnel_unverified" model="sgt.crm002.funnel">
+        <field name="name">Outbound Data</field><field name="code">unverified</field>
+        <field name="group_key">data</field>
+        <field name="sequence">30</field><field name="filter_mode">tag</field>
+        <field name="initial_tag_name">unverified</field><field name="is_main" eval="False"/>
+    </record>
+    <record id="funnel_face" model="sgt.crm002.funnel">
+        <field name="name">Inbound GB</field><field name="code">face</field>
+        <field name="group_key">data</field>
+        <field name="sequence">40</field><field name="filter_mode">tag</field>
+        <field name="initial_tag_name">face</field><field name="is_main" eval="False"/>
+    </record>
+    <!-- Group Sale (fixed): New and Renew.  Columns start with 1.Data only; the
+         Administrator adds the rest in Settings.  Departments: none (Administrator only). -->
+    <record id="funnel_sale_new" model="sgt.crm002.funnel">
+        <field name="name">New</field><field name="code">sale_new</field>
+        <field name="group_key">sale</field>
+        <field name="sequence">60</field><field name="filter_mode">tag</field>
+        <field name="is_main" eval="False"/>
+    </record>
+    <record id="funnel_sale_renew" model="sgt.crm002.funnel">
+        <field name="name">Renew</field><field name="code">sale_renew</field>
+        <field name="group_key">sale</field>
+        <field name="sequence">70</field><field name="filter_mode">tag</field>
+        <field name="is_main" eval="False"/>
+    </record>
+    <!-- Group Match Making Campaign (fixed): the native CRM pipeline. -->
+    <record id="funnel_mm" model="sgt.crm002.funnel">
+        <field name="name">Match Making</field><field name="code">mm</field>
+        <field name="group_key">mm</field>
+        <field name="sequence">80</field><field name="is_main" eval="True"/>
+    </record>
+</odoo>

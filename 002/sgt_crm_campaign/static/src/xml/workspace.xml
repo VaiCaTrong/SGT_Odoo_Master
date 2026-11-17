@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sgt_crm_campaign.Workspace" owl="1">
+        <div class="o_sgt_crm002 o_action">
+            <aside class="sgt002-sidebar">
+                <div class="sgt002-brand">XINYANG <span>CRM-002</span></div>
+                <div class="sgt002-section">CRM CAMPAIGN</div>
+                <t t-if="state.funnels.length">
+                    <div class="sgt002-nav-parent">▾ Data Funnel</div>
+                    <t t-foreach="state.funnels.filter((f) => !f.is_main)" t-as="f" t-key="f.code">
+                        <button type="button" t-att-class="'sgt002-nav-item ' + (state.selected === f.code ? 'active' : '')"
+                                t-on-click="() => this.selectFunnel(f.code)">
+                            <span class="sgt002-node">↳</span> <t t-esc="f.name"/>
+                        </button>
+                    </t>
+                    <div class="sgt002-nav-parent">▾ Match Making Campaign</div>
+                    <t t-foreach="state.funnels.filter((f) => f.is_main)" t-as="f" t-key="f.code">
+                        <button type="button" t-att-class="'sgt002-nav-item ' + (state.selected === f.code ? 'active' : '')"
+                                t-on-click="() => this.selectFunnel(f.code)">
+                            <span class="sgt002-node">↳</span> <t t-esc="f.name"/>
+                        </button>
+                    </t>
+                </t>
+                <t t-else="">
+                    <div class="sgt002-muted sgt002-padding">Không có phễu được cấp quyền.</div>
+                </t>
+                <t t-if="state.is_admin">
+                    <div class="sgt002-section sgt002-section-divider">SALESPERSON</div>
+                    <button type="button" t-att-class="'sgt002-nav-item ' + ((!state.deptId &amp;&amp; !state.userId) ? 'active' : '')"
+                            t-on-click="() => this.selectAllStaff()">♟ All</button>
+                    <t t-foreach="state.departments" t-as="dept" t-key="dept.id">
+                        <div class="sgt002-dept-row">
+                            <button type="button" class="sgt002-chevron" t-on-click="() => this.toggleDepartment(dept.id)"><t t-esc="state.expanded[dept.id] ? '▾' : '▸'"/></button>
+                            <button type="button" t-att-class="'sgt002-dept-name ' + (state.deptId === dept.id ? 'active' : '')"
+                                    t-on-click="() => this.selectDepartment(dept)"><t t-esc="dept.name"/></button>
+                        </div>
+                        <t t-if="state.expanded[dept.id]">
+                            <t t-foreach="dept.members" t-as="person" t-key="person.id">
+                                <button type="button" t-att-class="'sgt002-nav-item sgt002-person ' + (state.userId === person.id ? 'active' : '')"
+                                        t-on-click="() => this.selectPerson(person)">◦ <t t-esc="person.name"/></button>
+                            </t>
+                            <t t-if="!dept.members.length"><div class="sgt002-muted sgt002-padding">Không có User liên kết</div></t>
+                        </t>
+                    </t>
+                </t>
+            </aside>
+
+            <main class="sgt002-main">
+                <header class="sgt002-toolbar">
+                    <div>
+                        <div class="sgt002-heading"><t t-esc="state.board ? state.board.name : 'CRM Campaign'"/></div>
+                        <div class="sgt002-subtitle">
+                            <t t-if="state.is_admin">SALESPERSON: <t t-esc="this.staffLabel"/> · </t>
+                            <t t-if="state.board"><t t-esc="state.board.cards.length"/> / <t t-esc="state.board.total"/> Deal</t>
+                        </div>
+                    </div>
+                    <div class="sgt002-actions">
+                        <button type="button" class="btn btn-light" t-att-disabled="state.busy" t-on-click="() => this.loadBoard()">↻ Làm mới</button>
+                        <t t-if="state.board &amp;&amp; state.board.is_main">
+                            <button type="button" class="btn btn-outline-primary" t-on-click="() => this.openNativePipeline()">Mở Kanban CRM chuẩn ↗</button>
+                        </t>
+                        <t t-if="state.is_admin">
+                            <button type="button" class="btn btn-outline-secondary" t-on-click="() => this.openSettings('filters')">⚙ Cấu hình phễu</button>
+                            <button type="button" class="btn btn-primary" t-on-click="() => this.openSettings('permissions')">⚿ Phân quyền phễu</button>
+                        </t>
+                    </div>
+                </header>
+                <t t-if="state.loading || state.busy">
+                    <div class="sgt002-loading">⏳ <t t-esc="state.loading ? 'Đang tải CRM Campaign…' : 'Đang cập nhật dữ liệu…'"/></div>
+                </t>
+                <t t-if="state.board">
+                    <t t-if="state.board.warning"><div class="alert alert-warning sgt002-alert"><t t-esc="state.board.warning"/></div></t>
+                    <div class="sgt002-kanban-scroll">
+                        <div class="sgt002-kanban">
+                            <t t-foreach="state.board.stages" t-as="stage" t-key="stage.key">
+                                <section class="sgt002-column" t-on-dragover="(ev) => this.allowDrop(ev)"
+                                         t-on-drop="(ev) => this.dropOn(ev, stage.key)">
+                                    <div class="sgt002-column-header">
+                                        <strong><t t-esc="stage.name"/></strong>
+                                        <span class="sgt002-count"><t t-esc="this.cardsFor(stage.key).length"/></span>
+                                    </div>
+                                    <div class="sgt002-card-list">
+                                        <t t-foreach="this.cardsFor(stage.key)" t-as="card" t-key="card.id">
+                                            <article class="sgt002-deal" t-att-draggable="!state.board.is_main &amp;&amp; !card.closed"
+                                                     t-on-dragstart="(ev) => this.dragStart(ev, card)">
+                                                <div class="sgt002-badges">
+                                                    <t t-if="card.crm001_stage_text"><span t-att-class="'sgt002-age stage-' + card.stage_color"><t t-esc="card.crm001_stage_text"/></span></t>
+                                                    <t t-elif="card.stage_days !== null">
+                                                        <span t-att-class="'sgt002-age stage-' + card.stage_color">
+                                                            <t t-if="card.closed">Đã dừng</t>
+                                                            <t t-else="">Stage: <t t-esc="card.stage_days"/> ngày</t>
+                                                        </span>
+                                                    </t>
+                                                    <span class="sgt002-age">Tổng: <t t-esc="card.total_days"/> ngày</span>
+                                                </div>
+                                                <button type="button" class="sgt002-deal-title" t-on-click="() => this.openLead(card)"><t t-esc="card.name"/></button>
+                                                <t t-if="card.company"><div class="sgt002-line">🏢 <t t-esc="card.company"/></div></t>
+                                                <t t-if="card.partner"><div class="sgt002-line">👤 <t t-esc="card.partner"/></div></t>
+                                                <t t-if="card.phone"><div class="sgt002-line">☎ <t t-esc="card.phone"/></div></t>
+                                                <t t-if="card.email"><div class="sgt002-line sgt002-email"><t t-esc="card.email"/></div></t>
+                                                <div class="sgt002-tags">
+                                                    <t t-foreach="card.tags" t-as="tag" t-key="card.id + ':' + tag_index"><span class="sgt002-tag"><t t-esc="tag"/></span></t>
+                                                </div>
+                                                <div class="sgt002-card-bottom">
+                                                    <span>👤 <t t-esc="card.user || 'Chưa phân công'"/></span>
+                                                    <t t-if="!state.board.is_main &amp;&amp; !card.closed">
+                                                        <select class="sgt002-stage-select" t-on-change="(ev) => this.moveStage(card.id, ev.target.value)">
+                                                            <option value="data" t-att-selected="card.stage === 'data'">1.Data</option>
+                                                            <option value="verified" t-att-selected="card.stage === 'verified'">2.Verified</option>
+                                                            <option value="potential" t-att-selected="card.stage === 'potential'">3.Potential</option>
+                                                        </select>
+                                                    </t>
+                                                </div>
+                                            </article>
+                                        </t>
+                                    </div>
+                                </section>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="sgt002-footer" t-if="state.board.cards.length &lt; state.board.total">
+                        <button type="button" class="btn btn-outline-primary" t-att-disabled="state.busy" t-on-click="() => this.loadBoard(true)">Tải thêm Deal</button>
+                    </div>
+                </t>
+            </main>
+
+            <t t-if="state.modal &amp;&amp; state.is_admin">
+                <div class="sgt002-modal-backdrop">
+                    <div class="sgt002-modal">
+                        <div class="sgt002-modal-header">
+                            <strong>⚙ Cài đặt CRM Campaign</strong>
+                            <button type="button" class="btn btn-light" t-on-click="() => state.modal = false">✕</button>
+                        </div>
+                        <div class="sgt002-modal-tabs">
+                            <button type="button" t-att-class="state.tab === 'permissions' ? 'active' : ''" t-on-click="() => state.tab = 'permissions'">Phân quyền Department</button>
+                            <button type="button" t-att-class="state.tab === 'filters' ? 'active' : ''" t-on-click="() => state.tab = 'filters'">Cấu hình Tag / Source</button>
+                        </div>
+                        <t t-if="state.settings">
+                            <div class="sgt002-modal-body">
+                                <t t-if="state.tab === 'permissions'">
+                                    <label>Chọn Department</label>
+                                    <select class="form-select" t-on-change="(ev) => this.changeSettingsDepartment(ev)">
+                                        <t t-foreach="state.settings.departments" t-as="dep" t-key="dep.id">
+                                            <option t-att-value="dep.id" t-att-selected="dep.id === state.settingsDeptId"><t t-esc="dep.name"/></option>
+                                        </t>
+                                    </select>
+                                    <div class="sgt002-modal-hint">Chọn phễu được xem trong CRM-002. Role Administrator luôn xem tất cả.</div>
+                                    <t t-foreach="state.settings.funnels" t-as="f" t-key="f.code">
+                                        <label class="sgt002-check">
+                                            <input type="checkbox" t-att-checked="state.selectedCodes.includes(f.code)"
+                                                   t-on-change="(ev) => this.togglePermission(f.code, ev.target.checked)"/>
+                                            <span><t t-esc="f.name"/></span>
+                                        </label>
+                                    </t>
+                                    <button type="button" class="btn btn-primary sgt002-save" t-att-disabled="state.busy || !state.settingsDeptId" t-on-click="() => this.savePermissions()">Lưu phân quyền</button>
+                                </t>
+                                <t t-else="">
+                                    <label>Phễu Data Funnel</label>
+                                    <select class="form-select" t-on-change="(ev) => this.changeFilterFunnel(ev)">
+                                        <t t-foreach="state.settings.funnels.filter((f) => !f.is_main)" t-as="f" t-key="f.code">
+                                            <option t-att-value="f.code" t-att-selected="f.code === state.filterCode"><t t-esc="f.name"/></option>
+                                        </t>
+                                    </select>
+                                    <label>Chế độ lọc</label>
+                                    <select class="form-select" t-on-change="(ev) => state.filterMode = ev.target.value">
+                                        <option value="tag" t-att-selected="state.filterMode === 'tag'">Tag</option>
+                                        <option value="source" t-att-selected="state.filterMode === 'source'">Source</option>
+                                    </select>
+                                    <t t-if="state.filterMode === 'tag'">
+                                        <label>Tag</label>
+                                        <select class="form-select" t-on-change="(ev) => this.changeFilterTag(ev)">
+                                            <option value="">-- Chọn Tag --</option>
+                                            <t t-foreach="state.settings.tags" t-as="tag" t-key="tag.id">
+                                                <option t-att-value="tag.id" t-att-selected="tag.id === state.filterTagId"><t t-esc="tag.name"/></option>
+                                            </t>
+                                        </select>
+                                    </t>
+                                    <t t-else="">
+                                        <label>Source</label>
+                                        <select class="form-select" t-on-change="(ev) => this.changeFilterSource(ev)">
+                                            <option value="">-- Chọn Source --</option>
+                                            <t t-foreach="state.settings.sources" t-as="source" t-key="source.id">
+                                                <option t-att-value="source.id" t-att-selected="source.id === state.filterSourceId"><t t-esc="source.name"/></option>
+                                            </t>
+                                        </select>
+                                    </t>
+                                    <div class="sgt002-modal-hint">Bộ lọc được áp dụng trên dữ liệu thực của crm.lead, không tạo Deal mới.</div>
+                                    <button type="button" class="btn btn-primary sgt002-save" t-att-disabled="state.busy" t-on-click="() => this.saveFilter()">Lưu cấu hình phễu</button>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else=""><div class="sgt002-loading">Đang tải cấu hình…</div></t>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

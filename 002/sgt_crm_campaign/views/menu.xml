@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_crm002_workspace" model="ir.actions.client">
+        <field name="name">CRM Campaign</field>
+        <field name="tag">sgt_crm002.workspace</field>
+    </record>
+    <menuitem id="menu_crm002_workspace" name="CRM Campaign" parent="crm.crm_menu_sales"
+              action="crm.crm_lead_action_pipeline" sequence="1" groups="base.group_user"/>
+    <!-- V03 uses the real CRM Pipeline; hide the redundant legacy workspace menu. -->
+    <record id="menu_crm002_workspace" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <menuitem id="menu_crm002_funnel_config" name="CRM-002 Cài đặt phễu"
+              parent="crm.crm_menu_config" action="action_crm002_funnel_config"
+              sequence="90" groups="base.group_system"/>
+    <menuitem id="menu_crm002_permissions" name="CRM-002 Phân quyền phễu"
+              parent="crm.crm_menu_config" action="action_crm002_permissions"
+              sequence="91" groups="base.group_system"/>
+    <menuitem id="menu_crm002_rules" name="CRM-002 Luật bàn giao"
+              parent="crm.crm_menu_config" action="action_crm002_rules"
+              sequence="92" groups="base.group_system"/>
+</odoo>

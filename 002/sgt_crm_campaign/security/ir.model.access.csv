@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_crm002_funnel_admin,CRM-002 Funnel Admin,model_sgt_crm002_funnel,base.group_system,1,1,1,0
+access_crm002_progress_admin,CRM-002 Progress Admin,model_sgt_crm002_progress,base.group_system,1,1,1,0
+access_crm002_visit_admin,CRM-002 Stage Visit Admin,model_sgt_crm002_stage_visit,base.group_system,1,1,1,0
+access_crm002_stage_admin,CRM-002 Funnel Stage Admin,model_sgt_crm002_funnel_stage,base.group_system,1,1,1,1
+access_crm002_stage_user,CRM-002 Funnel Stage Read,model_sgt_crm002_funnel_stage,base.group_user,1,0,0,0
+access_crm002_rule_admin,CRM-002 Hand-off Rule Admin,model_sgt_crm002_handoff_rule,base.group_system,1,1,1,1

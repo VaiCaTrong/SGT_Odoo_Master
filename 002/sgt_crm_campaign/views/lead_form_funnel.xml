@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Update_015: the stage bar of the Deal form follows the funnel the Deal is worked in.
+         * Data Funnel (not yet Potential): 1.Data / 2.Verified / 3.Potential (sgt_crm002_step)
+         * opened from a Sale funnel page: the stages of that Sale funnel (sgt_crm002_sale_stage_id)
+         * otherwise (Match Making, handed-over Deals): the stock CRM stage bar, unchanged.
+         Both new bars are clickable; the click goes through the same funnel rules as a Kanban drag
+         (CRM-002 write(): no moving back after Potential, hand-off rules, Chatter line). -->
+    <record id="view_crm002_lead_form_funnel_bar" model="ir.ui.view">
+        <field name="name">sgt.crm002.lead.form.funnel.bar</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="priority" eval="96"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header//field[@name='stage_id']" position="attributes">
+                <attribute name="invisible"
+                           add="(sgt_crm002_funnel_id and sgt_crm002_step != 'potential') or (sgt_crm002_sale_funnel_id and context.get('sgt_crm002_funnel_group') == 'sale')"
+                           separator=" or "/>
+            </xpath>
+            <xpath expr="//header//field[@name='stage_id']" position="after">
+                <field name="sgt_crm002_funnel_id" invisible="1"/>
+                <field name="sgt_crm002_sale_funnel_id" invisible="1"/>
+                <field name="sgt_crm002_step" widget="statusbar" options="{'clickable': '1'}"
+                       invisible="type == 'lead' or not sgt_crm002_funnel_id or sgt_crm002_step == 'potential'"
+                       readonly="won_status == 'lost' or not active"/>
+                <field name="sgt_crm002_sale_stage_id" widget="statusbar" options="{'clickable': '1'}"
+                       domain="[('funnel_id', '=', sgt_crm002_sale_funnel_id)]"
+                       invisible="type == 'lead' or not sgt_crm002_sale_funnel_id or context.get('sgt_crm002_funnel_group') != 'sale'"
+                       readonly="won_status == 'lost' or not active"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

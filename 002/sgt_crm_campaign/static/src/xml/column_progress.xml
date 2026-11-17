@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Update_030: there are TWO distinct renderer templates in Odoo 19.
+         Main CRM Pipeline uses crm.ColumnProgress; CRM-002 intake/sale funnels use
+         web.ColumnProgress because their controller is based on kanbanView.
+         The crm template is a PRIMARY derivative: modifying web alone does not
+         update crm.  Keep both scoped to our existing age buckets so unrelated
+         progress bars elsewhere stay untouched.  Counts come from Odoo's
+         read_progress_bar data (bar.count / group.count), NOT new database queries. -->
+    <t t-inherit="crm.ColumnProgress" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('progress-bar')]" position="attributes">
+            <attribute name="t-attf-data-tooltip">{{ ['fresh', 'warn', 'late'].includes(bar.value) ? (bar.count + ' deal · ' + (bar.value === 'fresh' ? '0-3 ngày' : (bar.value === 'warn' ? '4-7 ngày' : 'từ 8 ngày'))) : (bar.count + ' ' + bar.string) }}</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('progress-bar')]" position="inside">
+            <t t-if="['fresh', 'warn', 'late'].includes(bar.value)">
+                <span class="sgt002-seg-count" t-esc="bar.count"/>
+            </t>
+        </xpath>
+        <xpath expr="//div[hasclass('o_column_progress')]" position="after">
+            <span t-if="props.progressBar.bars.length and ['fresh', 'warn', 'late'].includes(props.progressBar.bars[0].value)"
+                  class="sgt002-bar-total" data-tooltip="Tổng Deal trong cột" t-esc="props.group.count"/>
+        </xpath>
+    </t>
+    <!-- Native CRM-002 Data Funnel / Sale Funnel boards, which use web.ColumnProgress.
+         The numeric labels are not added globally to unrelated bar types. -->
+    <t t-inherit="web.ColumnProgress" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('progress-bar')]" position="attributes">
+            <attribute name="t-attf-data-tooltip">{{ ['fresh', 'warn', 'late'].includes(bar.value) ? (bar.count + ' deal · ' + (bar.value === 'fresh' ? '0-3 ngày' : (bar.value === 'warn' ? '4-7 ngày' : 'từ 8 ngày'))) : (bar.count + ' ' + bar.string) }}</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('progress-bar')]" position="inside">
+            <t t-if="['fresh', 'warn', 'late'].includes(bar.value)">
+                <span class="sgt002-seg-count" t-esc="bar.count"/>
+            </t>
+        </xpath>
+        <xpath expr="//div[hasclass('o_column_progress')]" position="after">
+            <span t-if="props.progressBar.bars.length and ['fresh', 'warn', 'late'].includes(props.progressBar.bars[0].value)"
+                  class="sgt002-bar-total" data-tooltip="Tổng Deal trong cột" t-esc="props.group.count"/>
+        </xpath>
+    </t>
+</templates>

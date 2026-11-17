@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Update_011: the CRM app opens CRM / Sales / My Pipeline.  That menu ran the stock
+         server action "Crm: My Pipeline", which always lands on Match Making whatever the
+         user's funnel permissions.  It now runs sgt.crm002.service.landing_action():
+         Match Making when allowed, else the first allowed funnel, else an empty page. -->
+    <record id="action_crm002_landing" model="ir.actions.server">
+        <field name="name">CRM-002: CRM landing by funnel permission</field>
+        <field name="model_id" ref="sales_team.model_crm_team"/>
+        <field name="state">code</field>
+        <!-- Update_029: like the stock "Crm: My Pipeline" server action, every internal user may run it.
+             Without a group Odoo 19 demands WRITE access on crm.team, which only Sales Administrator has. -->
+        <field name="group_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="code">action = env['sgt.crm002.service'].landing_action()</field>
+    </record>
+    <record id="crm.menu_crm_opportunities" model="ir.ui.menu">
+        <field name="action" eval="'ir.actions.server,%d' % ref('sgt_crm_campaign.action_crm002_landing')"/>
+    </record>
+
+    <!-- Update_029 (user 02/11 15:50): a user whose Sales field is "No" keeps the CRM app icon; clicking it
+         opens the empty page (no deal, no error) instead of the app being hidden by Odoo.
+         Odoo 19 only shows a menu folder when it has an action menu below it that the user can open, so:
+         - the CRM root menu is opened to every internal user (+ base.group_user) and gets its OWN action,
+           the same landing server action as My Pipeline (readable model crm.team for base.group_user);
+         - the "Sales" folder (My Pipeline / My Activities / Teams / Customers) is restricted back to
+           Sales User and Sales Administrator, so a Sales = No user sees nothing else under CRM.
+         Leads / Reporting / Configuration already carry their own groups. -->
+    <record id="crm.crm_menu_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="action" eval="'ir.actions.server,%d' % ref('sgt_crm_campaign.action_crm002_landing')"/>
+    </record>
+    <record id="crm.crm_menu_sales" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('sales_team.group_sale_salesman'), ref('sales_team.group_sale_manager')])]"/>
+    </record>
+
+    <!-- Update_012: mark the stock pipeline action so crm.lead._search can refuse its data
+         to a user without Match Making permission (same values as stock + one flag). -->
+    <record id="crm.crm_lead_action_pipeline" model="ir.actions.act_window">
+        <field name="context">{
+                'default_type': 'opportunity',
+                'search_default_assigned_to_me': 1,
+                'show_user_team_stages': 1,
+                'sgt_crm002_mm_guard': True,
+        }</field>
+    </record>
+
+    <!-- Empty page for a user without any funnel permission: no columns, no create.
+         Update_028: this page is NOT a crm.lead view any more.  A user whose Sales field is "No"
+         has no access right on crm.lead at all, and Odoo checks the access right BEFORE it
+         applies the domain, so even `id = 0` on crm.lead raised "You are not allowed to
+         access 'Lead' (crm.lead) records".  res.company is readable by every internal user
+         (stock ACL access_res_company_employee); the domain `id = 0` returns nothing, the CRM-002
+         sidebar (js_class) and the help text are shown, and no deal is ever read.
+         The old record view_crm002_noaccess_kanban (model crm.lead) is removed by Odoo on upgrade
+         because this file no longer defines it. -->
+    <record id="view_crm002_noaccess_company_kanban" model="ir.ui.view">
+        <field name="name">sgt.crm002.noaccess.company.kanban</field>
+        <field name="model">res.company</field>
+        <field name="priority" eval="97"/>
+        <field name="arch" type="xml">
+            <kanban js_class="sgt_crm002_intake" create="0" quick_create="false" group_create="false"
+                    group_edit="false" group_delete="false" groups_draggable="false" sample="false">
+                <field name="name"/>
+                <templates>
+                    <t t-name="card">
+                        <field name="name"/>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

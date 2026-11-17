@@ -1,0 +1,6 @@
+# CRM-002 Update_023 (19.0.1.19.0) — bấm màu thanh ngang lọc được + thanh hiện số
+
+Báo lỗi (2026-10-28 15:56, trang https://xinyang.sge.vn/odoo/action-375): bấm vào màu của thanh ngang không lọc được deal. Em đọc trang thật bằng Chrome và gọi thử RPC (chỉ đọc) trên production:
+1. **Lọc trả 0 deal.** `search_count([('sgt_crm002_age_bucket','=','late')])` = 0 trong khi tính tay cùng điều kiện = 2349. Nguyên nhân: Odoo 19 đổi ('=', 'x') thành ('in', OrderedSet(['x'])); hàm `_search_sgt_crm002_age_bucket` chỉ nhận list/tuple nên coi giá trị là rỗng → domain `id = 0`. Sửa: nhận mọi kiểu iterable (str / list / tuple / set / OrderedSet), bỏ trùng.
+2. **Thanh không hiện số.** Kanban CRM dùng template `crm.ColumnProgress` (kế thừa PRIMARY từ mail.RottingColumnProgress ← web.ColumnProgress), nên phần mở rộng của `web.ColumnProgress` (Update_016–022) không bao giờ tới được. Sửa: mở rộng `crm.ColumnProgress`. Số trong từng màu + tổng cuối thanh; tooltip đoạn màu nay là "N deal · 0-3 ngày / 4-7 ngày / từ 8 ngày" (bản gốc in "1 undefined"); thanh rộng 60% cột khi có số.
+Test mới `SearchBucketTests` chạy hàm thật với bộ đánh giá domain mini (cả 5 kiểu giá trị, 3 màu, nhiều màu, phủ định "Other"); xác nhận test đỏ trên code cũ (6 lỗi) và xanh trên code mới.

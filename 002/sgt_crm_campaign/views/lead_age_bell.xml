@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Update_016: (1) stage-age progress bar + bell + "Nd" label on the Kanban card,
+                     (2) bell + "Nd" column and row tint in the list,
+                     (3) bell next to the Deal title on the form.
+         Update_025: the bell never blocks a stage change any more.  Deals in 5.Match Making /
+         6.Approved Match Making frame their missing items in red as soon as the form opens. -->
+
+    <record id="view_crm002_lead_kanban_age_bell" model="ir.ui.view">
+        <field name="name">sgt.crm002.lead.kanban.age.bell</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="priority" eval="96"/>
+        <field name="arch" type="xml">
+            <xpath expr="//progressbar" position="attributes">
+                <attribute name="field">sgt_crm002_age_bucket</attribute>
+                <attribute name="colors">{"fresh": "success", "warn": "warning", "late": "danger"}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='stage_id']" position="after">
+                <field name="sgt_crm002_age_bucket"/>
+                <field name="sgt_crm002_age_days"/>
+                <field name="sgt_crm002_missing_info"/>
+            </xpath>
+            <xpath expr="//field[@name='rotting_days']" position="replace">
+                <span t-if="record.sgt_crm002_missing_info.raw_value"
+                      class="sgt002-bell sgt002-bell-bad me-2"
+                      t-att-title="'Thiếu dữ liệu: ' + record.sgt_crm002_missing_info.raw_value">
+                    <i class="fa fa-bell" role="img" aria-label="Dữ liệu"/> <t t-esc="record.sgt_crm002_missing_info.raw_value.split(', ').length"/>
+                </span>
+                <span t-else="" class="sgt002-bell sgt002-bell-ok me-2" title="Đã đủ dữ liệu">
+                    <i class="fa fa-bell" role="img" aria-label="Dữ liệu"/>
+                </span>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm002_lead_list_age_bell" model="ir.ui.view">
+        <field name="name">sgt.crm002.lead.list.age.bell</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="priority" eval="96"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='stage_id']" position="after">
+                <field name="sgt_crm002_age_bucket" column_invisible="True"/>
+                <field name="sgt_crm002_age_days" string="Days in Stage"
+                       decoration-success="sgt_crm002_age_bucket == 'fresh'"
+                       decoration-warning="sgt_crm002_age_bucket == 'warn'"
+                       decoration-danger="sgt_crm002_age_bucket == 'late'"
+                       class="sgt002-age-cell"/>
+                <field name="sgt_crm002_missing_info" string="Data"
+                       decoration-danger="sgt_crm002_missing_info"
+                       class="sgt002-bell-cell"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_crm002_lead_form_bell" model="ir.ui.view">
+        <field name="name">sgt.crm002.lead.form.bell</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="priority" eval="97"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[contains(@class,'oe_title')]/div[1]" position="before">
+                <!-- Update_022: the bell sits on its own line ABOVE the title (the Won/Lost ribbon covers the
+                     right end of the title row).  It shows only the NUMBER of missing items; the number is a CSS
+                     counter over the .sgt002-miss flag spans, which exist only while their field is empty, so the
+                     flags come BEFORE the bell.  Click (focus) on the bell = red frame on every empty required
+                     field (CSS only).  Click anywhere else to remove the frames. -->
+                <div class="sgt002-bellrow">
+                    <field name="sgt_crm002_missing_info" invisible="1"/>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="email_from" invisible="1"/>
+                    <field name="phone" invisible="1"/>
+                    <field name="source_id" invisible="1"/>
+                    <field name="x_getfly_id" invisible="1"/>
+                    <field name="street" invisible="1"/>
+                    <span class="sgt002-miss sgt002-miss-partner_id" invisible="partner_id"/>
+                    <span class="sgt002-miss sgt002-miss-email_from" invisible="email_from"/>
+                    <span class="sgt002-miss sgt002-miss-phone" invisible="phone"/>
+                    <span class="sgt002-miss sgt002-miss-source_id" invisible="source_id"/>
+                    <span class="sgt002-miss sgt002-miss-x_getfly_id" invisible="x_getfly_id"/>
+                    <span class="sgt002-miss sgt002-miss-street" invisible="street"/>
+                    <!-- Update_025: Evidence box of CRM-005.  Always in the DOM, counted only while the form shows an
+                         Evidence box WITHOUT a picture (CSS :has, see age_bell.scss); absent CRM-005 = never counted. -->
+                    <span class="sgt002-miss sgt002-miss-evidence"/>
+                    <!-- Update_025: Deal in 5.Match Making / 6.Approved Match Making = red frames without clicking. -->
+                    <field name="sgt_crm002_gate" invisible="1"/>
+                    <span class="sgt002-gate-on" invisible="not sgt_crm002_gate"/>
+                    <span class="sgt002-bell-btn" tabindex="0" invisible="not sgt_crm002_missing_info">
+                        <i class="fa fa-bell" role="img" aria-label="Dữ liệu"/><span class="sgt002-bell-num"/>
+                    </span>
+                    <span class="sgt002-bell sgt002-bell-ok" invisible="sgt_crm002_missing_info">
+                        <i class="fa fa-bell" role="img" aria-label="Dữ liệu"/>
+                    </span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

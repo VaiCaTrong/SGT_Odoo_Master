@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pipeline-only PRIMARY derivative. Do not modify the shared CRM Kanban
+         or the independent MM Approval actions/views. -->
+    <record id="view_crm002_pipeline_kanban" model="ir.ui.view">
+        <field name="name">sgt.crm002.pipeline.kanban.native</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="mode">primary</field>
+        <field name="priority" eval="90"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="js_class">sgt_crm002_pipeline</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="crm.crm_lead_action_pipeline_view_kanban" model="ir.actions.act_window.view">
+        <field name="view_id" ref="view_crm002_pipeline_kanban"/>
+    </record>
+</odoo>

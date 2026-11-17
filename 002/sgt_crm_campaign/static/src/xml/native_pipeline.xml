@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sgt_crm_campaign.PipelineKanbanView" t-inherit="web.KanbanView" t-inherit-mode="primary" owl="1">
+        <xpath expr="//Layout" position="before">
+            <aside t-att-class="'sgt002-native-sidebar' + (crm002State.collapsed ? ' is-collapsed' : '')" aria-label="CRM Campaign và SALESPERSON">
+                <div class="sgt002-native-top">
+                    <div t-if="!crm002State.collapsed" class="sgt002-native-brand" aria-label="Xinyang CRM Campaign">
+                        <img class="sgt002-native-brand-logo"
+                             src="/sgt_crm_campaign/static/src/img/xinyang_sidebar_logo.png"
+                             alt="Logo Xinyang 新扬"/>
+                        <span class="sgt002-native-brand-title">XINYANG</span>
+                    </div>
+                    <button type="button" class="sgt002-native-toggle"
+                            t-att-title="crm002State.collapsed ? 'Mở rộng thanh phễu' : 'Thu nhỏ thanh phễu'"
+                            t-att-aria-expanded="crm002State.collapsed ? 'false' : 'true'"
+                            t-on-click="() => this.crm002ToggleCollapse()">
+                        <t t-esc="crm002State.collapsed ? '»' : '«'"/>
+                    </button>
+                </div>
+                <t t-if="!crm002State.collapsed">
+                    <div class="sgt002-native-section">CRM CAMPAIGN</div>
+                    <t t-if="crm002State.loading">
+                        <div class="sgt002-native-muted">Đang tải phễu…</div>
+                    </t>
+                    <t t-elif="crm002State.groups.length">
+                        <t t-foreach="crm002State.groups" t-as="group" t-key="group.key">
+                            <button type="button" class="sgt002-native-parent sgt002-native-has-count" t-on-click="() => this.crm002ToggleGroup(group.key)">
+                                <span class="sgt002-native-name"><t t-esc="crm002State.open[group.key] !== false ? '▾' : '▸'"/> <t t-esc="group.name"/></span>
+                                <span class="sgt002-native-count" t-esc="group.count"/>
+                            </button>
+                            <t t-if="crm002State.open[group.key] !== false">
+                                <t t-foreach="group.funnels" t-as="f" t-key="f.code">
+                                    <button type="button" t-att-class="'sgt002-native-item sgt002-native-has-count ' + (this.crm002ActiveCode === f.code ? 'active' : '')"
+                                            t-on-click="() => this.crm002SelectFunnel(f)">
+                                        <span class="sgt002-native-name">↳ <t t-esc="f.name"/></span>
+                                        <span class="sgt002-native-count" t-esc="f.count"/>
+                                    </button>
+                                </t>
+                                <t t-if="!group.funnels.length"><div class="sgt002-native-muted">Chưa có phễu</div></t>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-else=""><div class="sgt002-native-muted">Không có phễu được cấp quyền.</div></t>
+
+                    <t t-if="crm002State.isAdmin">
+                        <div class="sgt002-native-section">SALESPERSON</div>
+                        <button type="button" t-att-class="'sgt002-native-item sgt002-native-all ' + (!crm002State.deptId &amp;&amp; !crm002State.userId ? 'active' : '')"
+                                t-on-click="() => this.crm002ChooseAll()">♟ All</button>
+                        <t t-foreach="crm002State.departments" t-as="dept" t-key="dept.id">
+                            <div class="sgt002-native-dept">
+                                <button type="button" class="sgt002-native-chevron" t-on-click="() => this.crm002ToggleDepartment(dept.id)">
+                                    <t t-esc="crm002State.expanded[dept.id] ? '▾' : '▸'"/>
+                                </button>
+                                <button type="button" t-att-class="'sgt002-native-item ' + (crm002State.deptId === dept.id ? 'active' : '')"
+                                        t-on-click="() => this.crm002ChooseDepartment(dept)"><t t-esc="dept.name"/></button>
+                            </div>
+                            <t t-if="crm002State.expanded[dept.id]">
+                                <t t-foreach="dept.members" t-as="person" t-key="person.id">
+                                    <button type="button" t-att-class="'sgt002-native-item sgt002-native-person ' + (crm002State.userId === person.id ? 'active' : '')"
+                                            t-on-click="() => this.crm002ChoosePerson(person)">◦ <t t-esc="person.name"/></button>
+                                </t>
+                                <t t-if="!dept.members.length"><div class="sgt002-native-muted">Không có User liên kết</div></t>
+                            </t>
+                        </t>
+                        <div class="sgt002-native-settings">
+                            <button type="button" class="sgt002-native-btn" t-on-click="() => this.crm002OpenPermissions()">🔑 Permissions</button>
+                            <button type="button" class="sgt002-native-btn" t-on-click="() => this.crm002OpenSettings()">⚙ Settings</button>
+                        </div>
+                    </t>
+                </t>
+            </aside>
+        </xpath>
+    </t>
+</templates>
