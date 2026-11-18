@@ -61,7 +61,7 @@ class DeleteDialog(unittest.TestCase):
         a = MANIFEST['assets']['web.assets_backend']
         self.assertIn('sgt_crm_yellowpages_profile/static/src/js/gallery_delete_dialog.js', a)
         self.assertIn('sgt_crm_yellowpages_profile/static/src/xml/gallery_delete_dialog.xml', a)
-        self.assertEqual(MANIFEST['version'], '19.0.1.66.0')
+        self.assertEqual(MANIFEST['version'], '19.0.1.67.0')
 
     def test_template_name_matches_component(self):
         name = DXML.getroot()[0].get('t-name')

@@ -37,6 +37,6 @@ class NoSourceFooter(unittest.TestCase):
         self.assertEqual(len(scan.xpath('//footer//field[@name="rotting_days"]')),1)
         self.assertEqual(len(self.tree.xpath('//xpath[@position="replace" and contains(@expr,"footer")]')),1)
         self.assertIn('kanban_activity',self.xpaths[3].get('expr'))
-        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.66.0')
+        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.67.0')
 
 if __name__=='__main__':unittest.main()

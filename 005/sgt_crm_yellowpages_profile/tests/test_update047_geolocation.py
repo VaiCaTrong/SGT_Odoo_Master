@@ -164,7 +164,7 @@ class GeoUpdate047(unittest.TestCase):
     def test_manifest_form_and_cron(self):
         manifest = ast.literal_eval((ROOT / '__manifest__.py').read_text())
         self.assertIn('base_geolocalize', manifest['depends'])
-        self.assertEqual(manifest['version'], '19.0.1.66.0')
+        self.assertEqual(manifest['version'], '19.0.1.67.0')
         view = etree.parse(str(ROOT / 'views/crm_yp_lead_form.xml'))
         assert view.xpath("//div[contains(@class, 'sgt_yp_profile')]//field[@name='x_yp_latitude']")
         assert view.xpath("//div[contains(@class, 'sgt_yp_profile')]//field[@name='x_yp_longitude']")

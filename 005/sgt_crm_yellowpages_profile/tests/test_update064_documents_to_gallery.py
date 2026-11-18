@@ -382,7 +382,7 @@ class ContractTests(unittest.TestCase):
 
     def test_registered_and_versioned(self):
         self.assertIn('from . import gallery_push', self.read('models/__init__.py'))
-        self.assertIn("'version': '19.0.1.66.0'", self.read('__manifest__.py'))
+        self.assertIn("'version': '19.0.1.67.0'", self.read('__manifest__.py'))
 
     def test_model_has_no_new_fields_or_sudo_write(self):
         src = self.read('models/gallery_push.py')

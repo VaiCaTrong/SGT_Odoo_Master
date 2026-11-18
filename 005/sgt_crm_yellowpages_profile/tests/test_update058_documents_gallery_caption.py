@@ -82,7 +82,7 @@ class TestDocumentsInterface(unittest.TestCase):
 
     def test_only_one_addon_version_bump(self):
         manifest = ast.literal_eval((ROOT / '__manifest__.py').read_text())
-        self.assertEqual(manifest['version'], '19.0.1.66.0')
+        self.assertEqual(manifest['version'], '19.0.1.67.0')
         self.assertIn('argo_documents', manifest['depends'])
 
 

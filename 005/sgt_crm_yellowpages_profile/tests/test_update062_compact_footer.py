@@ -66,7 +66,7 @@ class TestCompactFooter(unittest.TestCase):
 
     def test_manifest(self):
         manifest=ast.literal_eval((ROOT/'__manifest__.py').read_text())
-        self.assertEqual(manifest['version'],'19.0.1.66.0')
+        self.assertEqual(manifest['version'],'19.0.1.67.0')
         self.assertIn('base_geolocalize',manifest['depends'])
 
 if __name__=='__main__':unittest.main()

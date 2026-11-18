@@ -44,7 +44,7 @@ class Geo053(unittest.TestCase):
         self.assertEqual([x.get('string') for x in box.xpath('.//label')],['Lat','Lon'])
         buttons=box.xpath('.//button[@type="object"]')
         self.assertEqual([x.get('name') for x in buttons],['action_crm005_geolocate_now'])
-        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.66.0')
+        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.67.0')
     def test_guard_against_faking_coordinates(self):
         src=(ROOT/'models/geo_lead.py').read_text()
         self.assertIn('valid_coordinates(coords[0], coords[1])',src)

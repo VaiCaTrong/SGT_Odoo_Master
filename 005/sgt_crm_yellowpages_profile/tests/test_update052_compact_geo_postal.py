@@ -53,7 +53,7 @@ class Geo052(unittest.TestCase):
         self.assertIn('max-width: 100%;',scss)
         self.assertIn('background: #eaf3fb;',scss)
     def test_version_and_unchanged_contact_models(self):
-        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.66.0')
+        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.67.0')
         txt=(ROOT/'models/geo_lead.py').read_text()
         self.assertNotIn("self.env['res.partner'].create",txt)
         self.assertNotIn('res.partner.write',txt)

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Update_068: Administrator (Settings group) may always approve MM and open the MM Approval settings.
+       group_mm_manager implies group_mm_approver / group_mm_user of crm_mm_approval_bridge. -->
+  <record id="base.group_system" model="res.groups">
+    <field name="implied_ids" eval="[(4, ref('crm_mm_approval_bridge.group_mm_manager'))]"/>
+  </record>
+</odoo>

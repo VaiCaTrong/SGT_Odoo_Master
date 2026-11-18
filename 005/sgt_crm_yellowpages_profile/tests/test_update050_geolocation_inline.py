@@ -31,7 +31,7 @@ class GeoInlineUI(unittest.TestCase):
 
     def test_manifest_version(self):
         manifest=ast.literal_eval((ROOT/'__manifest__.py').read_text('utf-8'))
-        self.assertEqual(manifest['version'],'19.0.1.66.0')
+        self.assertEqual(manifest['version'],'19.0.1.67.0')
 
     def test_unchanged_geo_backend_and_cron(self):
         from zipfile import ZipFile

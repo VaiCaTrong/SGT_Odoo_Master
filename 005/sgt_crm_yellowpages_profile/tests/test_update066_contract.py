@@ -20,7 +20,7 @@ PY = (ROOT / 'models/crm_lead.py').read_text()
 class Contract(unittest.TestCase):
     def test_manifest(self):
         m = ast.literal_eval((ROOT / '__manifest__.py').read_text())
-        self.assertEqual(m['version'], '19.0.1.66.0')
+        self.assertEqual(m['version'], '19.0.1.67.0')
 
     def test_no_new_field_or_view_change(self):
         # Image Gallery only: the field stays the same readonly custom widget, no new column

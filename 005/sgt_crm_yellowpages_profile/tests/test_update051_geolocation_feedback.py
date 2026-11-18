@@ -83,7 +83,7 @@ class GeoUI051(unittest.TestCase):
         self.assertTrue(any('City Name' in q for q,_ in g.calls[1:]))
     def test_manifest_and_layout(self):
         manifest=ast.literal_eval((ROOT/'__manifest__.py').read_text('utf8'))
-        self.assertEqual(manifest['version'],'19.0.1.66.0')
+        self.assertEqual(manifest['version'],'19.0.1.67.0')
         tree=etree.parse(str(ROOT/'views/crm_yp_lead_form.xml'))
         row=tree.xpath("//div[contains(@class,'sgt_yp_geoloc_card')]")[0]
         self.assertEqual([x.get('string') for x in row.xpath('.//label')],['Lat','Lon'])

@@ -33,7 +33,7 @@ class Geo057CompactActions(unittest.TestCase):
         self.assertIn('background: #eaf3fb;',css)
     def test_assets_templates_and_maps(self):
         manifest=ast.literal_eval((ROOT/'__manifest__.py').read_text())
-        self.assertEqual(manifest['version'],'19.0.1.66.0')
+        self.assertEqual(manifest['version'],'19.0.1.67.0')
         assets=manifest['assets']['web.assets_backend']
         self.assertTrue(any('/js/geo_coordinate_actions.js' in a for a in assets))
         self.assertTrue(any('/xml/geo_coordinate_actions.xml' in a for a in assets))

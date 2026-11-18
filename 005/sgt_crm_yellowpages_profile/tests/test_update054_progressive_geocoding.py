@@ -104,7 +104,7 @@ class Update054(unittest.TestCase):
         self.assertIn("self.env['base.geocoder'].sudo()",src)
         self.assertIn("limit=5",src)
     def test_manifest_and_xml(self):
-        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.66.0')
+        self.assertEqual(ast.literal_eval((ROOT/'__manifest__.py').read_text())['version'],'19.0.1.67.0')
         for xml in (ROOT/'views').glob('*.xml'): etree.parse(str(xml))
         for xml in (ROOT/'data').glob('*.xml'): etree.parse(str(xml))
 if __name__ == '__main__': unittest.main()

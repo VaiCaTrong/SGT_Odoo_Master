@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- CRM-005 Update_068: horizontal "MM Approval" box with the red approve button, above the deal title.
+       Logic (remote MM card, chatter, delta sync) stays in crm_mm_approval_bridge; this view only places the button.
+       Shown only to MM approvers (and Administrators), only while the deal is in a stage listed in
+       "CRM stages visible in MM Approval" (5.Match Making), only before approval.
+       Not shown inside the old "SGT MM Approval" menu (mm_approval_mode), which has its own toolbar. -->
+  <record id="view_crm005_mm_approve_box" model="ir.ui.view">
+    <field name="name">crm.lead.form.crm005.mm.approve.box</field>
+    <field name="model">crm.lead</field>
+    <field name="inherit_id" ref="view_crm005_yellowpages_lead_form"/>
+    <field name="priority" eval="96"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet/div[hasclass('oe_title')]" position="before">
+        <field name="x_mm_stage_allowed" invisible="1"/>
+        <field name="x_mm_approved" invisible="1"/>
+        <field name="x_mm_remote_id" invisible="1"/>
+        <div class="sgt_mm_approve_box" groups="crm_mm_approval_bridge.group_mm_approver"
+             invisible="not x_mm_stage_allowed or x_mm_approved or x_mm_remote_id or type != 'opportunity' or context.get('mm_approval_mode')">
+          <div class="sgt_mm_approve_brand">
+            <span class="sgt_mm_approve_badge">SGT</span>
+            <span class="sgt_mm_approve_title">MM Approval</span>
+          </div>
+          <button name="action_crm005_approve_mm" type="object" class="btn btn-danger sgt_mm_approve_btn"
+                  string="Phê Duyệt &amp; Tạo MM" icon="fa-check"/>
+        </div>
+      </xpath>
+    </field>
+  </record>
+</odoo>

@@ -101,7 +101,7 @@ class SafeKanban(unittest.TestCase):
         self.assertIn('o_opportunity_kanban',CSS.read_text())
     def test_release_manifest_version(self):
         manifest=ast.literal_eval((ROOT/'__manifest__.py').read_text())
-        self.assertEqual(manifest['version'],'19.0.1.66.0')
+        self.assertEqual(manifest['version'],'19.0.1.67.0')
         self.assertIn('sgt_crm_yellowpages_profile/static/src/js/kanban_shortcuts_safe.js',manifest['assets']['web.assets_backend'])
 
 if __name__=='__main__':unittest.main()
