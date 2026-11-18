@@ -509,8 +509,11 @@ def _address(lead: dict) -> str:
                                  rel_name(lead.get("state_id")), rel_name(lead.get("country_id"))) if x)
 
 
-def deal_details(gateway, session, ids: list[int], base_host: str | None = None) -> dict[int, dict]:
-    """CRM information + Evidence image list of the Deals on the page, read with the user's own rights."""
+def deal_details(gateway, session, ids: list[int], base_host: str | None = None, epoch: str = "") -> dict[int, dict]:
+    """CRM information + Evidence image list of the Deals on the page, read with the user's own rights.
+
+    `epoch` = the saved version in use (Home > Settings > Update Data / Rollback). It is part of every image URL, so the pictures
+    a browser already holds are replaced only when an administrator runs Update Data, not at every edit in CRM."""
     if not ids:
         return {}
     try:
@@ -535,6 +538,7 @@ def deal_details(gateway, session, ids: list[int], base_host: str | None = None)
                 tag_names[t["id"]] = str(t.get("name") or "").strip()
         except Exception:  # noqa: BLE001 - tags are optional decoration
             tag_names = {}
+    tag = re.sub(r"[^0-9a-z]", "", str(epoch or "0").lower())[:16] or "0"
     out: dict[int, dict] = {}
     for ident, r in data.items():
         usable, found, note = ev.summarize(r.get(ev.FIELD_EVIDENCE), base_host) if ev.FIELD_EVIDENCE in present else ([], 0, "Không tìm thấy trường Evidence trong Odoo; chưa thể xác minh ảnh.")
@@ -549,14 +553,14 @@ def deal_details(gateway, session, ids: list[int], base_host: str | None = None)
             "approved_at": local_text(r.get("x_mm_approved_at")) if r.get("x_mm_approved_at") else "",
             "approved_by": rel_name(r.get("x_mm_approved_by")),
             "evidence_found": found, "evidence_note": note,
-            "evidence": [{"thumb": f"/sgt_home/kpi/evidence?lead={ident}&i={i}&size=thumb",
-                          "large": f"/sgt_home/kpi/evidence?lead={ident}&i={i}&size=large"} for i in usable],
+            "evidence": [{"thumb": f"/sgt_home/kpi/evidence?lead={ident}&i={i}&size=thumb&v={tag}",
+                          "large": f"/sgt_home/kpi/evidence?lead={ident}&i={i}&size=large&v={tag}"} for i in usable],
         }
     return out
 
 
 def mm_all_report(gateway, history, session, period: Period, page: int = 1, page_size: int = 25, force: bool = False,
-                  column: str = "all", detail: bool = False, base_host: str | None = None) -> dict[str, Any]:
+                  column: str = "all", detail: bool = False, base_host: str | None = None, epoch: str = "") -> dict[str, Any]:
     """Match Making page (Update_019b): column 5 (Match Making) and column 6 (Approved Match Making) in ONE list.
 
     Each column keeps the Dashboard's own cohort rule (Deals currently in the stage, dated by their first tracked entry into it);
@@ -582,7 +586,7 @@ def mm_all_report(gateway, history, session, period: Period, page: int = 1, page
     merged = sorted(({**e, "column": k} for k in wanted for e in cur[k]), key=lambda e: (e["dt"], e["lead_id"]), reverse=True)
     total_all = len(cur["mm"]) + len(cur["approved"])
     chosen = merged[(page - 1) * page_size:page * page_size]
-    more = deal_details(gateway, session, [e["lead_id"] for e in chosen], base_host) if detail else {}
+    more = deal_details(gateway, session, [e["lead_id"] for e in chosen], base_host, epoch) if detail else {}
     rows = []
     for e in chosen:
         lead = hists[e["column"]]["details"][e["lead_id"]]
@@ -606,7 +610,7 @@ def mm_all_report(gateway, history, session, period: Period, page: int = 1, page
 
 
 def stage_report(gateway, history, session, kind: str, period: Period, page: int = 1, page_size: int = 25, force: bool = False,
-                 detail: bool = False, base_host: str | None = None) -> dict[str, Any]:
+                 detail: bool = False, base_host: str | None = None, epoch: str = "") -> dict[str, Any]:
     if kind not in STAGES or not (1 <= page <= 100000 and 1 <= page_size <= 100):
         raise KpiError("Tham số không hợp lệ.")
     hist, was_cached = cached((session.token, "stage", kind), force, lambda: stage_history(gateway, history, session, kind))
@@ -623,7 +627,7 @@ def stage_report(gateway, history, session, kind: str, period: Period, page: int
     previous = len(pick(prev_period)) if prev_period is not None else None
     total = len(events)
     chosen = events[(page - 1) * page_size:page * page_size]
-    more = deal_details(gateway, session, [e["lead_id"] for e in chosen], base_host) if detail else {}
+    more = deal_details(gateway, session, [e["lead_id"] for e in chosen], base_host, epoch) if detail else {}
     rows = []
     for e in chosen:
         lead = hist["details"][e["lead_id"]]

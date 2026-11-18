@@ -9,6 +9,7 @@ by ``sgt.home.setting._kpi_sgt_config`` and never reaches the browser. Each KPI 
 shows its reason while the others still show.
 """
 import logging
+import re
 import os
 from urllib.parse import urlsplit
 
@@ -17,8 +18,11 @@ from odoo.http import request
 
 from ..heatmap.adapter import OdooEnvGateway, OdooError
 from ..kpi import evidence as ev_mod
+from ..kpi import gb_history as gb_mod
 from ..kpi import period as period_mod
+from ..kpi import posts as posts_mod
 from ..kpi import sgt as sgt_mod
+from ..kpi import snapshot as snap_mod
 from ..kpi import xinyang as xy_mod
 
 _logger = logging.getLogger(__name__)
@@ -86,26 +90,48 @@ class SgtKpi(http.Controller):
         client = sgt_mod.SgtClient(cfg.get('url'), cfg.get('db'), cfg.get('login'), cfg.get('secret'))
         return client if client.configured() else None
 
+    @staticmethod
+    def _from_saved(kpi, saved, per, force):
+        """GB / Content from the saved version in use (Update Data): works while social360 is down, every period of the filter."""
+        payload = saved['payload']
+        if kpi == 'gb':
+            card = snap_mod.fetch_gb(payload, per)
+        else:
+            replay = snap_mod.ReplayClient(payload['content_calls'], saved['label'], saved['id'])
+            card = sgt_mod.fetch_content_kpi(replay, per, force)
+        card['mode'] = 'saved'
+        card['saved'] = {'version': saved['id'], 'taken_at': payload.get('taken_at'), 'source': saved['label']}
+        card['updated_at'] = payload.get('taken_at')
+        return card
+
     def _one(self, kpi, per, force, page, page_size, detail=False, column='all'):
         try:
             if kpi in ('gb', 'content'):
+                saved = request.env['sgt.home.kpi.snapshot']._active()
+                if saved:
+                    return self._from_saved(kpi, saved, per, force)
                 client = self._sgt_client()
                 if client is None:
                     return _failed(kpi, 'Chưa kết nối social360. Quản trị viên nhập URL / database / tài khoản dịch vụ / API key '
                                         'tại Home > Settings (mục "KPI Dashboard · social360 connection").', not_connected=True,
                                    source='sgt', **per.as_dict())
-                return (sgt_mod.fetch_gb if kpi == 'gb' else sgt_mod.fetch_content_kpi)(client, per, force)
+                card = (sgt_mod.fetch_gb if kpi == 'gb' else sgt_mod.fetch_content_kpi)(client, per, force)
+                card['mode'] = 'live'
+                return card
             gateway = OdooEnvGateway(request.env)
             history = gateway.elevated(HISTORY_READS)
             session = gateway.session()
             if kpi == 'data':
                 return xy_mod.prospects(gateway, history, session, per, page, page_size, force)
             host = (urlsplit(request.httprequest.host_url).hostname or None) if detail else None
+            # Evidence pictures follow the saved version (Home > Settings > Update Data / Rollback): see xy_mod.deal_details
+            active = request.env['sgt.home.kpi.snapshot']._active() if detail else None
+            epoch = str(active['id']) if active else '0'
             if kpi == 'mm_all':
                 return xy_mod.mm_all_report(gateway, history, session, per, page, page_size, force, column=column,
-                                            detail=detail, base_host=host)
+                                            detail=detail, base_host=host, epoch=epoch)
             return xy_mod.stage_report(gateway, history, session, 'mm' if kpi == 'mm' else 'approved', per, page, page_size, force,
-                                       detail=detail, base_host=host)
+                                       detail=detail, base_host=host, epoch=epoch)
         except (sgt_mod.GbError, xy_mod.KpiError, OdooError) as exc:
             return _failed(kpi, str(exc), source='sgt' if kpi in ('gb', 'content') else 'xinyang', **per.as_dict())
         except _DbRetry:
@@ -161,6 +187,104 @@ class SgtKpi(http.Controller):
         detail = str(kw.get('detail', '')).lower() in ('1', 'true', 'yes') and kpi in ('mm', 'approved_mm', 'mm_all')
         return self._json({'period': per.as_dict(), 'card': self._one(kpi, per, force, page, page_size, detail, col)})
 
+    # ---- post URLs of the GB page (Update_026) ---------------------------------------------------------------------
+    @http.route('/sgt_home/kpi/links', type='http', auth='public', methods=['GET'], readonly=True)
+    def links(self, **kw):
+        """Every post URL of Project XINYANG in the period (Approved / Uncheck / Not Approved / All), like the SGT Summary box."""
+        denied = self._guard()
+        if denied:
+            return denied
+        try:
+            per = period_mod.resolve(kw.get('period'), kw.get('date'))
+        except period_mod.PeriodError as exc:
+            return self._json({'detail': str(exc)}, 422)
+        force = str(kw.get('force', '')).lower() in ('1', 'true', 'yes')
+        try:
+            saved = request.env['sgt.home.kpi.snapshot']._active()
+            if saved:
+                raw = saved['payload'].get('gb') or {}
+                if raw.get('links_error'):
+                    raise sgt_mod.GbError(raw['links_error'])
+                if 'links' not in raw:
+                    raise sgt_mod.GbError('Phiên bản đã lưu được tạo trước Update_026 nên chưa có link bài. Bấm Update Data để lưu phiên bản mới.')
+                items = gb_mod.links_from_saved(raw, per.start, per.end)
+                meta = {'mode': 'saved', 'taken_at': saved['payload'].get('taken_at'), 'source': saved['label']}
+            else:
+                client = self._sgt_client()
+                if client is None:
+                    raise sgt_mod.GbError('Chưa kết nối social360. Quản trị viên nhập kết nối tại Home > Settings.')
+                items, _hit = sgt_mod._cached((client.url, client.db, client.login, 'links', per.kind, str(per.start)), force,
+                                              lambda: gb_mod.fetch_links(client, per.start, per.end))
+                meta = {'mode': 'live', 'taken_at': sgt_mod._stamp(), 'source': client.where()}
+        except sgt_mod.GbError as exc:
+            return self._json({'available': False, 'reason': str(exc), 'items': []})
+        except _DbRetry:
+            raise
+        except Exception:  # noqa: BLE001
+            _logger.exception('GB links: unexpected error')
+            return self._json({'available': False, 'reason': 'Máy chủ không đọc được link bài (lỗi nội bộ).', 'items': []})
+        counts = {name: sum(1 for s, _u in items if s == slot) for name, slot in gb_mod.LINK_SLOTS.items()}
+        counts['all'] = len(items)
+        return self._json({'available': True, **meta, 'period': per.as_dict(), 'counts': counts, 'items': items})
+
+    # ---- newest approved Content posts (text + first image), Update_022 -----------------------------------------------
+    def _posts_data(self, force=False):
+        """(data, meta): the posts of the saved version in use, else read live from the selected connection. Raises GbError."""
+        saved = request.env['sgt.home.kpi.snapshot']._active()
+        if saved:
+            data = saved['payload'].get('posts')
+            if data is None:
+                raise sgt_mod.GbError('Phiên bản đã lưu được tạo trước Update_022 nên chưa có bài Content. Bấm Update Data để lưu phiên bản mới.')
+            if data.get('error'):
+                raise sgt_mod.GbError('Lần Update Data này không đọc được bài Content: %s' % data['error'])
+            return data, {'mode': 'saved', 'version': saved['id'], 'taken_at': saved['payload'].get('taken_at'), 'source': saved['label']}
+        client = self._sgt_client()
+        if client is None:
+            raise sgt_mod.GbError('Chưa kết nối social360. Quản trị viên nhập kết nối tại Home > Settings rồi bấm Update Data.')
+        data, _hit = sgt_mod._cached((client.url, client.db, client.login, 'posts'), force, lambda: posts_mod.load_latest(client))
+        return data, {'mode': 'live', 'version': 'live', 'taken_at': sgt_mod._stamp(), 'source': client.where()}
+
+    @http.route('/sgt_home/kpi/posts', type='http', auth='public', methods=['GET'], readonly=True)
+    def posts(self, **kw):
+        denied = self._guard()
+        if denied:
+            return denied
+        force = str(kw.get('force', '')).lower() in ('1', 'true', 'yes')
+        try:
+            data, meta = self._posts_data(force)
+        except sgt_mod.GbError as exc:
+            return self._json({'available': False, 'reason': str(exc), 'posts': []})
+        except _DbRetry:
+            raise
+        except Exception:  # noqa: BLE001
+            _logger.exception('Content posts: unexpected error')
+            return self._json({'available': False, 'reason': 'Máy chủ không đọc được bài Content (lỗi nội bộ).', 'posts': []})
+        return self._json({'available': True, **meta, 'posts': posts_mod.public_view(data)})
+
+    @http.route('/sgt_home/kpi/post_image', type='http', auth='public', methods=['GET'], readonly=True)
+    def post_image(self, **kw):
+        """One re-encoded image of a post from the data the Content page shows (saved version or live); never a public link."""
+        denied = self._guard()
+        if denied:
+            return denied
+        try:
+            post_id = int(kw.get('id'))
+        except (TypeError, ValueError):
+            return self._json({'detail': 'Yêu cầu ảnh không hợp lệ.'}, 422)
+        size = kw.get('size') or 'thumb'
+        if size not in ('thumb', 'large'):
+            return self._json({'detail': 'Kích thước ảnh không hợp lệ.'}, 422)
+        try:
+            data, _meta = self._posts_data(False)
+        except sgt_mod.GbError as exc:
+            return self._json({'detail': str(exc)}, 404)
+        body = posts_mod.image_bytes(data, post_id, size)
+        if body is None:
+            return self._json({'detail': 'Bài này không có ảnh.'}, 404)
+        return request.make_response(body, headers=[
+            ('Content-Type', 'image/jpeg'), ('Content-Length', str(len(body))), ('Cache-Control', 'private, max-age=600'),
+            ('X-Content-Type-Options', 'nosniff'), ('Content-Security-Policy', "default-src 'none'")])
+
     # ---- Evidence image of a Match Making Deal ---------------------------------------------------------
     @http.route('/sgt_home/kpi/evidence', type='http', auth='public', methods=['GET'], readonly=True)
     def evidence(self, **kw):
@@ -186,6 +310,8 @@ class SgtKpi(http.Controller):
         except Exception:  # noqa: BLE001
             _logger.exception('Evidence image %s/%s: unexpected error', lead_id, index)
             return self._json({'detail': 'Máy chủ không đọc được ảnh này.'}, 500)
+        # The link carries the saved-version tag (v): the picture stays in the browser until Update Data / Rollback gives a new link.
+        cache = 'private, max-age=86400' if re.fullmatch(r'[0-9a-z]{1,16}', str(kw.get('v') or '')) else 'private, max-age=600'
         return request.make_response(body, headers=[
-            ('Content-Type', mime), ('Content-Length', str(len(body))), ('Cache-Control', 'private, max-age=600'),
+            ('Content-Type', mime), ('Content-Length', str(len(body))), ('Cache-Control', cache),
             ('X-Content-Type-Options', 'nosniff'), ('Content-Security-Policy', "default-src 'none'")])

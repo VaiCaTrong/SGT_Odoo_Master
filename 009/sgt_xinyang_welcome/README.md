@@ -1,6 +1,91 @@
 # sgt_xinyang_welcome — UI-009 (trang đăng nhập) + UI-010 (app Home)
 
-**1 module, 1 ZIP.** Phụ thuộc: `web`, `website` (Odoo 19). Phiên bản 19.0.1.11.0 (Update_020).
+**1 module, 1 ZIP.** Phụ thuộc: `web`, `website` (Odoo 19). Phiên bản 19.0.1.24.0 (Update_033).
+
+## Update_033 (18/11/2026) — Home không còn bị ẩn khỏi menu app khi vào lại trang
+
+- Lỗi: vào lại trang (VD mở thẳng CRM) thì menu app không có Home, phải F5 mới thấy.
+- Nguyên nhân (đã tái hiện trên Odoo thử): Odoo lưu một bản sao menu trong trình duyệt (`localStorage` khoá `webclient_menus`), vẽ trang bằng bản sao đó trước rồi mới hỏi máy chủ. Bản sao cũ (từ trước khi có Home, hoặc do tài khoản khác cùng trình duyệt ghi) → menu mở ra thiếu Home; mở menu lúc đó thì nó đứng yên cho tới khi tải lại trang.
+- Sửa: `static/src/home/menu_fresh.js` xoá bản sao đó trước khi Odoo đọc, nên trang luôn vẽ menu hiện tại của máy chủ (trang đã gửi sẵn yêu cầu menu nên chỉ chờ vài chục mili giây). Máy chủ vẫn trả đúng menu mà người dùng được xem.
+- Đã kiểm tra trên server thật (chỉ đọc): máy chủ trả menu có Home đủ 40/40 lần, nên lỗi nằm ở bản sao trong trình duyệt.
+
+## Update_032 (17/11/2026) — Ảnh Evidence ở box MM đổi theo Update Data
+
+- Lỗi: đổi ảnh Evidence trong CRM nhưng Dashboard MM vẫn hiện ảnh cũ (link ảnh không đổi, trình duyệt giữ 10 phút).
+- Cách làm: link ảnh có thêm `v=<số phiên bản đã lưu đang dùng>`; link ảnh có `v` được trình duyệt giữ tới 1 ngày. Bấm **Update Data** (hoặc Rollback) ở Home › Settings → phiên bản đổi → link đổi → Dashboard lấy ảnh mới. Chưa bấm thì Dashboard giữ ảnh đã có, không tự đổi liền.
+- Update Data / Rollback cũng xoá bộ nhớ đệm 60 giây của danh sách MM trên máy chủ.
+- Trình duyệt mở lần đầu (chưa có ảnh trong bộ nhớ) vẫn nhận ảnh hiện tại của CRM.
+
+## Update_031 (17/11/2026) — Content: bài duyệt mới nhất lên đầu trang
+**Cài:** Upgrade rồi Ctrl+Shift+R. Trang Dashboard › Content nay xếp: **9 bài đã duyệt mới nhất** (trên cùng) → các ô số → Tác giả → bảng Ngày. Nếu phần số Content bị lỗi, khung bài vẫn hiện ở đầu trang.
+
+## Update_030 (17/11/2026) — So sánh "5 → 10 tăng 100%", màu vàng khi không có số, bỏ ghi chú
+**Cài:** Upgrade rồi Ctrl+Shift+R.
+
+- **So sánh kỳ trước** (Tổng quan và từng trang GB / Content / Data / Match Making) nay ghi rõ **từ bao nhiêu lên bao nhiêu và bao nhiêu %**: `▲ 5 → 10 tăng 100% so với kỳ trước` (xanh), `▼ 10 → 5 giảm 50% …` (đỏ).
+- **Không có số để so sánh** (Toàn thời gian, chưa có số kỳ trước): chữ **màu vàng**, không có mũi tên, ghi "Chưa có số kỳ trước để so sánh". Kỳ trước bằng 0: hiện `0 → 10` màu vàng kèm "kỳ trước bằng 0, không tính được %". Bằng nhau: `5 → 5 không đổi` (vàng).
+- **Đã bỏ các dòng ghi chú:** "Dữ liệu social360 đã lưu lúc …", "Cơ sở tính: …" (GB, Content, Data, Match Making), dòng "Theo tháng …" ở Content, và dòng "Kỳ trước: N" lặp lại. Dòng "Cập nhật" cuối trang vẫn giữ.
+- Kiểm tra trên Chromium: 5 trang × 4 kỳ không còn ghi chú; phần trăm và mũi tên khớp số; màu xanh/đỏ/vàng đúng.
+
+## Update_029 (17/11/2026) — Popup sản phẩm Home khóa cuộn trang nền
+**Cài:** Upgrade rồi Ctrl+Shift+R. Khi popup sản phẩm ở Home đang mở, trang phía sau bị khóa cuộn (kể cả lăn chuột trên nền tối), giống khung bài ở Dashboard. Đóng popup: trang cuộn lại, giữ nguyên vị trí.
+- **Sửa kèm:** phím **Esc** trước đây không đóng được popup sản phẩm Home trong Odoo thật (bị phím nóng của Odoo chặn); nay Esc đóng được, phím ←/→ vẫn đổi sản phẩm.
+
+## Update_028 (17/11/2026) — Khung POST URLS không hỏng vì dòng bất thường
+- Khi đọc trực tiếp (chưa có phiên bản lưu): dòng có link trống (chỉ dấu cách) không còn làm cả khung báo lỗi; dòng Published có Detail khác "OK"/trống vẫn hiện, nằm ở tab **All**.
+- **Lưu ý còn lại:** Update Data (lưu phiên bản) vẫn dừng nếu lịch sử GB có dòng Published với Detail lạ (quy tắc chặn đếm sai từ Update_021).
+
+## Update_027 (17/11/2026) — Sửa lỗi nền cuộn theo khi xem chi tiết bài
+**Cài:** Upgrade rồi Ctrl+Shift+R.
+
+- **Lỗi:** mở bài Content (hoặc ảnh MM) ở Dashboard, cuộn nội dung tới cuối thì trang nền phía sau cũng cuộn theo.
+- **Sửa:** khi khung phóng to đang mở, trang nền bị khóa cuộn (kể cả khi lăn chuột trên nền tối); cuộn tới cuối nội dung bài thì dừng, không lan ra trang. Đóng khung: trang cuộn lại bình thường, giữ nguyên vị trí cũ. Popup sản phẩm ở Home cũng không cho cuộn lan từ phần chữ ra nền.
+- Kiểm tra trên Chromium: cuộn 40 nhịp liên tiếp trên bài dài 3.700 px, nền đứng yên (300 → 300).
+
+## Update_026 (17/11/2026) — Dashboard GB: khung POST URLS giống Summary của SGT
+**Cài:** Upgrade, Ctrl+Shift+R, rồi vào Home > Settings bấm **Update Data một lần** (các phiên bản đã lưu trước đó chưa có link bài).
+
+- **Dashboard > GB**, bên dưới các ô số: khung **POST URLS** với 4 tab **Approved / Uncheck / Not Approved / All** (kèm số lượng), danh sách link cuộn được (chữ đơn cách), nút **Copy All** (copy đúng tab đang chọn, mỗi link một dòng) và nút **Ẩn link / Hiện link**. Link http(s) bấm được, mở tab mới.
+- Theo **kỳ đang chọn** trên Dashboard (Ngày / Tuần / Tháng / Toàn thời gian, giờ Asia/Ho_Chi_Minh), sắp xếp mới nhất trước — cùng quy tắc như Summary: Approved = Published + Detail "OK"; Uncheck = Published + Detail trống; Not Approved = Failed; All = mọi dòng có link.
+- Lưu trong **phiên bản đã lưu** (Update Data) nên vẫn hiện khi social360 ngưng; chưa có phiên bản thì đọc trực tiếp (cache 60 giây). Quyền như Dashboard (Dashboard Viewer / Settings Administrator).
+- **Lưu ý:** Summary của SGT chỉ đếm các dòng **có link**, còn ô số GB của Dashboard đếm mọi dòng lịch sử; số trong khung link có thể ít hơn số ở ô tương ứng nếu có dòng không có link.
+- Chưa mở được trang wizard thật (record 1136) để đối chiếu — làm theo mã nguồn Summary (sgt_gb_submit 19.0.5.121.0).
+
+## Update_025 (17/11/2026) — Khung phóng to bài Content giống popup sản phẩm Home; ảnh hạ xuống
+**Cài:** Upgrade rồi Ctrl+Shift+R (Home có sửa giao diện nên cần tải lại tài nguyên).
+
+- **Dashboard > Content, bấm ảnh bài:** khung phóng to nay có đúng bố cục popup sản phẩm ở Home: ảnh bên trái (nền xanh nhạt), tên tác giả (chữ đỏ), tiêu đề, ngày duyệt và toàn bộ nội dung bên phải (cuộn được, giữ xuống dòng), thanh dưới **"Bài trước / Bài sau"** kèm số thứ tự (vd 3 / 9), nút × góc phải. Phím ←/→ và Esc, bấm nền để đóng vẫn dùng được. Bài không có ảnh: chỉ một cột chữ. Màn hình hẹp (≤700 px): một cột.
+- **Ảnh hạ xuống ở cả hai nơi (popup sản phẩm Home và khung bài Dashboard):** ảnh nằm giữa vùng nhìn thấy thay vì dính mép trên, nên bớt khoảng trống phía dưới ảnh khi chữ bên phải dài; ảnh vẫn đứng yên khi cuộn chữ. Sản phẩm Home có nhiều ảnh: các ảnh nhỏ vẫn nằm **dưới** ảnh lớn như cũ (ảnh + hàng ảnh nhỏ cùng hạ xuống). Mỗi bài Content chỉ có 1 ảnh nên Dashboard không có hàng ảnh nhỏ.
+- Kiểm tra trên Chromium thật: bài ngắn, bài 3000 ký tự, sản phẩm Home 1 ảnh và 4 ảnh, bài không ảnh, 390 px; ảnh giữ vị trí khi cuộn chữ; Bài trước / sau, Esc, ×, bấm nền.
+
+## Update_024 (17/11/2026) — Hộp xác nhận Update Data nói đúng việc sẽ làm
+**Cài:** Upgrade rồi Ctrl+Shift+R. Hộp xác nhận không còn ghi "chỉ đọc social360": nay ghi rõ sẽ đọc **GB, Content và 9 bài đã duyệt mới nhất kèm ảnh** từ kết nối đang chọn, lưu thành phiên bản mới, không ghi gì sang hệ thống kia. Trên Settings có thêm dòng **"Update Data will read"** (kết nối đang chọn: URL + database, không hiện tài khoản / khoá) ngay trên nút.
+
+## Update_023 (17/11/2026) — Trang Content: bảng theo Ngày xuống cuối
+**Cài:** Upgrade rồi Ctrl+Shift+R. Chỉ đổi thứ tự trên trang Content: số liệu → Bài Content đã duyệt mới nhất → Tác giả → **Ngày** (bảng theo ngày nay ở cuối). Không đổi dữ liệu hay quyền.
+
+## Update_022 (17/11/2026) — Trang Content: 9 bài đã duyệt mới nhất, kèm ảnh, bấm ảnh để xem lớn
+**Cài:** Upgrade trên DB đang ở Update_021 (19.0.1.12.0), rồi Ctrl+Shift+R, **rồi bấm Update Data một lần** (bản lưu cũ chưa có bài, trang sẽ báo rõ). Không có nhóm quyền hay trường CRM mới; chỉ thêm 1 cột số đếm trong bảng phiên bản của addon.
+
+- **Dashboard > Content, khung "Bài Content đã duyệt mới nhất":** 9 bài đã duyệt mới nhất của Project XINYANG, sắp theo Last Reviewed (cùng quy tắc "Đã duyệt" của KPI Content), **không phụ thuộc bộ lọc thời gian**. Mỗi bài là một thẻ: ảnh đầu tiên, tiêu đề, tác giả, ngày duyệt, đoạn đầu nội dung.
+- **Bấm ảnh (hoặc tiêu đề) để xem lớn:** ảnh lớn (1280 px) kèm toàn bộ nội dung bài (tối đa 3000 ký tự), mũi tên ←/→ để chuyển bài, Esc / × / bấm nền để đóng. Bài không có ảnh vẫn mở được (chỉ chữ). Mỗi bài chỉ lấy **ảnh đầu tiên**; media còn lại chỉ ghi "+n media khác". **Video không tải**, chỉ ghi tên.
+- **Lấy từ đâu:** từ kết nối đang chọn trong Settings (mặc định Kết nối 1 = sgt.sge.vn). Nếu đã có bản lưu thì đọc từ **bản lưu** (nên social360 sập vẫn xem được cả chữ lẫn ảnh); chưa có bản lưu thì đọc trực tiếp (đệm 60 giây).
+- **Dung lượng:** ảnh được thu nhỏ trên máy chủ Xinyang (Pillow, JPEG): ảnh nhỏ 360 px cho thẻ + ảnh 1280 px để xem lớn. Thử với 9 bài: khoảng 2,3 MB mỗi phiên bản (ảnh nhiễu là trường hợp nặng nhất; ảnh thật thường nhẹ hơn). Giữ tối đa 10 phiên bản như Update_021.
+- **Quyền:** chỉ Settings Administrator và người có quyền Dashboard (Dashboard Viewer / Home Manager); ảnh đi qua route riêng có kiểm quyền, không có link công khai. Mọi chữ của bài đi qua `esc()` (HTML trong bài hiện thành chữ, không chạy). Tài khoản dịch vụ chỉ đọc.
+- **Lỗi đọc bài không làm mất số liệu:** nếu Update Data đọc được số liệu mà không đọc được bài / ảnh (thiếu quyền...), số liệu vẫn được lưu, thông báo cảnh báo ghi lý do, trang Content hiện lý do ở khung bài.
+- **Kiểm tra:** 9 bài đúng thứ tự so với truy vấn trực tiếp; 1 ảnh/bài; bài không ảnh, bài chỉ có video, bài 3 ảnh, ảnh dọc, PNG trong suốt, bài 3000 ký tự, HTML/script trong bài; bản lưu giữ bài + ảnh, tắt social360 vẫn xem; chế độ đọc trực tiếp; Admin / Viewer / Sales xem được, người không quyền 403, chưa đăng nhập 401, tham số xấu 422 / 404; bản lưu cũ (trước Update_022) và bản lưu lỗi báo lý do rõ, Rollback giữa các bản đúng; Chromium thật (thẻ, ảnh tải đủ, bấm ảnh ra ảnh lớn, mũi tên, Esc, bấm nền, EN/VI, 390 px không tràn ngang).
+- **Chưa kiểm chứng:** đọc bài thật từ sgt.sge.vn bằng khoá thật (tài khoản dịch vụ cần xem được `sgt.social.post` và ảnh: nhóm "User: All Documents" hoặc tương đương); kích thước ảnh thật trên production.
+
+## Update_021 (17/11/2026) — Ghi nhớ dữ liệu social360 (GB + Content), nút Update Data / Rollback, kết nối phụ
+**Cài:** Upgrade trên DB đang ở Update_020 (19.0.1.11.0), rồi Ctrl+Shift+R. Có **một bảng mới trong chính addon** (`sgt.home.kpi.snapshot`, chỉ Settings Administrator thấy); **không tạo trường nào trong CRM** và không đụng bảng của Odoo/CRM. Gỡ addon thì bảng này bị xoá theo, Contact/Deal không ảnh hưởng (đã thử gỡ + cài lại trên bản sao DB).
+
+- **Home > Settings > "KPI Dashboard · social360":** *Kết nối 1 (chính)* mặc định `https://sgt.sge.vn` và *Kết nối 2 (phụ)* mặc định `https://social360.sge.vn` (database `social360`), mỗi kết nối có URL / database / tài khoản / API key. Ô **"Update Data reads from"** chọn tay dùng kết nối nào khi bên kia hỏng. Khoá API chỉ admin nhập, không gửi ra trình duyệt, không hiện lại.
+- **Nút Update Data:** đọc social360 ngay (chỉ đọc, không ghi gì sang đó), lưu thành **một phiên bản mới** và đặt làm bản đang dùng. Lỗi bất kỳ (sai khoá, social360 sập, thiếu quyền, dữ liệu lạ) thì **không đổi gì**, bản đang dùng giữ nguyên. Giữ **10 phiên bản mới nhất**.
+- **Nút Rollback (trên từng dòng phiên bản):** chọn phiên bản đó làm bản Dashboard hiển thị; bản mới hơn vẫn còn, bấm Rollback trên dòng mới hơn để quay lại. Không xoá gì khi chuyển qua lại; bản đang dùng không xoá được.
+- **Dashboard khi social360 sập:** sau lần Update Data đầu tiên, GB và Content **luôn đọc từ bản đã lưu** (thẻ ghi "Dữ liệu social360 đã lưu lúc … · nguồn"), mọi kỳ Ngày / Tuần / Tháng / Toàn thời gian vẫn tính được. Chưa có bản lưu nào thì đọc trực tiếp như Update_018. Data và Match Making (Xinyang) vẫn đọc trực tiếp.
+- **Lưu cái gì:** GB = Publishing History của Project XINYANG gom theo ngày (4 số/ngày: tổng, duyệt, không duyệt, chưa kiểm); Content = nguyên các câu trả lời chỉ-đọc mà code Content gọi (phát lại qua đúng code Content cũ, không có bản sao quy tắc). Khi lưu, hệ thống phát lại và so với số vừa đọc, lệch thì không lưu. Bản lưu **không chứa dữ liệu CRM Xinyang** (Deal, Contact, ảnh).
+- **Kiểm tra:** GB lưu vs đọc trực tiếp 224 phép so trên Ngày / Tuần / Tháng / Toàn thời gian: 0 lệch; Content 336 phép so: 0 lệch; tắt hẳn social360 Dashboard vẫn ra số mọi kỳ; Update Data lỗi giữ nguyên bản cũ (kết nối chưa điền, sai khoá); Rollback và khôi phục; người không phải admin bị chặn (Update, Rollback, đọc payload, đọc khoá); tự giữ 10 bản; Settings trên Chromium thật (hộp xác nhận, danh sách phiên bản, Rollback, thẻ Dashboard); gỡ + cài lại addon trên bản sao DB.
+- **Chưa kiểm chứng:** đọc social360 thật từ máy chủ Xinyang bằng khoá thật (chỉ thử với bản giả lập Odoo 19 và Odoo social360 dựng thử); quy mô lớn hơn 1159 dòng lịch sử GB thật (giới hạn cứng 300.000 dòng, quá thì báo lỗi thay vì lưu thiếu). Tên database của sgt.sge.vn admin phải tự nhập ở Kết nối 1.
 
 ## Update_020 (17/11/2026) — Trang Match Making gộp cột 5 + cột 6
 **Cài:** Upgrade trên DB đang ở Update_019 (19.0.1.10.0) hoặc Update_018, rồi Ctrl+Shift+R. Không có nhóm quyền hay trường mới.

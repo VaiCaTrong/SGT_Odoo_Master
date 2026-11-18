@@ -147,8 +147,13 @@ def render(data: bytes, size: str) -> tuple[bytes, str]:
     """Scaled copy (JPEG, white behind transparency) so a page of Deals stays light. Raises EvidenceError on a bad image."""
     if size not in SIZES:
         raise EvidenceError("Kích thước ảnh không hợp lệ.")
-    from PIL import Image, ImageOps, UnidentifiedImageError   # Pillow ships with Odoo
     longest, quality = SIZES[size]
+    return render_box(data, longest, quality)
+
+
+def render_box(data: bytes, longest: int, quality: int) -> tuple[bytes, str]:
+    """Same scaling as ``render`` for an explicit longest side / JPEG quality (also used by the Content posts, Update_022)."""
+    from PIL import Image, ImageOps, UnidentifiedImageError   # Pillow ships with Odoo
     try:
         image = Image.open(io.BytesIO(data))
         if image.width * image.height > MAX_PIXELS:

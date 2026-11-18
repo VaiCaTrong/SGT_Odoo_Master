@@ -4,3 +4,4 @@ from . import website_switch
 from . import home_product
 from . import home_product_image
 from . import home_setting
+from . import kpi_snapshot

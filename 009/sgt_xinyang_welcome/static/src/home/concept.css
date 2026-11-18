@@ -417,10 +417,11 @@
 /* product popup: sticky picture + thumbnails (left), scrolling content (right), product navigation bar (bottom) */
 .o_sgt_home .home-product-backdrop{position:fixed;inset:0;z-index:2000;background:#04192dbc;backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px}
 .o_sgt_home .home-product-modal{position:relative;width:min(920px,100%);max-height:min(90vh,820px);display:flex;flex-direction:column;overflow:hidden;background:#fff;color:#102b49;border-radius:12px;box-shadow:0 30px 90px #0008}
-.o_sgt_home .dialog-scroll{flex:1 1 auto;min-height:0;overflow-y:auto}
+.o_sgt_home .dialog-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .o_sgt_home .dialog-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch}
 .o_sgt_home .dialog-media{background:#eef5fc}
-.o_sgt_home .dialog-sticky{position:sticky;top:0;padding-bottom:14px}
+.o_sgt_home .dialog-sticky{--ih:min(calc(min(100vw - 40px,920px)/2),calc(min(90vh,820px) - 150px));position:sticky;top:clamp(0px,calc((min(90vh,820px) - 54px - var(--ih) - var(--ex,0px))/2),130px);padding-bottom:14px}
+.o_sgt_home .dialog-sticky.multi{--ex:96px}
 .o_sgt_home .dialog-stage{position:relative}
 .o_sgt_home .dialog-main{display:block;width:100%;aspect-ratio:1/1;max-height:calc(min(90vh,820px) - 150px);object-fit:contain;background:#eef5fc}
 .o_sgt_home .dialog-counter{position:absolute;right:10px;bottom:10px;background:#092b4ecc;color:#fff;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;letter-spacing:.03em}
@@ -457,7 +458,7 @@
 .o_sgt_home .home-product-backdrop{padding:10px}
 .o_sgt_home .home-product-modal{max-height:94vh}
 .o_sgt_home .dialog-layout{grid-template-columns:1fr}
-.o_sgt_home .dialog-sticky{position:static}
+.o_sgt_home .dialog-sticky,.o_sgt_home .dialog-sticky.multi{position:static}
 .o_sgt_home .dialog-main{max-height:360px}
 .o_sgt_home .dialog-text{padding:22px 20px}
 .o_sgt_home .dialog-text h2{font-size:22px}
@@ -548,3 +549,6 @@
 /* ---- Update_018: Dashboard (4 main KPIs) menu item; the page itself is /sgt_home/kpi shown like the map ---- */
 .o_sgt_home .nav-links a.nav-kpi{display:inline-flex;align-items:center;gap:7px}
 .o_sgt_home .kpi-bars{width:11px;height:11px;display:inline-block;margin-right:2px;flex:0 0 auto;background:linear-gradient(var(--red),var(--red)) 0 100%/3px 45% no-repeat,linear-gradient(var(--red),var(--red)) 4px 100%/3px 75% no-repeat,linear-gradient(var(--red),var(--red)) 8px 100%/3px 100% no-repeat}
+/* Update_029: while a product popup is open the page behind it does not scroll */
+.o_sgt_home:has(.home-product-backdrop){overflow:hidden}
+.o_sgt_home .home-product-backdrop{overscroll-behavior:contain}

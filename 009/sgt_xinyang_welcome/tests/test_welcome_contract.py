@@ -27,7 +27,7 @@ for py in (A / 'models').glob('*.py'):
     for n in ast.walk(tree):
         if isinstance(n, ast.Assign) and getattr(n.targets[0], 'id', '') == '_name':
             names[n.value.value] = py.name
-ok(set(names) == {'sgt.home.slide', 'sgt.home.fact', 'sgt.home.product', 'sgt.home.product.image', 'sgt.home.setting', 'sgt.website.switch'}, f'models defined: {sorted(names)}')
+ok(set(names) == {'sgt.home.slide', 'sgt.home.fact', 'sgt.home.product', 'sgt.home.product.image', 'sgt.home.setting', 'sgt.home.kpi.snapshot', 'sgt.website.switch'}, f'models defined: {sorted(names)}')
 home_models = ['sgt.home.slide', 'sgt.home.fact']  # data models read by the Home page
 init = (A / 'models' / '__init__.py').read_text()
 ok(all(m.replace('.py', '') in init for m in set(names.values())), 'models/__init__ imports every model file')
@@ -308,7 +308,7 @@ ok(len(sa_rows) == 1 and sa_rows[0]['group_id:id'] == 'base.group_system' and sa
 d = etree.parse(str(A / 'data/website_switch.xml')).getroot()
 ok(d.get('noupdate') == '1' and d.xpath("record[@model='sgt.website.switch']") != [], 'default switch record is seed data (noupdate)')
 ok(man['data'].index('data/website_switch.xml') > man['data'].index('views/website_switch_views.xml') > man['data'].index('security/ir.model.access.csv'), 'manifest order: access, then view, then seed')
-ok(man['version'] == '19.0.1.11.0', 'manifest version 19.0.1.11.0 (Update_020, above every earlier build: ... 1.9.0 / 1.10.0)')
+ok(man['version'] == '19.0.1.24.0', 'manifest version 19.0.1.24.0 (Update_033, above every earlier build: ... 1.22.0 / 1.23.0)')
 # --- Update_012: Odoo 19 client-side contract of home.js (the "Service user is not available" crash) ---
 _hjs = (A / 'static/src/home/home.js').read_text()
 ok('useService("user")' not in _hjs and "useService('user')" not in _hjs, 'home.js does not ask for a "user" service (Odoo 19 has none)')
@@ -478,7 +478,7 @@ ok(_js.count('searchRead("sgt.home.product.image"') == 1 and 'searchRead("sgt.ho
 ok('DEFAULT_IMAGE_SECONDS = 30' in _js and 'imageAutoplayActive' in _js and 'reducedMotion' in _js and 'clearTimeout' in _js and 'holdImages' in _js, 'home.js: 30 s fallback, autoplay pauses on hover and respects reduced motion, timer is cleaned up')
 ok('dialog-strip' in _tpl and 'strip-prev' in _tpl and 'strip-next' in _tpl and 'dialog-footer' in _tpl and 'pn-prev' in _tpl and 'pn-next' in _tpl and 'dialog-arrow' not in _tpl, 'popup template: picture strip arrows and product bar are separate controls')
 _c15 = (A / 'static/src/home/concept.css').read_text()
-ok('.o_sgt_home .dialog-sticky{position:sticky;top:0' in _c15 and '.o_sgt_home .dialog-scroll{' in _c15 and '.o_sgt_home .dialog-footer{flex:0 0 auto' in _c15, 'css: sticky picture column, scrolling content, fixed product bar')
+ok('position:sticky;top:clamp(0px,calc(' in _c15.split('.o_sgt_home .dialog-sticky{')[1].split('}')[0] and '.o_sgt_home .dialog-scroll{' in _c15 and '.o_sgt_home .dialog-footer{flex:0 0 auto' in _c15, 'css: sticky picture column, scrolling content, fixed product bar')
 ok('.o_sgt_home .technical-section h2,.o_sgt_home .approach-section h2' in _c15 and 'color:#fff}' in _c15.split('.o_sgt_home .technical-section h2,.o_sgt_home .approach-section h2')[1].split('\n')[0], 'css: headings on dark sections are explicitly white (Odoo colours h1-h6)')
 ok(_tpl.count('class="industry-row"') == 4 and _tpl.count('class="industry-ico"') == 4 and _tpl.count('class="industry-go"') == 4, 'Applications section: 4 compact cards with icons')
 
@@ -527,9 +527,42 @@ sec18 = (A / 'security' / 'home_security.xml').read_text(); per18 = (K / 'period
 ok('Update_018' in man['description'], 'manifest description lists Update_018')
 ok('group_home_dashboard' in sec18 and "ref('group_home_dashboard')" in sec18.split('id="group_home_manager"')[1], 'Dashboard Viewer group exists and Home Manager implies it')
 ok("DASHBOARD_GROUP = 'sgt_xinyang_welcome.group_home_dashboard'" in ct18 and 'user.has_group(DASHBOARD_GROUP) or user.has_group(ADMIN_GROUP)' in ct18 and 'user._is_internal()' in ct18, 'KPI controller: internal users in Dashboard Viewer or Settings Administrators only')
-ok(ct18.count("auth='public'") == 3 and ct18.count('readonly=True') == 3 and ct18.count('denied = self._guard()') == 2, 'KPI routes: read-only transactions, data route guarded (401 / 403)')
+ok(ct18.count("auth='public'") == 6 and ct18.count('readonly=True') == 6 and ct18.count('denied = self._guard()') == 5, 'KPI routes: read-only transactions, data, evidence, links, posts and post image routes guarded (401 / 403)')
 ok('sudo(' not in xy18 and 'sudo(' not in sg18 and ct18.count('sudo(') == 1, 'KPI readers use the user environment (no sudo); only the version label lookup uses sudo')
 ok(hs18.count('sudo(') == 1 and 'def _kpi_sgt_config' in hs18 and hs18.index('sudo(') > hs18.index('def _kpi_sgt_config'), 'the only sudo of the settings model is the admin-only social360 connection read')
+# ---- Update_021: saved versions, Rollback, second connection ----
+sn21 = (A / 'models' / 'kpi_snapshot.py').read_text(); smod21 = (K / 'snapshot.py').read_text(); ac21 = (A / 'security' / 'ir.model.access.csv').read_text()
+ok('sgt.home.kpi.snapshot' in ac21.replace('_', '.') or 'sgt_home_kpi_snapshot' in ac21, 'saved versions model has an access rule')
+ok(all(not (ln.split(',')[0].endswith('_user') or 'group_user' in ln) for ln in ac21.splitlines() if 'kpi_snapshot' in ln) and 'base.group_system' in ''.join(ln for ln in ac21.splitlines() if 'kpi_snapshot' in ln), 'saved versions: Settings Administrators only (no internal-user row)')
+ok("groups='base.group_system'" in sn21.split('payload =')[1].split('\n')[0], 'the saved payload field is admin only')
+ok(sn21.count('sudo(') == 1 and "base.group_system" in sn21.split('def action_use_version')[1].split('def unlink')[0], 'Rollback re-checks Settings Administrator; only the active-version read uses sudo')
+ok(all(w not in smod21 + (K / 'gb_history.py').read_text().split('# ---- Update_021')[1] for w in ('"create"', "'create'", '"write"', "'write'", '"unlink"', "'unlink'")), 'snapshot code never calls create / write / unlink on social360')
+ok('is_active' in sn21 and 'def _prune' in sn21 and 'KEEP_VERSIONS = 10' in sn21 and 'cannot be deleted' in sn21, 'versions: one in use, newest 10 kept, the one in use cannot be deleted')
+ok(all(re.search(r"kpi_sgt2_%s = fields\.Char\([^)]*groups='base.group_system'" % n_, hs18, re.S) for n_ in ('url', 'db', 'login', 'key')), 'backup connection fields are Settings Administrator only')
+ok('action_kpi_update_data' in hs18 and 'Nothing was changed' in hs18 and 'forget_all' in hs18, 'Update Data leaves the saved data unchanged on any error')
+ok('name="action_use_version"' in hv18 and 'string="Rollback"' in hv18 and 'name="action_kpi_update_data"' in hv18 and 'kpi_sgt2_key' in hv18, 'Settings view: Update Data, Rollback and backup connection')
+ok('class ReplayClient' in smod21 and 'chưa ghi' not in smod21 and 'không đúng' not in smod21 and 'thiếu một câu trả lời' in smod21, 'replay never guesses: an unrecorded call is an error')
+ok("'mode'" in ct18 and '_from_saved' in ct18, 'dashboard controller marks saved mode')
+# ---- Update_022: latest approved Content posts (text + first image) ----
+ps22 = (K / 'posts.py').read_text(); ct22 = (A / 'controllers' / 'kpi.py').read_text(); pg22 = (K / 'kpi_page.html').read_text()
+ok('LATEST = 9' in ps22 and '"order": "reviewed_at desc, id desc"' in ps22 and '["reviewed_at", "!=", False]' in ps22 and 'approved_publication_ids' in ps22, 'posts: the 9 newest approved posts of Project XINYANG, ordered by Last Reviewed')
+ok(all(w not in ps22 for w in ('"create"', "'create'", '"write"', "'write'", '"unlink"', "'unlink'", 'requests.')), 'posts module: reads only (no create / write / unlink, no direct network)')
+ok('media_type' in ps22 and '"video"' in ps22 and ps22.count('"read", [[first["id"]]]') == 1 and 'video' not in ps22.split('_first_image')[1].split('def load_latest')[0].replace('"video"', ''), 'only the first IMAGE of a post is read; videos are never downloaded')
+ok('render_box(data, *THUMB)' in ps22 and 'render_box(data, *LARGE)' in ps22 and 'ev.sniff(data)' in ps22, 'post images are checked (magic bytes) and re-encoded as JPEG in two sizes')
+ok('/sgt_home/kpi/posts' in ct22 and '/sgt_home/kpi/post_image' in ct22 and ct22.count('denied = self._guard()') == 5, 'posts routes are guarded like the data route (Dashboard Viewer / Settings Administrator)')
+ok("'image' not in" in ps22 or 'if k != "image"' in ps22, 'the JSON for the browser carries no image bytes')
+ok("'Content-Security-Policy', \"default-src 'none'\"" in ct22.split('def post_image')[1] and 'nosniff' in ct22.split('def post_image')[1], 'post image response: nosniff + CSP')
+ok('"posts": posts' in (K / 'snapshot.py').read_text() and 'posts_mod.load_latest(client)' in (K / 'snapshot.py').read_text(), 'a saved version keeps the posts; a problem reading them never blocks the numbers')
+card22 = pg22.split('function postCard')[1].split('\nfunction ')[0]
+ok(card22.count('esc(') >= 5 and 'innerHTML' not in card22 and "esc(p.title" in card22 and 'esc(txt)' in card22, 'every post text on the Content page goes through esc()')
+_pc = pg22.split('function pageContent')[1].split('function pageData')[0]
+ok(_pc.index('postsPanel') < _pc.index('contentTitle') < _pc.index('c.creators&&c.creators.length') < _pc.index('c.daily&&c.daily.length') and 'return posts+' in _pc, 'Content page order: latest approved posts on top (also when the numbers fail), then numbers, authors, daily table at the bottom')
+ok('kpi_update_target' in hs18 and 'kpi_update_target' in hv18 and 'GB history' in hv18 and 'latest approved posts' in hv18 and 'Read social360 now' not in hv18, 'Update Data confirmation names what is read; Settings shows the selected connection (no login / key)')
+_css25 = (A / 'static' / 'src' / 'home' / 'concept.css').read_text(); _xml25 = (A / 'static' / 'src' / 'home' / 'home.xml').read_text()
+ok('.pvm' in pg22 and 'pv-media' in pg22 and 'pv-foot' in pg22 and 'prevPost' in pg22 and 'esc(p.text' in pg22 and 'figcaption' not in pg22.split('function showPlb')[1].split('function render')[0], 'Dashboard post viewer uses the Home popup layout (picture, text, previous / next bar), text escaped')
+ok('.dialog-sticky.multi' in _css25 and 'clamp(0px,calc(' in _css25 and "gallery.length &gt; 1 ? 'multi'" in _xml25 and 'dialog-strip' in _xml25, 'Home popup: picture (and its thumbnails below) sits lower, centred in the visible area')
+ok('data-pl=' in pg22 and 'function showPlb' in pg22 and 'closeLb' in pg22 and 'stepLb' in pg22 and 'st.plb' in pg22, 'click on a post picture opens the large viewer (arrows / Esc / close)')
+
 ok(all(re.search(r"kpi_sgt_%s = fields\.Char\([^)]*groups='base.group_system'" % n_, hs18, re.S) for n_ in ('url', 'db', 'login', 'key')), 'social360 URL / database / login / key fields are Settings Administrator only')
 ok('password="True"' in hv18 and 'kpi_sgt_key' in hv18 and 'dashboard_user_ids' in hv18 and 'dashboard_group_missing' in hv18, 'Home > Settings: Dashboard access, social360 connection and the missing-group warning')
 ok("has_group('base.group_system')" in hs18.split('def _inverse_dashboard_users', 1)[1], 'changing who may open the Dashboard re-checks Settings Administrator in the server code')
@@ -552,7 +585,10 @@ ok(all(f'_call(history, session, {m_}' in xy18 for m_ in ('MESSAGE, "search_read
 
 # --- Update_019: Match Making page with CRM information and Evidence images ---
 ev19 = (K / 'evidence.py').read_text()
-ok('Update_020' in man['description'] and 'Update_020' in (A / 'README.md').read_text() and 'Update_019' in (A / 'README.md').read_text(), 'manifest and README describe Update_019 and Update_020')
+mf33 = (A / 'static/src/home/menu_fresh.js').read_text()
+ok("removeItem(\"webclient_menus\")" in mf33 and 'static/src/home/menu_fresh.js' in (A / '__manifest__.py').read_text(), 'old browser copy of the app menu is dropped before Odoo reads it (Home never missing)')
+ok('&v={tag}' in xy18.split('def deal_details')[1] and "epoch" in ct18 and "_active()" in ct18 and 'xy_mod.forget_all()' in (Path(__file__).resolve().parents[1] / 'models' / 'home_setting.py').read_text() and 'xy_mod.forget_all()' in (Path(__file__).resolve().parents[1] / 'models' / 'kpi_snapshot.py').read_text(), 'MM Evidence links carry the saved-version tag; Update Data and Rollback clear the MM cache')
+ok('Update_022' in man['description'] and 'Update_022' in (A / 'README.md').read_text() and 'Update_020' in man['description'] and 'Update_020' in (A / 'README.md').read_text() and 'Update_019' in (A / 'README.md').read_text(), 'manifest and README describe Update_019 and Update_020')
 ok(re.search(r'def evidence\(self', ct18) is not None and "'/sgt_home/kpi/evidence'" in ct18 and 'OdooEnvGateway(request.env)' in ct18.split('def evidence')[1] and 'elevated' not in ct18.split('def evidence')[1], 'Evidence route reads with the signed-in user\'s own environment (no elevated gateway), guarded like the data route')
 ok('sudo' not in ev19 and 'su=True' not in ev19 and ev19.count('"read"') == 2 and all(w_ not in ev19 for w_ in ('"write"', '"create"', '"unlink"', 'requests.', 'urlopen', 'urllib.request')), 'Evidence module: only two reads (Deal, attachment), no write, no network fetch, no elevated rights')
 ok('(?:-[0-9a-f]+)?' in ev19 and 'ir\\.attachment' in ev19 and 'base_host' in ev19, 'Evidence accepts the Odoo 19 editor form (/web/image/<id>-<checksum>/...) and only this Odoo\'s host')
@@ -570,6 +606,35 @@ ok('def mm_all_report' in xy18 and 'column not in ("all", "mm", "approved")' in 
 mm_all_src = xy18.split('def mm_all_report')[1].split('\ndef ')[0]
 ok(mm_all_src.count('stage_history(') == 1 and 'unlink' not in mm_all_src and '"write"' not in mm_all_src and 'sudo' not in mm_all_src, 'mm_all reuses the existing cohort of each column (no new query, no write)')
 ok('data-v="' in pg18 and 'mm_all' in pg18 and 'col="+col' in pg18 and 'approved_total' in pg18, 'MM page: one combined total, per-column counts, filter All / column 5 / column 6')
+
+# ---- Update_026: POST URLS on the GB page
+pg26 = (K / 'kpi_page.html').read_text(); ct26 = (A / 'controllers' / 'kpi.py').read_text(); gh26 = (K / 'gb_history.py').read_text()
+_lk = ct26.split("'/sgt_home/kpi/links'")[1].split("'/sgt_home/kpi/posts'")[0]
+ok('denied = self._guard()' in _lk and "auth='public'" in ct26 and 'links_from_saved' in _lk and 'fetch_links' in _lk, 'links route: guarded like the data route, saved version first, live read otherwise')
+ok('"external_post_url"' in gh26 and '"links"' in gh26 and 'def fetch_links' in gh26 and 'def links_from_saved' in gh26 and 'posted_at desc, id desc' in gh26, 'saved version keeps the post URLs (Approved / Uncheck / Not Approved) newest first; live read uses the same domain as the SGT Summary')
+_pgb = pg26.split('function pageGb')[1].split('function pageContent')[0]
+ok('linksPanel' in _pgb and 'fillLinks(seq,force)' in pg26 and 'tabApproved' in pg26 and 'tabUncheck' in pg26 and 'tabNotApproved' in pg26 and 'tabAll' in pg26 and 'copyAll' in pg26, 'GB page shows POST URLS: tabs Approved / Uncheck / Not Approved / All and Copy All')
+_lkjs = pg26.split('function lkList')[1].split('function lkCopy')[0]
+ok('esc(u)' in _lkjs and "rel=\"noopener noreferrer\"" in _lkjs.replace("'", '"').replace('rel="noopener noreferrer"', 'rel=\"noopener noreferrer\"') or 'noopener noreferrer' in _lkjs, 'every URL goes through esc(); only http(s) links are clickable (noopener)')
+
+# ---- Update_027: the page behind a viewer does not scroll
+ok('html.lb-open' in pg26 and 'overscroll-behavior:contain' in pg26 and pg26.count('classList.add("lb-open")') == 2 and 'classList.remove("lb-open")' in pg26.split('function closeLb')[1].split('\n')[0], 'Dashboard viewers lock the page scroll and keep wheel scrolling inside the open post')
+ok('overscroll-behavior:contain' in (A / 'static' / 'src' / 'home' / 'concept.css').read_text(), 'Home product popup keeps wheel scrolling inside the popup text')
+
+# ---- Update_028: the live link list tolerates odd rows
+ok('slot = 0' in gh26 and 'seen != expected' in gh26 and 'hiển thị link' not in gh26, 'live link list: a Published row with another Detail text shows under All, a blank URL no longer blocks the list')
+
+# ---- Update_029: Home popup locks the page behind it
+_css29 = (A / 'static' / 'src' / 'home' / 'concept.css').read_text()
+ok('.o_sgt_home:has(.home-product-backdrop){overflow:hidden}' in _css29, 'Home: while a product popup is open the page behind it is locked (no scroll, also over the dark backdrop)')
+ok('{ capture: true }' in (A / 'static' / 'src' / 'home' / 'home.js').read_text() and 'ev.stopImmediatePropagation();' in (A / 'static' / 'src' / 'home' / 'home.js').read_text(), 'Home popup: Esc / arrows are caught before Odoo hotkeys can swallow them (Esc closes the popup in real Odoo)')
+
+# ---- Update_030: "5 -> 10 tang 100%", yellow when nothing to compare, notes removed
+pg30 = (K / 'kpi_page.html').read_text()
+_d30 = pg30.split('function delta(cur,prev){')[1].split('function warn')[0]
+ok('cNoPrev' in _d30 and 'class="delta flat"' in _d30 and "' → '" in _d30 and 'cUp' in _d30 and 'cDown' in _d30 and 'pctTxt' in _d30, 'comparison reads "5 → 10 tăng 100%"; no previous number -> yellow sentence without an arrow')
+ok('.delta.flat{color:#a36d00;background:#fff7e0' in pg30 and 'cmp(' not in pg30 and 'delta(c.delta' not in pg30, 'flat comparison is yellow; every card / page passes the two numbers (current, previous)')
+ok('class="basis"' not in pg30 and 'month_view' not in pg30 and 'savedNote(){return ""}' in pg30, 'notes removed from the page: saved-version time, Cơ sở tính (basis), monthly view line')
 
 print('\nRESULT:', 'ALL PASS' if not fails else f'{len(fails)} FAIL')
 sys.exit(1 if fails else 0)

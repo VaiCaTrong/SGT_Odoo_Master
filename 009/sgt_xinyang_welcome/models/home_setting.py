@@ -4,8 +4,17 @@ Add future Home settings as new fields on this model and show them in the form
 view of the "Settings" menu (Home > Settings). Every internal user can READ this
 record (Home needs the values), so never store secrets here.
 """
+import json
+import logging
+
 from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
+
+from ..kpi import sgt as sgt_mod
+from ..kpi import xinyang as xy_mod
+from ..kpi import snapshot as snap_mod
+
+_logger = logging.getLogger(__name__)
 
 AUTOPLAY_MIN = 3
 AUTOPLAY_MAX = 3600
@@ -117,21 +126,96 @@ class SgtHomeSetting(models.Model):
         for rec in self[:1]:
             group.user_ids = rec.dashboard_user_ids
 
-    # ---- social360 (SGT) connection for GB and Content ---------------------------------------------------------------
-    # One READ-ONLY service account. Only Settings Administrators can see or change these fields (field-level group), the key
-    # never goes to the browser; the KPI controller reads them with an elevated environment for exactly these four fields.
-    kpi_sgt_url = fields.Char(string='social360 URL', default='https://social360.sge.vn', groups='base.group_system',
+    # ---- social360 (SGT) connections for GB and Content --------------------------------------------------------------
+    # Two read-only service accounts: Connection 1 (main) and Connection 2 (backup). Both are the same Odoo app with the same
+    # structure; the administrator picks which one "Update Data" reads. Only Settings Administrators can see or change these
+    # fields (field-level group), the keys never go to the browser; the KPI controller reads them with an elevated environment.
+    kpi_sgt_active = fields.Selection(
+        [('main', 'Connection 1 · main'), ('backup', 'Connection 2 · backup')], string='Update Data reads from',
+        default='main', required=True, groups='base.group_system',
+        help='Which connection the Update Data button (and the live reading, before any version is saved) uses. Switch it when the other one is down.')
+    kpi_sgt_url = fields.Char(string='Main · URL', default='https://sgt.sge.vn', groups='base.group_system',
                               help='Address of the SGT Odoo, without /odoo at the end.')
-    kpi_sgt_db = fields.Char(string='social360 database', default='social360', groups='base.group_system')
-    kpi_sgt_login = fields.Char(string='Service account login', groups='base.group_system',
-                                help='A read-only user on social360 that can see Project XINYANG, its Content and the GB Logs.')
-    kpi_sgt_key = fields.Char(string='API key / password', groups='base.group_system',
-                              help='Preferably an API key created for that user on social360 (Preferences > Account Security).')
+    kpi_sgt_db = fields.Char(string='Main · database', groups='base.group_system')
+    kpi_sgt_login = fields.Char(string='Main · account login', groups='base.group_system',
+                                help='A user on social360 that can see Project XINYANG, its Content and the GB Logs (read only is enough).')
+    kpi_sgt_key = fields.Char(string='Main · API key', groups='base.group_system',
+                              help='An API key created for that user on social360 (Preferences > Security > Add API Key).')
+    kpi_sgt2_url = fields.Char(string='Backup · URL', default='https://social360.sge.vn', groups='base.group_system',
+                               help='Address of the second SGT Odoo, without /odoo at the end.')
+    kpi_sgt2_db = fields.Char(string='Backup · database', default='social360', groups='base.group_system')
+    kpi_sgt2_login = fields.Char(string='Backup · account login', groups='base.group_system')
+    kpi_sgt2_key = fields.Char(string='Backup · API key', groups='base.group_system')
+    kpi_snapshot_ids = fields.One2many('sgt.home.kpi.snapshot', 'setting_id', string='Saved versions', groups='base.group_system')
+    kpi_snapshot_note = fields.Char(string='Data in use', compute='_compute_kpi_snapshot_note', groups='base.group_system')
+    kpi_update_target = fields.Char(string='Update Data will read', compute='_compute_kpi_update_target', groups='base.group_system')
+
+    @api.depends('kpi_sgt_active', 'kpi_sgt_url', 'kpi_sgt_db', 'kpi_sgt2_url', 'kpi_sgt2_db')
+    def _compute_kpi_update_target(self):
+        for rec in self:
+            backup = rec.kpi_sgt_active == 'backup'
+            rec.kpi_update_target = '%s: %s · database %s' % (
+                'Connection 2 · backup' if backup else 'Connection 1 · main',
+                (rec.kpi_sgt2_url if backup else rec.kpi_sgt_url) or '(no URL)', (rec.kpi_sgt2_db if backup else rec.kpi_sgt_db) or '(no database)')
+
+    @api.depends('kpi_snapshot_ids.is_active', 'kpi_snapshot_ids.taken_at')
+    def _compute_kpi_snapshot_note(self):
+        for rec in self:
+            active = rec.kpi_snapshot_ids.filtered('is_active')[:1]
+            rec.kpi_snapshot_note = (
+                'GB and Content show the data saved at %s (%s).' % (
+                    fields.Datetime.context_timestamp(rec, active.taken_at).strftime('%d/%m/%Y %H:%M:%S'), active.source or '?')
+                if active else 'No saved data yet: GB and Content are read live from the selected connection. Click Update Data to save a version.')
 
     @api.model
-    def _kpi_sgt_config(self):
-        """Connection values for the KPI controller. Reads the admin-only fields with an elevated environment; never returned to a browser."""
+    def _kpi_sgt_config(self, which=None):
+        """Connection values for the KPI controller / Update Data. Reads the admin-only fields with an elevated environment; never returned to a browser."""
         rec = self.sudo().search([], limit=1)
         if not rec:
             return {}
-        return {'url': rec.kpi_sgt_url or '', 'db': rec.kpi_sgt_db or '', 'login': rec.kpi_sgt_login or '', 'secret': rec.kpi_sgt_key or ''}
+        which = which or rec.kpi_sgt_active or 'main'
+        if which == 'backup':
+            return {'which': 'backup', 'url': rec.kpi_sgt2_url or '', 'db': rec.kpi_sgt2_db or '',
+                    'login': rec.kpi_sgt2_login or '', 'secret': rec.kpi_sgt2_key or ''}
+        return {'which': 'main', 'url': rec.kpi_sgt_url or '', 'db': rec.kpi_sgt_db or '', 'login': rec.kpi_sgt_login or '',
+                'secret': rec.kpi_sgt_key or ''}
+
+    def action_kpi_update_data(self):
+        """Read social360 now (selected connection), save it as a new version and make it the one in use. Any error leaves everything as it was."""
+        if not self.env.user.has_group('base.group_system'):
+            raise AccessError('Only Settings Administrators can update the saved data.')
+        self.ensure_one()
+        self.env.cr.execute("SELECT pg_try_advisory_xact_lock(%s)", [7021])
+        if not self.env.cr.fetchone()[0]:
+            raise UserError('Another update is running. Try again in a moment.')
+        cfg = self._kpi_sgt_config()
+        name = 'Connection 2 · backup' if cfg.get('which') == 'backup' else 'Connection 1 · main'
+        client = sgt_mod.SgtClient(cfg.get('url'), cfg.get('db'), cfg.get('login'), cfg.get('secret'))
+        if not client.configured():
+            raise UserError('%s is not filled in (URL, database, account login and API key). Nothing was changed.' % name)
+        try:
+            payload = snap_mod.take(client)
+        except sgt_mod.GbError as exc:
+            raise UserError('%s could not be read. Nothing was changed; the data in use stays as it was.\n\n%s' % (name, exc)) from exc
+        except Exception as exc:  # noqa: BLE001 - shown to the admin, logged for the server
+            _logger.exception('Update Data: unexpected error')
+            raise UserError('%s could not be read (%s). Nothing was changed; the data in use stays as it was.' % (name, type(exc).__name__)) from exc
+        summary = payload.get('summary') or {}
+        Snapshot = self.env['sgt.home.kpi.snapshot']
+        Snapshot.search([('is_active', '=', True)]).write({'is_active': False})
+        Snapshot.create({
+            'setting_id': self.id, 'connection': cfg.get('which'), 'source': payload.get('source'),
+            'gb_total': summary.get('gb_total', 0), 'content_total': summary.get('content_total', 0),
+            'content_approved': summary.get('content_approved', 0), 'posts_total': summary.get('posts', 0), 'is_active': True,
+            'payload': json.dumps(payload, default=str, separators=(',', ':'))})
+        Snapshot._prune()
+        sgt_mod.forget_all()
+        xy_mod.forget_all()
+        message = 'Saved from %s: %s GB posts, %s Content, %s latest approved posts (text + image). The previous version can be restored with Rollback.' % (
+            name, summary.get('gb_total', 0), summary.get('content_total', 0), summary.get('posts', 0))
+        if summary.get('posts_error'):
+            message += '\n\nThe latest posts could not be read (numbers were saved): %s' % summary['posts_error']
+        return {'type': 'ir.actions.client', 'tag': 'display_notification',
+                'params': {'title': 'Saved data updated', 'type': 'warning' if summary.get('posts_error') else 'success',
+                           'sticky': bool(summary.get('posts_error')), 'message': message,
+                           'next': {'type': 'ir.actions.client', 'tag': 'soft_reload'}}}

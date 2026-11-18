@@ -41,16 +41,59 @@
                         Only the people listed here, the Home Managers and the Settings Administrators see the "Dashboard" item in the
                         Home menu. Data and Match Making follow each person's own CRM access rights.
                     </div>
-                    <group string="KPI Dashboard · social360 connection (GB and Content)" groups="base.group_system">
-                        <field name="kpi_sgt_url" placeholder="https://social360.sge.vn"/>
-                        <field name="kpi_sgt_db"/>
-                        <field name="kpi_sgt_login"/>
-                        <field name="kpi_sgt_key" password="True"/>
+                    <group string="KPI Dashboard · social360 (GB and Content)" groups="base.group_system">
+                        <field name="kpi_sgt_active" widget="radio"/>
+                    </group>
+                    <group groups="base.group_system">
+                        <group string="Connection 1 · main">
+                            <field name="kpi_sgt_url" placeholder="https://sgt.sge.vn"/>
+                            <field name="kpi_sgt_db"/>
+                            <field name="kpi_sgt_login"/>
+                            <field name="kpi_sgt_key" password="True"/>
+                        </group>
+                        <group string="Connection 2 · backup">
+                            <field name="kpi_sgt2_url" placeholder="https://social360.sge.vn"/>
+                            <field name="kpi_sgt2_db"/>
+                            <field name="kpi_sgt2_login"/>
+                            <field name="kpi_sgt2_key" password="True"/>
+                        </group>
                     </group>
                     <div class="text-muted" groups="base.group_system">
-                        GB and Content are read from social360 with this one read-only service account (nothing is written there).
-                        Only Settings Administrators can see or change these four fields; the key is never sent to the browser.
-                        The Xinyang server must be allowed to reach the social360 address over HTTPS.
+                        GB and Content are read from social360 with a read-only account (nothing is written there). Both connections
+                        are the same kind of Odoo; choose above which one "Update Data" reads, and switch when the other is down.
+                        Only Settings Administrators can see or change these fields; the keys are never sent to the browser.
+                        The Xinyang server must be allowed to reach the social360 addresses over HTTPS.
+                    </div>
+                    <group string="Saved data (GB and Content)" groups="base.group_system">
+                        <field name="kpi_snapshot_note" readonly="1" nolabel="1" colspan="2"/>
+                    </group>
+                    <group groups="base.group_system">
+                        <field name="kpi_update_target" readonly="1" colspan="2"/>
+                    </group>
+                    <div groups="base.group_system">
+                        <button name="action_kpi_update_data" type="object" string="Update Data" class="btn btn-primary"
+                                confirm="Read the selected connection now (see 'Update Data will read' above): GB history (with every post URL), Content figures and the 9 latest approved posts with their first image. Save it all as a new version? The version in use stays available for Rollback. Nothing is written to the other system."/>
+                    </div>
+                    <field name="kpi_snapshot_ids" groups="base.group_system" readonly="1" nolabel="1">
+                        <list string="Saved versions" create="false" delete="false" decoration-success="is_active" default_order="taken_at desc, id desc">
+                            <field name="taken_at"/>
+                            <field name="taken_by_id"/>
+                            <field name="connection"/>
+                            <field name="source"/>
+                            <field name="gb_total"/>
+                            <field name="content_total"/>
+                            <field name="content_approved"/>
+                            <field name="posts_total"/>
+                            <field name="is_active" widget="boolean" string="In use"/>
+                            <button name="action_use_version" type="object" string="Rollback" class="btn btn-sm btn-secondary"
+                                    invisible="is_active"
+                                    confirm="Show this saved version on the Dashboard instead of the one in use? Nothing is deleted."/>
+                        </list>
+                    </field>
+                    <div class="text-muted" groups="base.group_system">
+                        Every "Update Data" saves a new version (the last 10 are kept). The Dashboard shows the version in use, so GB and
+                        Content keep working when social360 is down. "Rollback" on an older row shows that older data again; on a newer
+                        row it brings that newer data back. Nothing is deleted by switching.
                     </div>
                     <div class="text-muted">
                         When a product has several pictures, the popup changes the picture by itself with this delay.

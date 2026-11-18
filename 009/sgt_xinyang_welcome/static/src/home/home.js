@@ -79,7 +79,8 @@ export class SgtHome extends Component {
         this.mapRef = useRef("mapFrame");
         this.kpiRef = useRef("kpiFrame");
         this.opener = null;
-        useExternalListener(window, "keydown", (ev) => this.onKeydown(ev));
+        // capture phase: Odoo's hotkey service stops Escape before a bubbling listener would see it
+        useExternalListener(window, "keydown", (ev) => this.onKeydown(ev), { capture: true });
         // Automatic picture change in the product popup (seconds come from Home > Settings).
         useEffect(
             () => {
@@ -406,6 +407,7 @@ export class SgtHome extends Component {
         if (!this.state.selectedProduct) { return; }
         if (ev.key === "Escape") {
             ev.preventDefault();
+            ev.stopImmediatePropagation();
             this.closeProduct();
         } else if (ev.key === "ArrowRight") {
             this.stepProduct(1);

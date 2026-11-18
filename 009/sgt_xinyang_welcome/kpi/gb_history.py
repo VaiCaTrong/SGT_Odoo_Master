@@ -149,3 +149,170 @@ def fetch_history(service, period: str, start: date | None, end: date | None) ->
         "data_source": "SGT GB Publishing History (read-only)",
         "aggregation": aggregation,
     }
+
+
+# ---- Update_021: raw daily counts, so a saved version can answer ANY period without social360 --------------------------
+RAW_PAGE = 5000
+RAW_MAX_ROWS = 300000
+HCM = ZoneInfo("Asia/Ho_Chi_Minh")
+
+
+def load_daily(service) -> dict[str, Any]:
+    """Read every GB Publishing History row of Project XINYANG (3 fields only) and tally it per Asia/Ho_Chi_Minh day.
+
+    Same classification rules and the same fail-closed checks as ``fetch_history`` (Approved = Published + Detail "OK",
+    Failed = Failed, Unchecked = Published + empty Detail; anything else stops with an error). The result is tiny
+    (days x 4 numbers): {"daily": {"2026-11-17": [total, approved, rejected, unchecked]}, "undated": [...], "rows": n}.
+    """
+    from .sgt import GbError, _integer
+    project_id = service._project()
+    model = service._discover_history_model()
+    metadata = service._call(model, "fields_get", [], {"attributes": ["type", "relation", "selection", "store"]})
+    if not isinstance(metadata, dict):
+        raise GbError("Không đọc được metadata GB Publishing History từ SGT.")
+    for field, typ in {"posted_at": "datetime", "project_id": "many2one", "status": "selection", "detail": "char"}.items():
+        desc = metadata.get(field)
+        if not isinstance(desc, dict) or desc.get("type") != typ or desc.get("store") is False:
+            raise GbError(f"GB Publishing History thiếu field lưu trữ {field} ({typ}).")
+    published = _selection_code(metadata["status"], "Published")
+    failed = _selection_code(metadata["status"], "Failed")
+    if not published or not failed or published == failed:
+        raise GbError("Chưa xác định duy nhất giá trị kỹ thuật Published và Failed của GB Logs; cần xác minh Selection Options.")
+    has_url = isinstance(metadata.get("external_post_url"), dict) and metadata["external_post_url"].get("store") is not False
+    fields = ["id", "posted_at", "status", "detail"] + (["external_post_url"] if has_url else [])
+    domain: list = [["project_id", "=", project_id]]
+    expected = _integer(service._call(model, "search_count", [domain]), "search_count")
+    if expected > RAW_MAX_ROWS:
+        raise GbError(f"GB Logs có {expected} dòng, vượt giới hạn {RAW_MAX_ROWS} của bản lưu; cần xử lý riêng.")
+    daily: dict[str, list[int]] = {}
+    undated = [0, 0, 0, 0]
+    keep: list[tuple[str, int, int, str]] = []      # (posted, id, slot, url) of the rows that have a post URL
+    rows_read = 0
+    last_id = 0
+    while True:
+        rows = service._call(model, "search_read", [domain + [["id", ">", last_id]]],
+                             {"fields": fields, "order": "id asc", "limit": RAW_PAGE})
+        if not isinstance(rows, list):
+            raise GbError("SGT không trả về danh sách GB Logs hợp lệ.")
+        if not rows:
+            break
+        for row in rows:
+            rid = row.get("id")
+            if type(rid) is not int or rid <= last_id:
+                raise GbError("GB Logs trả về ID trùng hoặc không tăng dần; dừng để tránh đếm sai.")
+            last_id = rid
+            status, detail = row.get("status"), row.get("detail")
+            if status == failed:
+                slot = 2
+            elif status == published and isinstance(detail, str) and detail.strip().casefold() == "ok":
+                slot = 1
+            elif status == published and detail in (False, None, ""):
+                slot = 3
+            else:
+                raise GbError("GB Logs có trạng thái/Detail chưa có quy tắc KPI xác minh. Cần đối chiếu Summary trước khi lưu phiên bản.")
+            posted = row.get("posted_at")
+            local = ""
+            if posted:
+                try:
+                    moment = datetime.fromisoformat(str(posted).replace("Z", "+00:00").replace(" ", "T"))
+                except ValueError as exc:
+                    raise GbError("GB Logs có Posted At không hợp lệ.") from exc
+                if moment.tzinfo is None:
+                    moment = moment.replace(tzinfo=timezone.utc)
+                local_dt = moment.astimezone(HCM)
+                local = local_dt.strftime("%Y-%m-%dT%H:%M:%S")
+                bucket = daily.setdefault(str(local_dt.date()), [0, 0, 0, 0])
+            else:
+                bucket = undated
+            url = row.get("external_post_url")
+            if isinstance(url, str) and url.strip():
+                keep.append((local, rid, slot, url.strip()))
+            bucket[0] += 1
+            bucket[slot] += 1
+            rows_read += 1
+        if len(rows) < RAW_PAGE:
+            break
+    if rows_read != expected:
+        raise GbError(f"GB Logs đọc được {rows_read} dòng nhưng SGT báo {expected}; không lưu phiên bản thiếu dữ liệu.")
+    keep.sort(key=lambda k: (k[0], k[1]), reverse=True)          # posted_at desc, id desc (undated last)
+    out: dict[str, Any] = {"daily": daily, "undated": undated, "rows": rows_read}
+    if not has_url:
+        out["links_error"] = "GB Publishing History không có field external_post_url; không lấy được link bài."
+    elif len(keep) > LINKS_MAX:
+        out["links_error"] = f"Có {len(keep)} link, vượt giới hạn {LINKS_MAX} của bản lưu; không lưu danh sách link."
+    else:
+        out["links"] = [[k[0], k[2], k[3]] for k in keep]
+    return out
+
+
+def values_from_daily(raw: dict[str, Any], start: date | None, end: date | None) -> dict[str, Any]:
+    """Same shape as ``fetch_history`` from the saved daily tally. All Time (start is None) also counts undated rows."""
+    total = approved = rejected = unchecked = 0
+    parts = [] if start is not None else [raw.get("undated") or [0, 0, 0, 0]]
+    for day, numbers in (raw.get("daily") or {}).items():
+        if start is None or start <= date.fromisoformat(day) <= end:
+            parts.append(numbers)
+    for p in parts:
+        total += p[0]; approved += p[1]; rejected += p[2]; unchecked += p[3]
+    return {"total_published": total, "approved_links": approved, "not_approved_links": rejected, "uncheck": unchecked,
+            "data_source": "SGT GB Publishing History (saved version)", "aggregation": "saved daily tally"}
+
+
+# ---- Update_026: post URLs (the "POST URLS" box of the SGT Summary: Approved / Uncheck / Not Approved / All) -------------------
+LINKS_MAX = 50000
+LINK_SLOTS = {"approved": 1, "not_approved": 2, "uncheck": 3}
+
+
+def links_from_saved(raw: dict[str, Any], start: date | None, end: date | None) -> list[list[Any]]:
+    """[[slot, url], ...] of the saved version for the period (newest first). All Time (start is None) also gives undated rows."""
+    out = []
+    for posted, slot, url in raw.get("links") or []:
+        if start is None or (posted and start <= date.fromisoformat(posted[:10]) <= end):
+            out.append([slot, url])
+    return out
+
+
+def fetch_links(service, start: date | None, end: date | None) -> list[list[Any]]:
+    """Live read of the same list (rows of Project XINYANG that have a post URL), classified like the Summary."""
+    from .sgt import GbError, _integer
+    project_id = service._project()
+    model = service._discover_history_model()
+    metadata = service._call(model, "fields_get", [], {"attributes": ["type", "relation", "selection", "store"]})
+    if not isinstance(metadata, dict) or not isinstance(metadata.get("external_post_url"), dict):
+        raise GbError("GB Publishing History không có field external_post_url; không lấy được link bài.")
+    published = _selection_code(metadata["status"], "Published")
+    failed = _selection_code(metadata["status"], "Failed")
+    if not published or not failed or published == failed:
+        raise GbError("Chưa xác định duy nhất giá trị kỹ thuật Published và Failed của GB Logs; cần xác minh Selection Options.")
+    domain: list = [["project_id", "=", project_id], ["external_post_url", "!=", False]]
+    if start is not None:
+        left, right = _utc_bounds(start, end)
+        domain += [["posted_at", ">=", left], ["posted_at", "<", right]]
+    expected = _integer(service._call(model, "search_count", [domain]), "search_count")
+    if expected > LINKS_MAX:
+        raise GbError(f"Có {expected} link trong kỳ này, vượt giới hạn {LINKS_MAX}; hãy chọn kỳ ngắn hơn.")
+    out: list[list[Any]] = []
+    offset = seen = 0
+    while offset < expected:
+        rows = service._call(model, "search_read", [domain], {"fields": ["id", "status", "detail", "external_post_url"],
+                             "order": "posted_at desc, id desc", "offset": offset, "limit": RAW_PAGE})
+        if not isinstance(rows, list) or not rows:
+            break
+        for row in rows:
+            status, detail = row.get("status"), row.get("detail")
+            if status == failed:
+                slot = 2
+            elif status == published and isinstance(detail, str) and detail.strip().casefold() == "ok":
+                slot = 1
+            elif status == published and detail in (False, None, ""):
+                slot = 3
+            else:
+                slot = 0                    # Published with another Detail text: listed under All only
+            url = row.get("external_post_url")
+            if isinstance(url, str) and url.strip():
+                out.append([slot, url.strip()])
+        offset += len(rows)
+        seen += len(rows)
+    if seen != expected:
+        raise GbError(f"Đọc được {seen} dòng link nhưng SGT báo {expected}; không hiển thị danh sách thiếu.")
+    return out

@@ -86,7 +86,7 @@
   <div class="home-product-backdrop" t-if="state.selectedProduct" t-on-click="onBackdrop"><section class="home-product-modal" role="dialog" aria-modal="true" t-att-aria-label="state.selectedProduct.name">
     <button class="dialog-close" type="button" t-ref="productClose" t-on-click="closeProduct" t-att-aria-label="tr(&quot;Close product&quot;)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <div class="dialog-scroll"><div class="dialog-layout">
-      <div class="dialog-media"><div class="dialog-sticky" t-on-mouseenter="holdImages" t-on-mouseleave="releaseImages" t-on-focusin="holdImages" t-on-focusout="releaseImages">
+      <div class="dialog-media"><div class="dialog-sticky" t-att-class="gallery.length &gt; 1 ? 'multi' : ''" t-on-mouseenter="holdImages" t-on-mouseleave="releaseImages" t-on-focusin="holdImages" t-on-focusout="releaseImages">
         <div class="dialog-stage"><img class="dialog-main" t-att-src="currentImage.full" t-att-alt="state.selectedProduct.name"/><span class="dialog-counter" t-if="gallery.length &gt; 1" t-out="(state.imgIndex + 1) + ' / ' + gallery.length"/></div>
         <div class="dialog-strip" t-if="gallery.length &gt; 1">
           <button type="button" class="strip-arrow strip-prev" t-on-click="prevImage" t-att-aria-label="tr(&quot;Previous image&quot;)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>

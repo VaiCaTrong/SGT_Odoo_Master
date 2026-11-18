@@ -13,3 +13,4 @@ access_sgt_home_product_image_settings_admin,sgt.home.product.image Settings Adm
 access_sgt_home_setting_reader,sgt.home.setting reader,model_sgt_home_setting,base.group_user,1,0,0,0
 access_sgt_home_setting_manager,sgt.home.setting Home Manager,model_sgt_home_setting,sgt_xinyang_welcome.group_home_manager,1,1,0,0
 access_sgt_home_setting_settings_admin,sgt.home.setting Settings Administrator,model_sgt_home_setting,base.group_system,1,1,0,0
+access_sgt_home_kpi_snapshot_admin,sgt.home.kpi.snapshot Settings Administrator,model_sgt_home_kpi_snapshot,base.group_system,1,1,1,1
